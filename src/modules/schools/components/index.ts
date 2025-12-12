@@ -1,0 +1,9 @@
+/**
+ * 📦 Exportación centralizada del módulo Schools
+ */
+
+export { SchoolCard } from './SchoolCard';
+export type { SchoolCardProps } from './SchoolCard';
+
+export { SchoolList } from './SchoolList';
+export type { SchoolListProps } from './SchoolList';

@@ -1,0 +1,251 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ============================================
+// 👤 USER & AUTH MODELS
+// ============================================
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  image         String?
+  role          String    @default("user") // user, admin, super_admin
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  schools  UserSchool[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ============================================
+// 🔗 USER-SCHOOL RELATIONSHIP (Multi-tenant)
+// ============================================
+model UserSchool {
+  id        String   @id @default(cuid())
+  userId    String
+  schoolId  String
+  role      String   @default("admin") // admin, teacher, viewer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, schoolId])
+  @@map("user_schools")
+}
+
+// ============================================
+// 🏫 SCHOOL MODEL
+// ============================================
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users     UserSchool[]
+  teachers  Teacher[]
+  subjects  Subject[]
+  courses   Course[]
+  schedules Schedule[]
+
+  @@map("schools")
+}
+
+// ============================================
+// 👨‍🏫 TEACHER MODEL
+// ============================================
+model Teacher {
+  id             String   @id @default(cuid())
+  schoolId       String
+  firstName      String
+  lastName       String
+  email          String
+  phone          String?
+  specialization String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  school          School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  availability    TeacherAvailability[]
+  teacherSubjects TeacherSubject[]
+  scheduleBlocks  ScheduleBlock[]
+
+  @@index([schoolId])
+  @@map("teachers")
+}
+
+// ============================================
+// 👨‍🏫 TEACHER AVAILABILITY
+// ============================================
+model TeacherAvailability {
+  id        String   @id @default(cuid())
+  teacherId String
+  dayOfWeek String // MONDAY, TUESDAY, etc.
+  startTime String // HH:mm format
+  endTime   String // HH:mm format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@map("teacher_availability")
+}
+
+// ============================================
+// 📚 SUBJECT MODEL
+// ============================================
+model Subject {
+  id          String   @id @default(cuid())
+  schoolId    String
+  name        String
+  code        String // e.g., "MAT101"
+  description String?
+  color       String? // Color hex para visualización
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  school          School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacherSubjects TeacherSubject[]
+  scheduleBlocks  ScheduleBlock[]
+
+  @@unique([schoolId, code])
+  @@index([schoolId])
+  @@map("subjects")
+}
+
+// ============================================
+// 📚 TEACHER-SUBJECT (Many-to-Many)
+// ============================================
+model TeacherSubject {
+  id        String   @id @default(cuid())
+  teacherId String
+  subjectId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId])
+  @@index([teacherId])
+  @@index([subjectId])
+  @@map("teacher_subjects")
+}
+
+// ============================================
+// 🎓 COURSE MODEL
+// ============================================
+model Course {
+  id            String   @id @default(cuid())
+  schoolId      String
+  name          String // e.g., "1° Básico A"
+  grade         String // e.g., "1", "2", "3"
+  section       String // e.g., "A", "B", "C"
+  academicLevel String // PRIMARY, SECONDARY, HIGH_SCHOOL
+  academicYear  Int
+  studentCount  Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schedules Schedule[]
+
+  @@index([schoolId])
+  @@index([academicYear])
+  @@map("courses")
+}
+
+// ============================================
+// 🗓️ SCHEDULE MODEL
+// ============================================
+model Schedule {
+  id           String   @id @default(cuid())
+  schoolId     String
+  courseId     String
+  name         String // e.g., "Horario 1° Básico A - Semestre 1"
+  academicYear Int
+  semester     Int // 1 or 2
+  startDate    DateTime
+  endDate      DateTime
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  school School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  course Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  blocks ScheduleBlock[]
+
+  @@index([schoolId])
+  @@index([courseId])
+  @@index([academicYear])
+  @@index([isActive])
+  @@map("schedules")
+}
+
+// ============================================
+// 🗓️ SCHEDULE BLOCK MODEL
+// ============================================
+model ScheduleBlock {
+  id          String   @id @default(cuid())
+  scheduleId  String
+  courseId    String
+  subjectId   String
+  teacherId   String
+  dayOfWeek   String // MONDAY, TUESDAY, etc.
+  blockNumber Int // 1, 2, 3, etc.
+  startTime   String // HH:mm format
+  endTime     String // HH:mm format
+  duration    Int // Duration in minutes
+  classroom   String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  subject  Subject  @relation(fields: [subjectId], references: [id])
+  teacher  Teacher  @relation(fields: [teacherId], references: [id])
+
+  @@index([scheduleId])
+  @@index([teacherId])
+  @@index([dayOfWeek])
+  @@map("schedule_blocks")
+}
