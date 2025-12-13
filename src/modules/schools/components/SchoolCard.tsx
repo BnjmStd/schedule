@@ -7,7 +7,6 @@
 'use client';
 
 import { School } from '@/types';
-import { Card, CardContent, CardFooter, Button, Badge } from '@/components/ui';
 
 export interface SchoolCardProps {
   school: School;
@@ -18,71 +17,63 @@ export interface SchoolCardProps {
 
 export function SchoolCard({ school, onEdit, onDelete, onView }: SchoolCardProps) {
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-300">
-      <CardContent>
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-neutral-900 mb-2">
-              {school.name}
-            </h3>
-            <div className="space-y-1 text-sm text-neutral-600">
-              <p className="flex items-center gap-2">
-                <span>📍</span>
-                <span>{school.address}</span>
-              </p>
-              {school.phone && (
-                <p className="flex items-center gap-2">
-                  <span>📞</span>
-                  <span>{school.phone}</span>
-                </p>
-              )}
-              {school.email && (
-                <p className="flex items-center gap-2">
-                  <span>✉️</span>
-                  <span>{school.email}</span>
-                </p>
-              )}
-            </div>
-          </div>
-          <Badge variant="primary" size="sm">
-            Activo
-          </Badge>
+    <div className="schools-card">
+      <div className="schools-card-header">
+        <div>
+          <h3 className="schools-card-title">
+            {school.name}
+          </h3>
         </div>
-      </CardContent>
+        <span className="schools-card-badge">
+          Activo
+        </span>
+      </div>
       
-      <CardFooter>
-        <div className="flex gap-2 w-full">
-          {onView && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => onView(school)}
-              className="flex-1"
-            >
-              Ver Detalles
-            </Button>
-          )}
-          {onEdit && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(school)}
-            >
-              Editar
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(school)}
-              className="text-danger-600 hover:bg-danger-50"
-            >
-              Eliminar
-            </Button>
-          )}
+      <div className="schools-card-info">
+        <div className="schools-card-info-item">
+          <span className="schools-card-info-icon">📍</span>
+          <span>{school.address}</span>
         </div>
-      </CardFooter>
-    </Card>
+        {school.phone && (
+          <div className="schools-card-info-item">
+            <span className="schools-card-info-icon">📞</span>
+            <span>{school.phone}</span>
+          </div>
+        )}
+        {school.email && (
+          <div className="schools-card-info-item">
+            <span className="schools-card-info-icon">✉️</span>
+            <span>{school.email}</span>
+          </div>
+        )}
+      </div>
+      
+      <div className="schools-card-footer">
+        {onView && (
+          <button
+            className="schools-card-btn schools-card-btn-primary"
+            onClick={() => onView(school)}
+          >
+            Ver Detalles
+          </button>
+        )}
+        {onEdit && (
+          <button
+            className="schools-card-btn schools-card-btn-ghost"
+            onClick={() => onEdit(school)}
+          >
+            Editar
+          </button>
+        )}
+        {onDelete && (
+          <button
+            className="schools-card-btn schools-card-btn-danger"
+            onClick={() => onDelete(school)}
+          >
+            Eliminar
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

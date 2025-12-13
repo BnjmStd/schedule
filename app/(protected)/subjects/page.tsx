@@ -1,89 +1,96 @@
-import { Container, PageHeader } from "@/components/layout";
-import { Button, Card, CardContent, Badge } from "@/components/ui";
+import { getSubjects } from "@/modules/subjects/actions";
+import { AddSubjectButton } from "@/modules/subjects/components/AddSubjectButton";
+import "../../subjects.css";
 
-export default function SubjectsPage() {
+export default async function SubjectsPage() {
+  const subjects = await getSubjects();
+
   return (
-    <Container>
-      <PageHeader
-        title="📚 Asignaturas"
-        description="Gestiona las asignaturas disponibles y asígnalas a profesores calificados."
-        actions={<Button variant="primary">+ Agregar Asignatura</Button>}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <SubjectCard
-          name="Matemáticas"
-          code="MAT101"
-          teachers={["María González", "Carlos López"]}
-          color="primary"
-        />
-        <SubjectCard
-          name="Física"
-          code="FIS201"
-          teachers={["María González"]}
-          color="secondary"
-        />
-        <SubjectCard
-          name="Historia"
-          code="HIS301"
-          teachers={["Pedro Ramírez"]}
-          color="accent"
-        />
-        <SubjectCard
-          name="Lenguaje"
-          code="LEN101"
-          teachers={["Ana Torres"]}
-          color="success"
-        />
-        <SubjectCard
-          name="Química"
-          code="QUI201"
-          teachers={["Laura Fernández"]}
-          color="warning"
-        />
-        <SubjectCard
-          name="Inglés"
-          code="ING101"
-          teachers={["John Smith"]}
-          color="neutral"
-        />
+    <div className="schools-page">
+      <div className="schools-bg">
+        <div className="schools-gradient" />
       </div>
-    </Container>
-  );
-}
 
-interface SubjectCardProps {
-  name: string;
-  code: string;
-  teachers: string[];
-  color: "primary" | "secondary" | "accent" | "success" | "warning" | "neutral";
-}
+      <div className="schools-container">
+        <header className="schools-header">
+          <div className="schools-header-top">
+            <h1 className="schools-title">📚 Asignaturas</h1>
+            <AddSubjectButton />
+          </div>
+          <p className="schools-description">
+            Gestiona las asignaturas disponibles y asígnalas a profesores
+            calificados.
+          </p>
+        </header>
 
-function SubjectCard({ name, code, teachers, color }: SubjectCardProps) {
-  return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent>
-        <Badge variant={color} className="mb-3">
-          {code}
-        </Badge>
-        <h3 className="text-lg font-bold text-neutral-900 mb-2">{name}</h3>
-        <div className="text-sm text-neutral-600">
-          <span className="font-medium">Profesores:</span>
-          <ul className="mt-1 space-y-1">
-            {teachers.map((teacher) => (
-              <li key={teacher} className="flex items-center gap-2">
-                <span>👨‍🏫</span>
-                <span>{teacher}</span>
-              </li>
+        {subjects.length === 0 ? (
+          <div className="schools-empty">
+            <div className="schools-empty-icon">📚</div>
+            <p className="schools-empty-title">
+              No hay asignaturas registradas
+            </p>
+            <p className="schools-empty-subtitle">
+              Comienza agregando tu primera asignatura
+            </p>
+          </div>
+        ) : (
+          <div className="schools-grid">
+            {subjects.map((subject) => (
+              <div key={subject.id} className="schools-card">
+                <div className="schools-card-header">
+                  <div>
+                    <h3 className="schools-card-title">{subject.name}</h3>
+                  </div>
+                  <span
+                    className="schools-card-badge"
+                    style={{
+                      background: subject.color
+                        ? `${subject.color}33`
+                        : undefined,
+                      borderColor: subject.color
+                        ? `${subject.color}66`
+                        : undefined,
+                    }}
+                  >
+                    {subject.code}
+                  </span>
+                </div>
+
+                <div className="schools-card-info">
+                  <div className="schools-card-info-item">
+                    <span className="schools-card-info-icon">🏫</span>
+                    <span>{subject.school.name}</span>
+                  </div>
+                  {subject.teacherSubjects.length > 0 && (
+                    <div className="schools-card-info-item">
+                      <span className="schools-card-info-icon">👨‍🏫</span>
+                      <span>
+                        {subject.teacherSubjects.length} profesor
+                        {subject.teacherSubjects.length !== 1 ? "es" : ""}
+                      </span>
+                    </div>
+                  )}
+                  {subject.description && (
+                    <div className="schools-card-info-item">
+                      <span className="schools-card-info-icon">📝</span>
+                      <span>{subject.description}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="schools-card-footer">
+                  <button className="schools-card-btn schools-card-btn-primary">
+                    Ver Detalles
+                  </button>
+                  <button className="schools-card-btn schools-card-btn-ghost">
+                    Editar
+                  </button>
+                </div>
+              </div>
             ))}
-          </ul>
-        </div>
-        <div className="mt-4 flex gap-2">
-          <Button variant="ghost" size="sm" className="flex-1">
-            Editar
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

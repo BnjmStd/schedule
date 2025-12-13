@@ -4,10 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card, CardContent } from "@/components/ui/Card";
-import { hash } from "bcryptjs";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -19,6 +15,8 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,66 +65,73 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-primary-50 via-accent-50 to-secondary-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="auth-layout">
+      <div className="auth-bg">
+        <div className="auth-gradient"></div>
+        <div className="auth-orb auth-orb-1"></div>
+        <div className="auth-orb auth-orb-2"></div>
+      </div>
+
+      <div className="auth-card">
         {/* Logo */}
-        <Link href="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary-400 to-accent-500 flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-2xl">📅</span>
+        <Link href="/" className="auth-logo">
+          <div className="auth-logo-icon">
+            <span>📅</span>
           </div>
-          <span className="text-2xl font-bold bg-linear-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
-            {siteConfig.name}
-          </span>
+          <span className="auth-logo-text">{siteConfig.name}</span>
         </Link>
 
-        <Card className="shadow-2xl border-2 border-white">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-                Crea tu cuenta
-              </h1>
-              <p className="text-neutral-600">
-                Comienza gratis, sin tarjeta de crédito
-              </p>
+        <div className="auth-form-card">
+          <div className="auth-header">
+            <h1 className="auth-title">Crea tu cuenta</h1>
+            <p className="auth-description">
+              Comienza gratis, sin tarjeta de crédito
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && <div className="auth-error">{error}</div>}
+
+            <div className="auth-input-group">
+              <label className="auth-input-label">
+                Nombre completo<span className="required">*</span>
+              </label>
+              <input
+                className="auth-input"
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                placeholder="Juan Pérez"
+                required
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {error && (
-                <div className="p-4 rounded-lg bg-danger-50 border border-danger-200 text-danger-700 text-sm">
-                  {error}
-                </div>
-              )}
+            <div className="auth-input-group">
+              <label className="auth-input-label">
+                Email<span className="required">*</span>
+              </label>
+              <input
+                className="auth-input"
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="tu@email.com"
+                required
+              />
+            </div>
 
-              <div>
-                <Input
-                  label="Nombre completo"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Juan Pérez"
-                  required
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder="tu@email.com"
-                  required
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Contraseña"
-                  type="password"
+            <div className="auth-input-group">
+              <label className="auth-input-label">
+                Contraseña<span className="required">*</span>
+              </label>
+              <div className="auth-input-wrapper">
+                <input
+                  className="auth-input auth-input-with-icon"
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
@@ -134,12 +139,35 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   required
                 />
+                <button
+                  type="button"
+                  className="auth-input-icon"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
+                </button>
               </div>
+            </div>
 
-              <div>
-                <Input
-                  label="Confirmar contraseña"
-                  type="password"
+            <div className="auth-input-group">
+              <label className="auth-input-label">
+                Confirmar contraseña<span className="required">*</span>
+              </label>
+              <div className="auth-input-wrapper">
+                <input
+                  className="auth-input auth-input-with-icon"
+                  type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={(e) =>
                     setFormData({
@@ -150,46 +178,57 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   required
                 />
+                <button
+                  type="button"
+                  className="auth-input-icon"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showConfirmPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  )}
+                </button>
               </div>
+            </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                isLoading={isLoading}
-              >
-                Crear Cuenta
-              </Button>
+            <button
+              type="submit"
+              className="auth-button auth-button-primary"
+              disabled={isLoading}
+            >
+              {isLoading ? <span className="auth-button-spinner"></span> : null}
+              Crear Cuenta
+            </button>
 
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-neutral-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-neutral-500">
-                    ¿Ya tienes una cuenta?
-                  </span>
-                </div>
+            <div className="auth-divider">
+              <div className="auth-divider-line">
+                <div></div>
               </div>
+              <div className="auth-divider-text">
+                <span>¿Ya tienes una cuenta?</span>
+              </div>
+            </div>
 
-              <Link href="/auth/login">
-                <Button variant="outline" className="w-full" size="lg">
-                  Iniciar Sesión
-                </Button>
-              </Link>
-            </form>
-          </CardContent>
-        </Card>
+            <Link href="/auth/login">
+              <button type="button" className="auth-button auth-button-outline">
+                Iniciar Sesión
+              </button>
+            </Link>
+          </form>
+        </div>
 
-        <p className="text-center text-sm text-neutral-600 mt-8">
+        <p className="auth-footer">
           Al crear una cuenta, aceptas nuestros{" "}
-          <a href="#terms" className="text-primary-600 hover:underline">
-            Términos de Servicio
-          </a>{" "}
-          y{" "}
-          <a href="#privacy" className="text-primary-600 hover:underline">
-            Política de Privacidad
-          </a>
+          <a href="#terms">Términos de Servicio</a> y{" "}
+          <a href="#privacy">Política de Privacidad</a>
         </p>
       </div>
     </div>

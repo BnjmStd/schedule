@@ -1,58 +1,87 @@
-import { Container, PageHeader } from '@/components/layout';
-import { Button, Badge, Card, CardContent } from '@/components/ui';
+import { getCourses } from '@/modules/courses/actions';
+import { AddCourseButton } from '@/modules/courses/components/AddCourseButton';
+import '../../courses.css';
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const courses = await getCourses();
+
   return (
-    <Container>
-      <PageHeader
-        title="🎓 Cursos"
-        description="Administra los cursos, secciones y niveles académicos de la institución."
-        actions={
-          <Button variant="primary">
-            + Agregar Curso
-          </Button>
-        }
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <CourseCard
-          name="1° Básico A"
-          level="Básica"
-          students={32}
-          hasSchedule={true}
-        />
-        <CourseCard
-          name="1° Básico B"
-          level="Básica"
-          students={30}
-          hasSchedule={true}
-        />
-        <CourseCard
-          name="2° Básico A"
-          level="Básica"
-          students={28}
-          hasSchedule={false}
-        />
-        <CourseCard
-          name="3° Medio A"
-          level="Media"
-          students={35}
-          hasSchedule={true}
-        />
-        <CourseCard
-          name="3° Medio B"
-          level="Media"
-          students={34}
-          hasSchedule={false}
-        />
-        <CourseCard
-          name="4° Medio A"
-          level="Media"
-          students={38}
-          hasSchedule={true}
-        />
+    <div className="schools-page">
+      <div className="schools-bg">
+        <div className="schools-gradient" />
       </div>
-    </Container>
+      
+      <div className="schools-container">
+        <header className="schools-header">
+          <div className="schools-header-top">
+            <h1 className="schools-title">
+              🎓 Cursos
+            </h1>
+            <AddCourseButton />
+          </div>
+          <p className="schools-description">
+            Administra los cursos, secciones y niveles académicos de la institución.
+          </p>
+        </header>
+
+        {courses.length === 0 ? (
+          <div className="schools-empty">
+            <div className="schools-empty-icon">🎓</div>
+            <p className="schools-empty-title">No hay cursos registrados</p>
+            <p className="schools-empty-subtitle">Comienza agregando tu primer curso</p>
+          </div>
+        ) : (
+          <div className="schools-grid">
+            {courses.map((course) => (
+              <div key={course.id} className="schools-card">
+                <div className="schools-card-header">
+                  <div>
+                    <h3 className="schools-card-title">
+                      {course.name}
+                    </h3>
+                  </div>
+                  <span className="schools-card-badge">
+                    {course.academicLevel}
+                  </span>
+                </div>
+                
+                <div className="schools-card-info">
+                  <div className="schools-card-info-item">
+                    <span className="schools-card-info-icon">🏫</span>
+                    <span>{course.school.name}</span>
+                  </div>
+                  {course.studentCount && (
+                    <div className="schools-card-info-item">
+                      <span className="schools-card-info-icon">👥</span>
+                      <span>{course.studentCount} estudiantes</span>
+                    </div>
+                  )}
+                  <div className="schools-card-info-item">
+                    <span className="schools-card-info-icon">📅</span>
+                    <span>Año {course.academicYear}</span>
+                  </div>
+                  {course.schedules.length > 0 && (
+                    <div className="schools-card-info-item">
+                      <span className="schools-card-info-icon">🗓️</span>
+                      <span>{course.schedules.length} horario{course.schedules.length !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="schools-card-footer">
+                  <button className="schools-card-btn schools-card-btn-primary">
+                    {course.schedules.length > 0 ? 'Ver Horario' : 'Crear Horario'}
+                  </button>
+                  <button className="schools-card-btn schools-card-btn-ghost">
+                    Editar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

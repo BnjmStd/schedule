@@ -1,36 +1,83 @@
-import { Container, PageHeader } from "@/components/layout";
-import { Button, Card, CardContent, Badge } from "@/components/ui";
+import { getTeachers } from '@/modules/teachers/actions';
+import { AddTeacherButton } from '@/modules/teachers/components/AddTeacherButton';
+import '../../teachers.css';
 
-export default function TeachersPage() {
+export default async function TeachersPage() {
+  const teachers = await getTeachers();
+
   return (
-    <Container>
-      <PageHeader
-        title="👨‍🏫 Profesores"
-        description="Administra los profesores, su disponibilidad horaria y las asignaturas que pueden dictar."
-        actions={<Button variant="primary">+ Agregar Profesor</Button>}
-      />
-
-      <div className="space-y-4">
-        <DemoTeacherCard
-          name="María González"
-          email="maria.gonzalez@ejemplo.cl"
-          subjects={["Matemáticas", "Física"]}
-          availability="Lunes a Viernes, 8:00 - 17:00"
-        />
-        <DemoTeacherCard
-          name="Pedro Ramírez"
-          email="pedro.ramirez@ejemplo.cl"
-          subjects={["Historia", "Geografía"]}
-          availability="Lunes a Jueves, 9:00 - 16:00"
-        />
-        <DemoTeacherCard
-          name="Ana Torres"
-          email="ana.torres@ejemplo.cl"
-          subjects={["Lenguaje", "Literatura"]}
-          availability="Martes a Viernes, 8:30 - 15:30"
-        />
+    <div className="schools-page">
+      <div className="schools-bg">
+        <div className="schools-gradient" />
       </div>
-    </Container>
+      
+      <div className="schools-container">
+        <header className="schools-header">
+          <div className="schools-header-top">
+            <h1 className="schools-title">
+              👨‍🏫 Profesores
+            </h1>
+            <AddTeacherButton />
+          </div>
+          <p className="schools-description">
+            Administra los profesores, su disponibilidad horaria y las asignaturas que pueden dictar.
+          </p>
+        </header>
+
+        {teachers.length === 0 ? (
+          <div className="schools-empty">
+            <div className="schools-empty-icon">👨‍🏫</div>
+            <p className="schools-empty-title">No hay profesores registrados</p>
+            <p className="schools-empty-subtitle">Comienza agregando tu primer profesor</p>
+          </div>
+        ) : (
+          <div className="schools-grid">
+            {teachers.map((teacher) => (
+              <div key={teacher.id} className="schools-card">
+                <div className="schools-card-header">
+                  <div>
+                    <h3 className="schools-card-title">
+                      {teacher.firstName} {teacher.lastName}
+                    </h3>
+                  </div>
+                  <span className="schools-card-badge">
+                    {teacher.specialization || 'Profesor'}
+                  </span>
+                </div>
+                
+                <div className="schools-card-info">
+                  <div className="schools-card-info-item">
+                    <span className="schools-card-info-icon">✉️</span>
+                    <span>{teacher.email}</span>
+                  </div>
+                  {teacher.phone && (
+                    <div className="schools-card-info-item">
+                      <span className="schools-card-info-icon">📞</span>
+                      <span>{teacher.phone}</span>
+                    </div>
+                  )}
+                  {teacher.teacherSubjects.length > 0 && (
+                    <div className="schools-card-info-item">
+                      <span className="schools-card-info-icon">📚</span>
+                      <span>{teacher.teacherSubjects.length} asignatura{teacher.teacherSubjects.length !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="schools-card-footer">
+                  <button className="schools-card-btn schools-card-btn-primary">
+                    Ver Detalles
+                  </button>
+                  <button className="schools-card-btn schools-card-btn-ghost">
+                    Editar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

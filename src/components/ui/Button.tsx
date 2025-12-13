@@ -30,20 +30,20 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 shadow-sm',
-  secondary: 'bg-secondary-500 text-white hover:bg-secondary-600 active:bg-secondary-700 shadow-sm',
+  primary: 'bg-gradient-to-r from-primary-500 to-accent-500 text-white border-0 hover:shadow-[0_10px_30px_rgba(13,139,255,0.4)] hover:-translate-y-0.5',
+  secondary: 'bg-transparent text-white/80 border border-white/20 hover:bg-white/5',
   accent: 'bg-accent-500 text-white hover:bg-accent-600 active:bg-accent-700 shadow-sm',
   success: 'bg-success-500 text-white hover:bg-success-600 active:bg-success-700 shadow-sm',
   warning: 'bg-warning-500 text-white hover:bg-warning-600 active:bg-warning-700 shadow-sm',
   danger: 'bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700 shadow-sm',
-  ghost: 'bg-transparent text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200',
-  outline: 'border-2 border-primary-500 text-primary-600 hover:bg-primary-50 active:bg-primary-100',
+  ghost: 'bg-transparent text-white/80 hover:bg-white/10 active:bg-white/5 hover:text-white',
+  outline: 'border-2 border-primary-400/50 text-primary-400 hover:bg-primary-400/10 active:bg-primary-400/20 backdrop-blur-sm',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm rounded-md',
-  md: 'px-4 py-2 text-base rounded-lg',
-  lg: 'px-6 py-3 text-lg rounded-xl',
+  md: 'px-6 py-3.5 text-base rounded-xl font-semibold',
+  lg: 'px-6 py-4 text-lg rounded-xl font-semibold',
 };
 
 export function Button({

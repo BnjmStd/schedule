@@ -1,3 +1,5 @@
+"use static"; 
+
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { siteConfig } from "@/config/site";
@@ -19,10 +21,10 @@ export default function LandingPage() {
             <a href="#pricing" className="landing-menu-link">Precios</a>
             <a href="#about" className="landing-menu-link">Nosotros</a>
             <Link href="/auth/login">
-              <Button variant="ghost" size="sm">Iniciar Sesión</Button>
+              <button className="landing-btn-login">Iniciar Sesión</button>
             </Link>
             <Link href="/auth/register">
-              <Button size="sm">Comenzar Gratis</Button>
+              <button className="landing-btn-register">Comenzar Gratis</button>
             </Link>
           </nav>
         </div>

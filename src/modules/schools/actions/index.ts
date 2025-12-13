@@ -9,10 +9,16 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { getCurrentUser, getUserSchoolIds, userHasAccessToSchool } from '@/lib/auth-helpers';
 import { CreateSchoolInput, UpdateSchoolInput, School } from '@/types';
 
 export async function getSchools(): Promise<School[]> {
+  const schoolIds = await getUserSchoolIds();
+  
   const schools = await prisma.school.findMany({
+    where: {
+      id: { in: schoolIds },
+    },
     orderBy: { name: 'asc' },
   });
   
@@ -26,6 +32,12 @@ export async function getSchools(): Promise<School[]> {
 }
 
 export async function getSchoolById(id: string): Promise<School | null> {
+  const hasAccess = await userHasAccessToSchool(id);
+  
+  if (!hasAccess) {
+    throw new Error('No tienes acceso a este colegio');
+  }
+  
   const school = await prisma.school.findUnique({
     where: { id },
   });
@@ -42,12 +54,21 @@ export async function getSchoolById(id: string): Promise<School | null> {
 }
 
 export async function createSchool(data: CreateSchoolInput): Promise<School> {
+  const user = await getCurrentUser();
+  
   const school = await prisma.school.create({
     data: {
       name: data.name,
       address: data.address,
       phone: data.phone,
       email: data.email,
+      // Crear la relación UserSchool automáticamente
+      users: {
+        create: {
+          userId: user.id,
+          role: 'admin',
+        },
+      },
     },
   });
   
@@ -64,6 +85,11 @@ export async function createSchool(data: CreateSchoolInput): Promise<School> {
 
 export async function updateSchool(data: UpdateSchoolInput): Promise<School | null> {
   const { id, ...updateData } = data;
+  
+  const hasAccess = await userHasAccessToSchool(id);
+  if (!hasAccess) {
+    throw new Error('No tienes acceso a este colegio');
+  }
   
   try {
     const school = await prisma.school.update({
@@ -87,6 +113,11 @@ export async function updateSchool(data: UpdateSchoolInput): Promise<School | nu
 }
 
 export async function deleteSchool(id: string): Promise<boolean> {
+  const hasAccess = await userHasAccessToSchool(id);
+  if (!hasAccess) {
+    throw new Error('No tienes acceso a este colegio');
+  }
+  
   try {
     await prisma.school.delete({
       where: { id },

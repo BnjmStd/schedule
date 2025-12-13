@@ -9,7 +9,6 @@
 import { useState } from 'react';
 import { School } from '@/types';
 import { SchoolCard } from './SchoolCard';
-import { Input } from '@/components/ui';
 
 export interface SchoolListProps {
   schools: School[];
@@ -27,11 +26,13 @@ export function SchoolList({ schools, onEdit, onDelete, onView }: SchoolListProp
   );
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Búsqueda */}
-      <div className="max-w-md">
-        <Input
+      <div className="schools-search" style={{ position: 'relative' }}>
+        <span className="schools-search-icon">🔍</span>
+        <input
           type="search"
+          className="schools-search-input"
           placeholder="Buscar colegios..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -40,13 +41,19 @@ export function SchoolList({ schools, onEdit, onDelete, onView }: SchoolListProp
 
       {/* Lista de escuelas */}
       {filteredSchools.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-neutral-500 text-lg">
+        <div className="schools-empty">
+          <div className="schools-empty-icon">🏫</div>
+          <p className="schools-empty-title">
             {search ? 'No se encontraron colegios' : 'No hay colegios registrados'}
           </p>
+          {!search && (
+            <p className="schools-empty-subtitle">
+              Comienza agregando tu primer colegio
+            </p>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="schools-grid">
           {filteredSchools.map((school) => (
             <SchoolCard
               key={school.id}

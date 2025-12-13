@@ -66,6 +66,38 @@
   gap: var(--spacing-6);
 }
 
+/* Botones del header */
+.landing-menu .landing-btn-login {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.landing-menu .landing-btn-login:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.landing-menu .landing-btn-register {
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.landing-menu .landing-btn-register:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(13, 139, 255, 0.3);
+}
+
 .landing-menu-link {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
@@ -218,6 +250,7 @@
   letter-spacing: -0.03em;
   margin-bottom: var(--spacing-6);
   animation: fadeInUp 0.8s ease 0.2s both;
+  color: #fff;
 }
 
 .landing-hero-title-gradient {
@@ -399,6 +432,7 @@
   font-weight: 700;
   margin-bottom: var(--spacing-4);
   letter-spacing: -0.02em;
+  color: #fff;
 }
 
 .landing-section-subtitle {
@@ -446,6 +480,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: var(--spacing-3);
+  color: #fff;
 }
 
 .landing-feature-description {
@@ -543,6 +578,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: #fff;
 }
 
 .landing-pricing-description {
@@ -559,6 +595,7 @@
 .landing-pricing-amount {
   font-size: 3.5rem;
   font-weight: 700;
+  color: #fff;
 }
 
 .landing-pricing-period {
@@ -603,6 +640,7 @@
   font-weight: 700;
   margin-bottom: var(--spacing-4);
   letter-spacing: -0.02em;
+  color: #fff;
 }
 
 .landing-cta-description {
@@ -676,6 +714,7 @@
 .landing-footer-logo-text {
   font-weight: 600;
   font-size: 1.125rem;
+  color: #fff;
 }
 
 .landing-footer-tagline {
@@ -690,6 +729,7 @@
   margin-bottom: var(--spacing-3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: #fff;
 }
 
 .landing-footer-links ul {

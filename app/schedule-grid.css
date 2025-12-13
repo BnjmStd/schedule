@@ -1,0 +1,260 @@
+/**
+ * 📅 Estilos para la grilla de horarios experimental
+ */
+
+/* Contenedor del horario */
+.schedule-view {
+  margin-top: 2rem;
+  animation: slideUp 0.4s ease-out;
+}
+
+.schedule-view-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.schedule-view-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.schedule-view-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Wrapper con scroll horizontal en móvil */
+.schedule-grid-wrapper {
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+}
+
+/* Tabla del horario */
+.schedule-grid-table {
+  display: grid;
+  min-width: 800px;
+  gap: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Header row */
+.schedule-header-row {
+  display: grid;
+  grid-template-columns: 150px repeat(5, 1fr);
+  background: linear-gradient(135deg, rgba(13, 139, 255, 0.1), rgba(139, 92, 246, 0.1));
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.schedule-time-header {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.schedule-day-header {
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.schedule-day-header:last-child {
+  border-right: none;
+}
+
+/* Filas del horario */
+.schedule-row {
+  display: grid;
+  grid-template-columns: 150px repeat(5, 1fr);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 80px;
+}
+
+.schedule-row:last-child {
+  border-bottom: none;
+}
+
+/* Celda de hora */
+.schedule-time-cell {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(139, 92, 246, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* Celda de break (almuerzo) */
+.schedule-break-cell {
+  grid-column: 2 / -1;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Celdas de clases */
+.schedule-cell {
+  padding: 0.75rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule-cell:last-child {
+  border-right: none;
+}
+
+.schedule-cell.has-block {
+  cursor: pointer;
+  border-radius: 0.5rem;
+  margin: 0.25rem;
+}
+
+.schedule-cell.has-block:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.schedule-cell.has-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.schedule-cell.has-block:hover::before {
+  opacity: 1;
+}
+
+/* Contenido del bloque */
+.schedule-block-content {
+  text-align: center;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.schedule-block-subject {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+
+.schedule-block-detail {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.65);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Animación de entrada */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .schedule-grid-table {
+    min-width: 900px;
+  }
+  
+  .schedule-time-cell {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .schedule-day-header {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+  }
+  
+  .schedule-block-subject {
+    font-size: 0.8rem;
+  }
+  
+  .schedule-block-detail {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .schedule-grid-wrapper {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+  
+  .schedule-grid-table {
+    min-width: 800px;
+  }
+  
+  .schedule-header-row {
+    grid-template-columns: 120px repeat(5, 1fr);
+  }
+  
+  .schedule-row {
+    grid-template-columns: 120px repeat(5, 1fr);
+  }
+  
+  .schedule-time-cell {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+  
+  .schedule-day-header {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  .schedule-cell {
+    padding: 0.5rem;
+  }
+  
+  .schedule-block-subject {
+    font-size: 0.75rem;
+  }
+  
+  .schedule-block-detail {
+    font-size: 0.65rem;
+  }
+}

@@ -1,24 +1,31 @@
-import { Container, PageHeader } from '@/components/layout';
-import { Button } from '@/components/ui';
 import { getSchools } from '@/modules/schools/actions';
-import { SchoolList } from '@/modules/schools/components';
+import { SchoolList, AddSchoolButton } from '@/modules/schools/components';
+import '../../schools.css';
 
 export default async function SchoolsPage() {
   const schools = await getSchools();
 
   return (
-    <Container>
-      <PageHeader
-        title="🏫 Colegios"
-        description="Gestiona los colegios registrados en el sistema. Cada colegio puede tener múltiples profesores, cursos y horarios."
-        actions={
-          <Button variant="primary">
-            + Agregar Colegio
-          </Button>
-        }
-      />
+    <div className="schools-page">
+      <div className="schools-bg">
+        <div className="schools-gradient" />
+      </div>
+      
+      <div className="schools-container">
+        <header className="schools-header">
+          <div className="schools-header-top">
+            <h1 className="schools-title">
+              🏫 Colegios
+            </h1>
+            <AddSchoolButton />
+          </div>
+          <p className="schools-description">
+            Gestiona los colegios registrados en el sistema. Cada colegio puede tener múltiples profesores, cursos y horarios.
+          </p>
+        </header>
 
-      <SchoolList schools={schools} />
-    </Container>
+        <SchoolList schools={schools} />
+      </div>
+    </div>
   );
 }

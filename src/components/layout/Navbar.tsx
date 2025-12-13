@@ -1,38 +1,47 @@
 /**
  * 🧭 Componente Navbar - Sistema de Horarios
  * 
- * Barra de navegación principal con diseño pastel
+ * Barra de navegación principal con diseño oscuro y menú hamburguesa responsive
  */
 
+'use client';
+
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import { useState, ReactNode } from 'react';
+import './Navbar.css';
 
 export interface NavbarProps {
   children?: ReactNode;
 }
 
 export function Navbar({ children }: NavbarProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-neutral-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <>
+      <nav className="navbar">
+        <div className="navbar-container">
           {/* Logo y título */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary-400 to-accent-500 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <span className="text-white font-bold text-lg">📅</span>
+          <Link href="/dashboard" className="navbar-logo" onClick={closeMenu}>
+            <div className="navbar-logo-icon">
+              <span>📅</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-neutral-900">
-                Sistema de Horarios
-              </span>
-              <span className="text-xs text-neutral-500">
-                Gestión Escolar
-              </span>
+            <div className="navbar-logo-text">
+              <span className="navbar-title">Sistema de Horarios</span>
+              <span className="navbar-subtitle">Gestión Escolar</span>
             </div>
           </Link>
 
-          {/* Navegación principal */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Navegación desktop */}
+          <div className="navbar-menu-desktop">
             <NavLink href="/schools">🏫 Colegios</NavLink>
             <NavLink href="/teachers">👨‍🏫 Profesores</NavLink>
             <NavLink href="/subjects">📚 Asignaturas</NavLink>
@@ -41,10 +50,60 @@ export function Navbar({ children }: NavbarProps) {
           </div>
 
           {/* Acciones adicionales */}
-          {children}
+          <div className="navbar-actions">
+            {children}
+          </div>
+
+          {/* Botón hamburguesa */}
+          <button
+            className={`navbar-hamburger ${isMenuOpen ? 'active' : ''}`}
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Overlay */}
+      {isMenuOpen && (
+        <div className="navbar-overlay" onClick={closeMenu} />
+      )}
+
+      {/* Menú móvil deslizante */}
+      <div className={`navbar-menu-mobile ${isMenuOpen ? 'open' : ''}`}>
+        <div className="navbar-menu-mobile-header">
+          <span className="navbar-menu-mobile-title">Menú</span>
+          <button
+            className="navbar-menu-mobile-close"
+            onClick={closeMenu}
+            aria-label="Cerrar menú"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div className="navbar-menu-mobile-links">
+          <MobileNavLink href="/schools" onClick={closeMenu}>
+            🏫 Colegios
+          </MobileNavLink>
+          <MobileNavLink href="/teachers" onClick={closeMenu}>
+            👨‍🏫 Profesores
+          </MobileNavLink>
+          <MobileNavLink href="/subjects" onClick={closeMenu}>
+            📚 Asignaturas
+          </MobileNavLink>
+          <MobileNavLink href="/courses" onClick={closeMenu}>
+            🎓 Cursos
+          </MobileNavLink>
+          <MobileNavLink href="/schedules" onClick={closeMenu}>
+            🗓️ Horarios
+          </MobileNavLink>
         </div>
       </div>
-    </nav>
+    </>
   );
 }
 
@@ -55,10 +114,19 @@ interface NavLinkProps {
 
 function NavLink({ href, children }: NavLinkProps) {
   return (
-    <Link
-      href={href}
-      className="px-4 py-2 rounded-lg text-sm font-medium text-neutral-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200"
-    >
+    <Link href={href} className="navbar-link">
+      {children}
+    </Link>
+  );
+}
+
+interface MobileNavLinkProps extends NavLinkProps {
+  onClick: () => void;
+}
+
+function MobileNavLink({ href, children, onClick }: MobileNavLinkProps) {
+  return (
+    <Link href={href} className="navbar-mobile-link" onClick={onClick}>
       {children}
     </Link>
   );
