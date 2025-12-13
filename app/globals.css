@@ -177,6 +177,25 @@ a:hover {
   color: var(--primary-700);
 }
 
+/* Estilos globales para select y options */
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background: #1a1a2e;
+  color: white;
+  padding: 0.5rem;
+}
+
+/* Para navegadores que no soportan color-scheme */
+@media (prefers-color-scheme: dark) {
+  select option {
+    background: #1a1a2e;
+    color: white;
+  }
+}
+
 /* Utilidades de layout */
 .container {
   width: 100%;

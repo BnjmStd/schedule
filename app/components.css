@@ -241,6 +241,12 @@
   cursor: pointer;
 }
 
+.select option {
+  background: white;
+  color: var(--neutral-900);
+  padding: 0.5rem;
+}
+
 .select:focus {
   outline: none;
   border-color: var(--primary-400);

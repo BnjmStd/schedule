@@ -3,6 +3,9 @@
  * 
  * Select dropdown reutilizable
  * Diseño consistente con Input
+ * 
+ * NOTA: Usa color-scheme: dark para asegurar que las opciones
+ * tengan fondo oscuro y texto blanco en todos los navegadores
  */
 
 import { SelectHTMLAttributes, forwardRef } from 'react';

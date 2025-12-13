@@ -19,17 +19,29 @@ const ACADEMIC_LEVELS = [
   { value: 'MEDIA', label: 'Media' },
 ];
 
-export function CreateCourseForm() {
+interface CreateCourseFormProps {
+  onSuccess?: () => void;
+}
+
+export function CreateCourseForm({ onSuccess }: CreateCourseFormProps) {
   const router = useRouter();
   const { closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
   const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    schoolId: '',
+  });
 
   useEffect(() => {
     const loadSchools = async () => {
       const data = await getSchools();
       setSchools(data);
+      
+      // Si solo hay un colegio, auto-seleccionarlo
+      if (data.length === 1) {
+        setFormData({ schoolId: data[0].id });
+      }
     };
     loadSchools();
   }, []);
@@ -55,6 +67,7 @@ export function CreateCourseForm() {
     try {
       await createCourse(data);
       closeModal();
+      onSuccess?.(); // Llamar al callback para recargar los datos
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el curso');
@@ -82,6 +95,9 @@ export function CreateCourseForm() {
           name="schoolId"
           required
           disabled={isLoading}
+          value={formData.schoolId}
+          onChange={(e) => setFormData({ schoolId: e.target.value })}
+          placeholder="Selecciona un colegio"
           options={schools.map(school => ({
             value: school.id,
             label: school.name

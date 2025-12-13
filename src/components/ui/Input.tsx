@@ -15,7 +15,13 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, className, ...props }, ref) => {
+  ({ label, error, helperText, className, value, onChange, ...props }, ref) => {
+    // Si se pasa value pero no onChange, el componente debe ser no controlado
+    const isControlled = value !== undefined && onChange !== undefined;
+    const inputProps = isControlled 
+      ? { value: value ?? '', onChange }
+      : { defaultValue: value, onChange };
+
     return (
       <div className="w-full">
         {label && (
@@ -27,6 +33,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={cn(className)}
+          {...inputProps}
           style={{
             width: '100%',
             padding: '0.75rem 1rem',

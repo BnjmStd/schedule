@@ -1,9 +1,58 @@
-import { getCourses } from '@/modules/courses/actions';
-import { AddCourseButton } from '@/modules/courses/components/AddCourseButton';
-import '../../courses.css';
+'use client';
 
-export default async function CoursesPage() {
-  const courses = await getCourses();
+import { useState, useEffect } from 'react';
+import { getCourses } from '@/modules/courses/actions';
+import { getSchools } from '@/modules/schools/actions';
+import { AddCourseButton } from '@/modules/courses/components/AddCourseButton';
+import type { School } from '@/types';
+import '../../courses.css';
+import { Badge } from '@/components/ui/Badge';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui';
+
+type CourseWithRelations = {
+  id: string;
+  name: string;
+  academicLevel: string;
+  academicYear: number;
+  studentCount: number | null;
+  schoolId: string;
+  school: {
+    name: string;
+  };
+  schedules: any[];
+};
+
+export default function CoursesPage() {
+  const [courses, setCourses] = useState<CourseWithRelations[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const [coursesData, schoolsData] = await Promise.all([
+        getCourses(),
+        getSchools()
+      ]);
+      setCourses(coursesData as any);
+      setSchools(schoolsData);
+    };
+    loadData();
+  }, []);
+
+  const reloadCourses = async () => {
+    const coursesData = await getCourses();
+    setCourses(coursesData as any);
+  };
+
+  const filteredCourses = selectedSchool === 'all' 
+    ? courses 
+    : courses.filter(course => course.schoolId === selectedSchool);
+
+  const getSchoolName = (schoolId: string) => {
+    return schools.find(s => s.id === schoolId)?.name || '';
+  };
 
   return (
     <div className="schools-page">
@@ -16,29 +65,78 @@ export default async function CoursesPage() {
           <div className="schools-header-top">
             <h1 className="schools-title">
               🎓 Cursos
+              {selectedSchool !== 'all' && (
+                <span style={{ 
+                  fontSize: '0.6em', 
+                  fontWeight: 400, 
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  marginLeft: '0.5rem'
+                }}>
+                  - {getSchoolName(selectedSchool)}
+                </span>
+              )}
             </h1>
-            <AddCourseButton />
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button
+                className="schools-filter-btn"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                🔍 {showFilters ? 'Ocultar' : 'Filtros'}
+              </button>
+              <AddCourseButton onCourseCreated={reloadCourses} />
+            </div>
           </div>
           <p className="schools-description">
             Administra los cursos, secciones y niveles académicos de la institución.
+            {selectedSchool !== 'all' && ` Mostrando ${filteredCourses.length} curso${filteredCourses.length !== 1 ? 's' : ''}.`}
           </p>
+
+          {/* Filtros */}
+          {showFilters && (
+            <div className="schools-filters">
+              <div className="schools-filter-group">
+                <label className="schools-filter-label">Colegio</label>
+                <select 
+                  className="schools-filter-select"
+                  value={selectedSchool}
+                  onChange={(e) => setSelectedSchool(e.target.value)}
+                >
+                  <option value="all">Todos los colegios</option>
+                  {schools.map(school => (
+                    <option key={school.id} value={school.id}>
+                      {school.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </header>
 
-        {courses.length === 0 ? (
+        {filteredCourses.length === 0 ? (
           <div className="schools-empty">
             <div className="schools-empty-icon">🎓</div>
-            <p className="schools-empty-title">No hay cursos registrados</p>
-            <p className="schools-empty-subtitle">Comienza agregando tu primer curso</p>
+            <p className="schools-empty-title">
+              {selectedSchool === 'all' ? 'No hay cursos registrados' : 'No hay cursos en este colegio'}
+            </p>
+            <p className="schools-empty-subtitle">
+              {selectedSchool === 'all' ? 'Comienza agregando tu primer curso' : 'Selecciona otro colegio o agrega un curso nuevo'}
+            </p>
           </div>
         ) : (
           <div className="schools-grid">
-            {courses.map((course) => (
+            {filteredCourses.map((course) => (
               <div key={course.id} className="schools-card">
                 <div className="schools-card-header">
                   <div>
                     <h3 className="schools-card-title">
                       {course.name}
                     </h3>
+                    {selectedSchool === 'all' && (
+                      <span className="schools-card-school-badge">
+                        {course.school.name}
+                      </span>
+                    )}
                   </div>
                   <span className="schools-card-badge">
                     {course.academicLevel}

@@ -7,11 +7,15 @@
 import { useModal } from '@/contexts/ModalContext';
 import { CreateCourseForm } from './CreateCourseForm';
 
-export function AddCourseButton() {
+interface AddCourseButtonProps {
+  onCourseCreated?: () => void;
+}
+
+export function AddCourseButton({ onCourseCreated }: AddCourseButtonProps) {
   const { openModal } = useModal();
 
   const handleClick = () => {
-    openModal(<CreateCourseForm />, '🎓 Crear Nuevo Curso');
+    openModal(<CreateCourseForm onSuccess={onCourseCreated} />, '🎓 Crear Nuevo Curso');
   };
 
   return (

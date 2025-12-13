@@ -74,9 +74,13 @@ export async function createSubject(data: {
 }) {
   const schoolIds = await getUserSchoolIds();
   
+  // Debug: ver qué colegios tiene acceso el usuario
+  console.log('User school IDs:', schoolIds);
+  console.log('Trying to create subject in school:', data.schoolId);
+  
   // Verificar que el usuario tiene acceso a esta escuela
   if (!schoolIds.includes(data.schoolId)) {
-    throw new Error('No tienes acceso a esta escuela');
+    throw new Error(`No tienes acceso a esta escuela. Tienes acceso a: ${schoolIds.join(', ')}`);
   }
 
   const subject = await prisma.subject.create({
