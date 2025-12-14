@@ -127,3 +127,17 @@ export async function deleteTeacher(id: string) {
 
   revalidatePath('/teachers');
 }
+
+export async function countTeachers() {
+  const schoolIds = await getUserSchoolIds();
+  
+  const count = await prisma.teacher.count({
+    where: {
+      schoolId: {
+        in: schoolIds
+      }
+    }
+  });
+
+  return count;
+}

@@ -129,3 +129,82 @@ export async function deleteSchool(id: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Obtener configuración de horario del colegio
+ */
+export async function getSchoolScheduleConfig(schoolId: string) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
+    throw new Error('No tienes acceso a este colegio');
+  }
+
+  const school = await prisma.school.findUnique({
+    where: { id: schoolId },
+    select: {
+      scheduleStartTime: true,
+      scheduleEndTime: true,
+      blockDuration: true,
+      breakDuration: true,
+      lunchBreakEnabled: true,
+      lunchBreakStart: true,
+      lunchBreakEnd: true,
+    },
+  });
+
+  if (!school) {
+    throw new Error('Colegio no encontrado');
+  }
+
+  return {
+    startTime: school.scheduleStartTime,
+    endTime: school.scheduleEndTime,
+    blockDuration: school.blockDuration,
+    breakDuration: school.breakDuration,
+    lunchBreak: {
+      enabled: school.lunchBreakEnabled,
+      startTime: school.lunchBreakStart,
+      endTime: school.lunchBreakEnd,
+    },
+  };
+}
+
+/**
+ * Actualizar configuración de horario del colegio
+ */
+export async function updateSchoolScheduleConfig(
+  schoolId: string,
+  config: {
+    startTime: string;
+    endTime: string;
+    blockDuration: number;
+    breakDuration: number;
+    lunchBreak: {
+      enabled: boolean;
+      startTime: string;
+      endTime: string;
+    };
+  }
+) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
+    throw new Error('No tienes acceso a este colegio');
+  }
+
+  await prisma.school.update({
+    where: { id: schoolId },
+    data: {
+      scheduleStartTime: config.startTime,
+      scheduleEndTime: config.endTime,
+      blockDuration: config.blockDuration,
+      breakDuration: config.breakDuration,
+      lunchBreakEnabled: config.lunchBreak.enabled,
+      lunchBreakStart: config.lunchBreak.startTime,
+      lunchBreakEnd: config.lunchBreak.endTime,
+    },
+  });
+
+  revalidatePath('/schools');
+  revalidatePath('/schedules');
+  return { success: true };
+}

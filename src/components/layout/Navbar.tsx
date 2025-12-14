@@ -42,6 +42,7 @@ export function Navbar({ children }: NavbarProps) {
 
           {/* Navegación desktop */}
           <div className="navbar-menu-desktop">
+            <NavLink href="/dashboard">🏠 Dashboard</NavLink>
             <NavLink href="/schools">🏫 Colegios</NavLink>
             <NavLink href="/teachers">👨‍🏫 Profesores</NavLink>
             <NavLink href="/subjects">📚 Asignaturas</NavLink>
@@ -86,6 +87,9 @@ export function Navbar({ children }: NavbarProps) {
         </div>
         
         <div className="navbar-menu-mobile-links">
+          <MobileNavLink href="/dashboard" onClick={closeMenu}>
+            🏠 Dashboard
+          </MobileNavLink>
           <MobileNavLink href="/schools" onClick={closeMenu}>
             🏫 Colegios
           </MobileNavLink>

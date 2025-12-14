@@ -31,10 +31,10 @@
 
 /* Contenedor del modal - estilo auth-form-card */
 .modal-container {
-  background: rgba(20, 20, 30, 0.95);
+  background: rgba(30, 30, 45, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 1.5rem;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
   max-width: 600px;
@@ -44,6 +44,7 @@
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: auto;
 }
 
 @keyframes slideUp {
@@ -169,4 +170,112 @@
   .modal-content {
     padding: 1rem;
   }
+}
+
+/* Confirm Dialog Styles */
+.confirm-dialog {
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+
+.confirm-dialog-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  line-height: 1;
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.confirm-dialog-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.confirm-dialog-message {
+  font-size: 1.0625rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Button styles for confirm dialog */
+.confirm-dialog-actions .schools-card-btn {
+  flex: 0 1 auto;
+  min-width: 130px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* Make sure buttons are visible */
+.schools-card-btn {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.schools-card-btn-primary {
+  background: linear-gradient(135deg, #0d8bff, #a855f7);
+  color: #fff;
+}
+
+.schools-card-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(13, 139, 255, 0.3);
+}
+
+.schools-card-btn-ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.schools-card-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.schools-card-btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-weight: 600;
+}
+
+.schools-card-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ff5555;
+  border-color: rgba(239, 68, 68, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }

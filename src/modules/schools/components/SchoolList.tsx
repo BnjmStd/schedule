@@ -15,9 +15,10 @@ export interface SchoolListProps {
   onEdit?: (school: School) => void;
   onDelete?: (school: School) => void;
   onView?: (school: School) => void;
+  onConfigSchedule?: (school: School) => void;
 }
 
-export function SchoolList({ schools, onEdit, onDelete, onView }: SchoolListProps) {
+export function SchoolList({ schools, onEdit, onDelete, onView, onConfigSchedule }: SchoolListProps) {
   const [search, setSearch] = useState('');
 
   const filteredSchools = schools.filter(school =>
@@ -61,6 +62,7 @@ export function SchoolList({ schools, onEdit, onDelete, onView }: SchoolListProp
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
+              onConfigSchedule={onConfigSchedule}
             />
           ))}
         </div>

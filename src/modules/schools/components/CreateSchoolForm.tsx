@@ -7,14 +7,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useModal } from '@/contexts/ModalContext';
 import { createSchool } from '@/modules/schools/actions';
 import { Input } from '@/components/ui';
 import './SchoolForms.css';
 
-export function CreateSchoolForm() {
-  const router = useRouter();
+interface CreateSchoolFormProps {
+  onSchoolCreated?: () => void;
+}
+
+export function CreateSchoolForm({ onSchoolCreated }: CreateSchoolFormProps) {
   const { closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,7 +37,10 @@ export function CreateSchoolForm() {
     try {
       await createSchool(data);
       closeModal();
-      router.refresh(); // Refrescar la lista de colegios
+      // Llamar callback para actualizar la lista
+      if (onSchoolCreated) {
+        onSchoolCreated();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el colegio');
     } finally {

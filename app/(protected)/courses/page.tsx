@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getCourses } from '@/modules/courses/actions';
+import { getCourses, deleteCourse } from '@/modules/courses/actions';
 import { getSchools } from '@/modules/schools/actions';
 import { AddCourseButton } from '@/modules/courses/components/AddCourseButton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useModal } from '@/contexts/ModalContext';
 import type { School } from '@/types';
 import '../../courses.css';
 import { Badge } from '@/components/ui/Badge';
@@ -28,6 +30,7 @@ export default function CoursesPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const { openModal, closeModal } = useModal();
 
   useEffect(() => {
     const loadData = async () => {
@@ -44,6 +47,30 @@ export default function CoursesPage() {
   const reloadCourses = async () => {
     const coursesData = await getCourses();
     setCourses(coursesData as any);
+  };
+
+  const handleDeleteCourse = (course: CourseWithRelations) => {
+    openModal(
+      <ConfirmDialog
+        title="¿Eliminar curso?"
+        message={`¿Estás seguro de que quieres eliminar ${course.name}? Los horarios asociados también se eliminarán. Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={async () => {
+          try {
+            await deleteCourse(course.id);
+            setCourses(courses.filter(c => c.id !== course.id));
+            closeModal();
+          } catch (error) {
+            console.error('Error al eliminar curso:', error);
+            alert('Error al eliminar el curso');
+          }
+        }}
+        onCancel={closeModal}
+      />,
+      '⚠️ Confirmar eliminación'
+    );
   };
 
   const filteredCourses = selectedSchool === 'all' 
@@ -148,6 +175,12 @@ export default function CoursesPage() {
                     <span className="schools-card-info-icon">🏫</span>
                     <span>{course.school.name}</span>
                   </div>
+                  <button 
+                    className="schools-card-btn schools-card-btn-danger"
+                    onClick={() => handleDeleteCourse(course)}
+                  >
+                    Eliminar
+                  </button>
                   {course.studentCount && (
                     <div className="schools-card-info-item">
                       <span className="schools-card-info-icon">👥</span>

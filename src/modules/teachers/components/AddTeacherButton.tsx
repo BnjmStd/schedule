@@ -7,11 +7,15 @@
 import { useModal } from '@/contexts/ModalContext';
 import { CreateTeacherForm } from './CreateTeacherForm';
 
-export function AddTeacherButton() {
+interface AddTeacherButtonProps {
+  onTeacherCreated?: () => void;
+}
+
+export function AddTeacherButton({ onTeacherCreated }: AddTeacherButtonProps) {
   const { openModal } = useModal();
 
   const handleClick = () => {
-    openModal(<CreateTeacherForm />, '👨‍🏫 Crear Nuevo Profesor');
+    openModal(<CreateTeacherForm onTeacherCreated={onTeacherCreated} />, '👨‍🏫 Crear Nuevo Profesor');
   };
 
   return (

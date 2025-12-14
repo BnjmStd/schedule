@@ -1,36 +1,53 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { getCourses } from '@/modules/courses/actions';
-import { getTeachers } from '@/modules/teachers/actions';
-import { ScheduleGrid } from '@/modules/schedules/components/ScheduleGridSimple';
-import '../../schools.css';
-import '../../schedules.css';
-import '../../schedule-grid.css';
-import '../../schedule-accordion.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getCourses } from "@/modules/courses/actions";
+import { getTeachers } from "@/modules/teachers/actions";
+import {
+  getSchedulesForCourse,
+  getSchedulesForTeacher,
+} from "@/modules/schedules/actions";
+import { ScheduleGrid } from "@/modules/schedules/components/ScheduleGridSimple";
+import { DownloadScheduleModal } from "@/components/ui";
+import "../../schools.css";
+import "../../schedules.css";
+import "../../schedule-grid.css";
+import "../../schedule-accordion.css";
 
-type ScheduleView = 'course' | 'teacher';
+type ScheduleView = "course" | "teacher";
+
+interface DownloadData {
+  name: string;
+  id: string;
+  type: "course" | "teacher";
+}
 
 export default function SchedulesPage() {
   const router = useRouter();
-  const [activeView, setActiveView] = useState<ScheduleView>('course');
+  const [activeView, setActiveView] = useState<ScheduleView>("course");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSchedules, setLoadingSchedules] = useState<
+    Record<string, boolean>
+  >({});
+  const [scheduleData, setScheduleData] = useState<Record<string, any>>({});
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [downloadData, setDownloadData] = useState<DownloadData | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const [coursesData, teachersData] = await Promise.all([
           getCourses(),
-          getTeachers()
+          getTeachers(),
         ]);
         setCourses(coursesData);
         setTeachers(teachersData);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error("Error loading data:", error);
       } finally {
         setLoading(false);
       }
@@ -38,16 +55,132 @@ export default function SchedulesPage() {
     loadData();
   }, []);
 
-  const toggleExpand = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
+  const toggleExpand = async (id: string, type: "course" | "teacher") => {
+    const newExpandedId = expandedId === id ? null : id;
+    setExpandedId(newExpandedId);
+
+    // Si se está abriendo el acordeón, SIEMPRE recargar los datos (sin caché)
+    if (newExpandedId) {
+      setLoadingSchedules((prev) => ({ ...prev, [id]: true }));
+      try {
+        if (type === "course") {
+          console.log("[Acordeón] Cargando schedules para curso:", id);
+          const schedules = await getSchedulesForCourse(id);
+          console.log("[Acordeón] Schedules recibidos:", schedules.length);
+          if (schedules && schedules.length > 0) {
+            console.log(
+              "[Acordeón] Schedule ID:",
+              schedules[0].id,
+              "Bloques:",
+              schedules[0].blocks.length
+            );
+            // Transformar bloques para el ScheduleGrid
+            const blocks = schedules[0].blocks.map((block: any) => ({
+              id: block.id,
+              day: block.dayOfWeek,
+              startTime: block.startTime,
+              endTime: block.endTime,
+              subject: block.subject.name,
+              teacher: `${block.teacher.firstName} ${block.teacher.lastName}`,
+              color: block.subject.color,
+            }));
+            console.log("[Acordeón] Bloques transformados:", blocks.length);
+            setScheduleData((prev) => ({ ...prev, [id]: blocks }));
+          } else {
+            setScheduleData((prev) => ({ ...prev, [id]: [] }));
+          }
+        } else {
+          // Cargar horarios de profesor
+          console.log("[Acordeón] Cargando schedules para profesor:", id);
+          const blocks = await getSchedulesForTeacher(id);
+          console.log("[Acordeón] Bloques recibidos:", blocks.length);
+          if (blocks && blocks.length > 0) {
+            // Transformar bloques para el ScheduleGrid
+            const transformedBlocks = blocks.map((block: any) => ({
+              id: block.id,
+              day: block.dayOfWeek,
+              startTime: block.startTime,
+              endTime: block.endTime,
+              subject: block.subject.name,
+              course: block.course.name,
+              color: block.subject.color,
+            }));
+            console.log(
+              "[Acordeón] Bloques transformados:",
+              transformedBlocks.length
+            );
+            setScheduleData((prev) => ({ ...prev, [id]: transformedBlocks }));
+          } else {
+            setScheduleData((prev) => ({ ...prev, [id]: [] }));
+          }
+        }
+      } catch (error) {
+        console.error("Error cargando horario:", error);
+        setScheduleData((prev) => ({ ...prev, [id]: [] }));
+      } finally {
+        setLoadingSchedules((prev) => ({ ...prev, [id]: false }));
+      }
+    }
   };
 
-  const handleDownload = (name: string) => {
-    console.log(`Descargando horario de: ${name}`);
-    alert(`Función de descarga en desarrollo para: ${name}`);
+  const handleDownload = async (
+    name: string,
+    id: string,
+    type: "course" | "teacher"
+  ) => {
+    // Primero expandir el acordeón si no está expandido
+    if (expandedId !== id) {
+      setExpandedId(id);
+    }
+
+    // Cargar datos del horario si no están en el estado
+    if (!scheduleData[id]) {
+      setLoadingSchedules((prev) => ({ ...prev, [id]: true }));
+      try {
+        if (type === "course") {
+          const schedules = await getSchedulesForCourse(id);
+          if (schedules && schedules.length > 0) {
+            const blocks = schedules[0].blocks.map((block: any) => ({
+              id: block.id,
+              day: block.dayOfWeek,
+              startTime: block.startTime,
+              endTime: block.endTime,
+              subject: block.subject.name,
+              teacher: `${block.teacher.firstName} ${block.teacher.lastName}`,
+              color: block.subject.color,
+            }));
+            setScheduleData((prev) => ({ ...prev, [id]: blocks }));
+          }
+        } else {
+          const blocks = await getSchedulesForTeacher(id);
+          if (blocks && blocks.length > 0) {
+            const transformedBlocks = blocks.map((block: any) => ({
+              id: block.id,
+              day: block.dayOfWeek,
+              startTime: block.startTime,
+              endTime: block.endTime,
+              subject: block.subject.name,
+              course: block.course.name,
+              color: block.subject.color,
+            }));
+            setScheduleData((prev) => ({ ...prev, [id]: transformedBlocks }));
+          }
+        }
+      } catch (error) {
+        console.error("Error cargando horario para descarga:", error);
+      } finally {
+        setLoadingSchedules((prev) => ({ ...prev, [id]: false }));
+      }
+    }
+
+    // Pequeño delay para asegurar que el DOM se ha actualizado
+    setTimeout(() => {
+      setDownloadData({ name, id, type });
+      setDownloadModalOpen(true);
+    }, 300);
   };
 
-  const handleEdit = (id: string, type: 'course' | 'teacher') => {
+  const handleEdit = (id: string, type: "course" | "teacher") => {
     router.push(`/schedules/editor?id=${id}&type=${type}`);
   };
 
@@ -56,13 +189,11 @@ export default function SchedulesPage() {
       <div className="schools-bg">
         <div className="schools-gradient" />
       </div>
-      
+
       <div className="schools-container">
         <header className="schools-header">
           <div className="schools-header-top">
-            <h1 className="schools-title">
-              🗓️ Horarios
-            </h1>
+            <h1 className="schools-title">🗓️ Horarios</h1>
           </div>
           <p className="schools-description">
             Visualiza y gestiona los horarios semanales de cursos y profesores.
@@ -72,15 +203,19 @@ export default function SchedulesPage() {
         {/* Pestañas de visualización */}
         <div className="schedule-tabs">
           <button
-            className={`schedule-tab ${activeView === 'course' ? 'active' : ''}`}
-            onClick={() => setActiveView('course')}
+            className={`schedule-tab ${
+              activeView === "course" ? "active" : ""
+            }`}
+            onClick={() => setActiveView("course")}
           >
             <span className="schedule-tab-icon">🎓</span>
             <span className="schedule-tab-text">Por Curso</span>
           </button>
           <button
-            className={`schedule-tab ${activeView === 'teacher' ? 'active' : ''}`}
-            onClick={() => setActiveView('teacher')}
+            className={`schedule-tab ${
+              activeView === "teacher" ? "active" : ""
+            }`}
+            onClick={() => setActiveView("teacher")}
           >
             <span className="schedule-tab-icon">👨‍🏫</span>
             <span className="schedule-tab-text">Por Profesor</span>
@@ -96,35 +231,35 @@ export default function SchedulesPage() {
         ) : (
           <>
             {/* Empty state */}
-            {((activeView === 'course' && courses.length === 0) || 
-              (activeView === 'teacher' && teachers.length === 0)) && (
+            {((activeView === "course" && courses.length === 0) ||
+              (activeView === "teacher" && teachers.length === 0)) && (
               <div className="schools-empty">
                 <div className="schools-empty-icon">
-                  {activeView === 'course' ? '🎓' : '👨‍🏫'}
+                  {activeView === "course" ? "🎓" : "👨‍🏫"}
                 </div>
                 <p className="schools-empty-title">
-                  {activeView === 'course' 
-                    ? 'No hay cursos registrados' 
-                    : 'No hay profesores registrados'}
+                  {activeView === "course"
+                    ? "No hay cursos registrados"
+                    : "No hay profesores registrados"}
                 </p>
                 <p className="schools-empty-subtitle">
-                  {activeView === 'course'
-                    ? 'Primero debes crear cursos para gestionar sus horarios'
-                    : 'Primero debes crear profesores para gestionar sus horarios'}
+                  {activeView === "course"
+                    ? "Primero debes crear cursos para gestionar sus horarios"
+                    : "Primero debes crear profesores para gestionar sus horarios"}
                 </p>
               </div>
             )}
 
             {/* Accordion list */}
-            {((activeView === 'course' && courses.length > 0) || 
-              (activeView === 'teacher' && teachers.length > 0)) && (
+            {((activeView === "course" && courses.length > 0) ||
+              (activeView === "teacher" && teachers.length > 0)) && (
               <div className="schedule-accordion-container">
-                {activeView === 'course'
+                {activeView === "course"
                   ? courses.map((course) => (
                       <div key={course.id} className="schedule-accordion-item">
                         <div
                           className="schedule-accordion-header"
-                          onClick={() => toggleExpand(course.id)}
+                          onClick={() => toggleExpand(course.id, "course")}
                         >
                           <div className="schedule-accordion-info">
                             <div className="schedule-accordion-icon">🎓</div>
@@ -133,7 +268,8 @@ export default function SchedulesPage() {
                                 {course.name}
                               </h3>
                               <p className="schedule-accordion-subtitle">
-                                {course.school.name} • {course.studentCount || 0} estudiantes
+                                {course.school.name} •{" "}
+                                {course.studentCount || 0} estudiantes
                               </p>
                             </div>
                           </div>
@@ -142,7 +278,11 @@ export default function SchedulesPage() {
                               className="schedule-action-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDownload(course.name);
+                                handleDownload(
+                                  course.name,
+                                  course.id,
+                                  "course"
+                                );
                               }}
                               title="Descargar horario"
                             >
@@ -163,7 +303,7 @@ export default function SchedulesPage() {
                               className="schedule-action-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEdit(course.id, 'course');
+                                handleEdit(course.id, "course");
                               }}
                               title="Editar horario"
                             >
@@ -202,14 +342,32 @@ export default function SchedulesPage() {
                         </div>
                         {expandedId === course.id && (
                           <div className="schedule-accordion-content">
-                            {course.schedules && course.schedules.length > 0 ? (
-                              <ScheduleGrid blocks={course.schedules[0].blocks || []} type="course" />
+                            {loadingSchedules[course.id] ? (
+                              <div
+                                style={{
+                                  padding: "2rem",
+                                  textAlign: "center",
+                                  color: "rgba(255, 255, 255, 0.6)",
+                                }}
+                              >
+                                ⏳ Cargando horario...
+                              </div>
+                            ) : scheduleData[course.id] &&
+                              scheduleData[course.id].length > 0 ? (
+                              <div id={`schedule-grid-${course.id}`}>
+                                <ScheduleGrid
+                                  blocks={scheduleData[course.id]}
+                                  type="course"
+                                />
+                              </div>
                             ) : (
-                              <div style={{ 
-                                padding: '2rem', 
-                                textAlign: 'center', 
-                                color: 'rgba(255, 255, 255, 0.6)' 
-                              }}>
+                              <div
+                                style={{
+                                  padding: "2rem",
+                                  textAlign: "center",
+                                  color: "rgba(255, 255, 255, 0.6)",
+                                }}
+                              >
                                 Este curso aún no tiene horario asignado
                               </div>
                             )}
@@ -221,7 +379,7 @@ export default function SchedulesPage() {
                       <div key={teacher.id} className="schedule-accordion-item">
                         <div
                           className="schedule-accordion-header"
-                          onClick={() => toggleExpand(teacher.id)}
+                          onClick={() => toggleExpand(teacher.id, "teacher")}
                         >
                           <div className="schedule-accordion-info">
                             <div className="schedule-accordion-icon">👨‍🏫</div>
@@ -230,7 +388,9 @@ export default function SchedulesPage() {
                                 {teacher.firstName} {teacher.lastName}
                               </h3>
                               <p className="schedule-accordion-subtitle">
-                                {teacher.specialization || 'Sin especialización'} • {teacher.email}
+                                {teacher.specialization ||
+                                  "Sin especialización"}{" "}
+                                • {teacher.email}
                               </p>
                             </div>
                           </div>
@@ -239,7 +399,11 @@ export default function SchedulesPage() {
                               className="schedule-action-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDownload(`${teacher.firstName} ${teacher.lastName}`);
+                                handleDownload(
+                                  `${teacher.firstName} ${teacher.lastName}`,
+                                  teacher.id,
+                                  "teacher"
+                                );
                               }}
                               title="Descargar horario"
                             >
@@ -260,7 +424,7 @@ export default function SchedulesPage() {
                               className="schedule-action-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEdit(teacher.id, 'teacher');
+                                handleEdit(teacher.id, "teacher");
                               }}
                               title="Editar horario"
                             >
@@ -299,13 +463,35 @@ export default function SchedulesPage() {
                         </div>
                         {expandedId === teacher.id && (
                           <div className="schedule-accordion-content">
-                            <div style={{ 
-                              padding: '2rem', 
-                              textAlign: 'center', 
-                              color: 'rgba(255, 255, 255, 0.6)' 
-                            }}>
-                              Este profesor aún no tiene horario asignado
-                            </div>
+                            {loadingSchedules[teacher.id] ? (
+                              <div
+                                style={{
+                                  padding: "2rem",
+                                  textAlign: "center",
+                                  color: "rgba(255, 255, 255, 0.6)",
+                                }}
+                              >
+                                ⏳ Cargando horario...
+                              </div>
+                            ) : scheduleData[teacher.id] &&
+                              scheduleData[teacher.id].length > 0 ? (
+                              <div id={`schedule-grid-${teacher.id}`}>
+                                <ScheduleGrid
+                                  blocks={scheduleData[teacher.id]}
+                                  type="teacher"
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                style={{
+                                  padding: "2rem",
+                                  textAlign: "center",
+                                  color: "rgba(255, 255, 255, 0.6)",
+                                }}
+                              >
+                                Este profesor aún no tiene horario asignado
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -315,6 +501,19 @@ export default function SchedulesPage() {
           </>
         )}
       </div>
+
+      {/* Modal de descarga */}
+      {downloadModalOpen && downloadData && scheduleData[downloadData.id] && (
+        <DownloadScheduleModal
+          isOpen={downloadModalOpen}
+          onClose={() => {
+            setDownloadModalOpen(false);
+            setDownloadData(null);
+          }}
+          scheduleName={downloadData.name}
+          scheduleId={downloadData.id}
+        />
+      )}
     </div>
   );
 }

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     await createSession({
       id: user.id,
       email: user.email,
-      name: user.name,
+      name: user.name || '',
       role: user.role,
     });
 

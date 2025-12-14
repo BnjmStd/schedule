@@ -18,3 +18,8 @@ export { Select } from './Select';
 export type { SelectProps, SelectOption } from './Select';
 
 export { Modal } from './Modal';
+
+export { ConfirmDialog } from './ConfirmDialog';
+
+export { DownloadScheduleModal } from './DownloadScheduleModal';
+export type { DownloadScheduleModalProps } from './DownloadScheduleModal';

@@ -124,3 +124,17 @@ export async function deleteCourse(id: string) {
 
   revalidatePath('/courses');
 }
+
+export async function countCourses() {
+  const schoolIds = await getUserSchoolIds();
+  
+  const count = await prisma.course.count({
+    where: {
+      schoolId: {
+        in: schoolIds
+      }
+    }
+  });
+
+  return count;
+}

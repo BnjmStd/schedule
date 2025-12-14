@@ -145,6 +145,7 @@ function EditorContent() {
           entityId={id!}
           entityType={type}
           entityName={entityName}
+          schoolId={entity.schoolId}
         />
       </div>
     </div>

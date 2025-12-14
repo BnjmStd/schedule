@@ -13,9 +13,10 @@ export interface SchoolCardProps {
   onEdit?: (school: School) => void;
   onDelete?: (school: School) => void;
   onView?: (school: School) => void;
+  onConfigSchedule?: (school: School) => void;
 }
 
-export function SchoolCard({ school, onEdit, onDelete, onView }: SchoolCardProps) {
+export function SchoolCard({ school, onEdit, onDelete, onView, onConfigSchedule }: SchoolCardProps) {
   return (
     <div className="schools-card">
       <div className="schools-card-header">
@@ -49,9 +50,18 @@ export function SchoolCard({ school, onEdit, onDelete, onView }: SchoolCardProps
       </div>
       
       <div className="schools-card-footer">
-        {onView && (
+        {onConfigSchedule && (
           <button
             className="schools-card-btn schools-card-btn-primary"
+            onClick={() => onConfigSchedule(school)}
+            title="Configurar horario de jornada"
+          >
+            ⚙️ Jornada
+          </button>
+        )}
+        {onView && (
+          <button
+            className="schools-card-btn schools-card-btn-ghost"
             onClick={() => onView(school)}
           >
             Ver Detalles

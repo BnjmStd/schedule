@@ -608,3 +608,504 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Subject Palette - Paleta lateral de asignaturas */
+.schedule-editor-with-palette {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.subject-palette {
+  width: 300px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: sticky;
+  top: 100px;
+}
+
+.subject-palette-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.subject-palette-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.subject-palette-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.subject-palette-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.subject-palette-item {
+  padding: 0.875rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--subject-color);
+  border-radius: 0.75rem;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.subject-palette-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.subject-palette-item:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.subject-palette-item.no-teacher {
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.subject-palette-item.no-teacher:hover {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.subject-palette-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.subject-palette-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.625rem;
+  background: var(--subject-color);
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.375rem;
+  letter-spacing: 0.5px;
+}
+
+.subject-palette-warning {
+  font-size: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.subject-palette-item-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.375rem;
+}
+
+.subject-palette-item-status {
+  font-size: 0.8125rem;
+  color: rgba(251, 191, 36, 0.9);
+  font-weight: 500;
+}
+
+.subject-palette-item-teachers {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.subject-palette-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.subject-palette-hint {
+  padding: 1rem;
+  background: rgba(13, 139, 255, 0.1);
+  border: 1px solid rgba(13, 139, 255, 0.2);
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.subject-palette-hint strong {
+  color: rgba(13, 139, 255, 1);
+}
+
+/* Drop zone active state */
+.schedule-editor-cell.drop-active {
+  background: rgba(13, 139, 255, 0.15);
+  border-color: rgba(13, 139, 255, 0.5);
+}
+
+.schedule-editor-cell.drop-hover {
+  background: rgba(13, 139, 255, 0.25);
+  border-color: rgba(13, 139, 255, 0.7);
+  transform: scale(1.02);
+}
+
+.schedule-editor-cell.lunch-break {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(251, 191, 36, 0.05),
+    rgba(251, 191, 36, 0.05) 10px,
+    rgba(251, 191, 36, 0.1) 10px,
+    rgba(251, 191, 36, 0.1) 20px
+  );
+  border-color: rgba(251, 191, 36, 0.3);
+  cursor: not-allowed;
+  opacity: 0.6;
+  position: relative;
+}
+
+.schedule-editor-cell.lunch-break::after {
+  content: '🍽️ Almuerzo';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: rgba(251, 191, 36, 0.8);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.schedule-editor-cell.lunch-break:hover {
+  transform: none;
+}
+
+
+/* Scrollbar personalizada para la paleta */
+.subject-palette::-webkit-scrollbar {
+  width: 6px;
+}
+
+.subject-palette::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.subject-palette::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.subject-palette::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive para paleta */
+@media (max-width: 1200px) {
+  .schedule-editor-with-palette {
+    flex-direction: column;
+  }
+  
+  .subject-palette {
+    width: 100%;
+    max-height: 300px;
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Quick Assign Modal */
+.quick-assign-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.quick-assign-modal {
+  background: rgba(20, 20, 30, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  max-width: 480px;
+  width: 100%;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.quick-assign-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-assign-modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.quick-assign-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.5rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-assign-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.quick-assign-modal-body {
+  padding: 1.5rem;
+}
+
+.quick-assign-preview {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.quick-assign-preview-badge {
+  display: inline-flex;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: #000;
+  margin-bottom: 0.75rem;
+}
+
+.quick-assign-preview-info {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.quick-assign-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.quick-assign-form-group label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
+}
+
+.quick-assign-form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  color: #fff;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-assign-form-group select:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.quick-assign-form-group select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(13, 139, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(13, 139, 255, 0.1);
+}
+
+.quick-assign-modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.quick-assign-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.quick-assign-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.quick-assign-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.quick-assign-btn.primary {
+  background: linear-gradient(135deg, #0d8bff, #a855f7);
+  color: #fff;
+}
+
+.quick-assign-btn.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(13, 139, 255, 0.3);
+}
+
+.quick-assign-btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Schedule Config Modal */
+.schedule-config-modal {
+  max-width: 600px;
+  width: 100%;
+}
+
+.schedule-config-body {
+  padding: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.schedule-config-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.schedule-config-section:last-of-type {
+  border-bottom: none;
+}
+
+.schedule-config-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1rem 0;
+}
+
+.schedule-config-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.schedule-config-checkbox {
+  margin-bottom: 1rem;
+}
+
+.schedule-config-checkbox label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.schedule-config-checkbox input[type="checkbox"] {
+  margin-top: 0.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+  accent-color: #0d8bff;
+}
+
+.schedule-config-hint {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0.5rem 0 0 2rem;
+}
+
+.schedule-config-preview {
+  background: rgba(13, 139, 255, 0.1);
+  border: 1px solid rgba(13, 139, 255, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.schedule-config-preview strong {
+  color: rgba(13, 139, 255, 1);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.schedule-config-preview p {
+  margin: 0;
+}
+
+.schedule-config-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.schedule-config-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.schedule-config-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+@media (max-width: 600px) {
+  .schedule-config-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+

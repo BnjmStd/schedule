@@ -70,6 +70,16 @@ model School {
   address   String
   phone     String?
   email     String?
+  
+  // Configuración de jornada escolar (horario tipo)
+  scheduleStartTime   String  @default("09:00") // Hora de inicio de jornada
+  scheduleEndTime     String  @default("18:00") // Hora de término de jornada
+  blockDuration       Int     @default(60)      // Duración de bloques en minutos
+  breakDuration       Int     @default(15)      // Duración de recreos en minutos
+  lunchBreakEnabled   Boolean @default(true)    // Si hay recreo de almuerzo
+  lunchBreakStart     String  @default("13:00") // Inicio del almuerzo
+  lunchBreakEnd       String  @default("14:00") // Fin del almuerzo
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -184,8 +194,9 @@ model Course {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  schedules Schedule[]
+  school         School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schedules      Schedule[]
+  scheduleBlocks ScheduleBlock[]
 
   @@index([schoolId])
   @@index([academicYear])
@@ -241,10 +252,12 @@ model ScheduleBlock {
 
   // Relations
   schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   subject  Subject  @relation(fields: [subjectId], references: [id])
   teacher  Teacher  @relation(fields: [teacherId], references: [id])
 
   @@index([scheduleId])
+  @@index([courseId])
   @@index([teacherId])
   @@index([dayOfWeek])
   @@map("schedule_blocks")

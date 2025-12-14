@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSubjects } from "@/modules/subjects/actions";
-import { createSubject } from "@/modules/subjects/actions";
+import { getSubjects, createSubject, deleteSubject } from "@/modules/subjects/actions";
 import { getSchools } from "@/modules/schools/actions";
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useModal } from '@/contexts/ModalContext';
 import { Input, Select } from "@/components/ui";
 import type { School } from "@/types";
 import "../../subjects.css";
@@ -174,6 +175,7 @@ export default function SubjectsPage() {
   >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { openModal, closeModal } = useModal();
 
   // Accordion state - todas las categorías abiertas por defecto
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
@@ -207,17 +209,41 @@ export default function SubjectsPage() {
       ]);
       setSubjects(subjectsData);
       setSchools(schoolsData);
-      
+
       // Si solo hay un colegio, auto-seleccionarlo
-      if (schoolsData.length === 1 && formData.schoolId === '') {
-        setFormData(prev => ({
+      if (schoolsData.length === 1 && formData.schoolId === "") {
+        setFormData((prev) => ({
           ...prev,
-          schoolId: schoolsData[0].id
+          schoolId: schoolsData[0].id,
         }));
       }
     };
     loadData();
   }, []);
+
+  const handleDeleteSubject = (subject: SubjectWithRelations) => {
+    openModal(
+      <ConfirmDialog
+        title="¿Eliminar asignatura?"
+        message={`¿Estás seguro de que quieres eliminar ${subject.name}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={async () => {
+          try {
+            await deleteSubject(subject.id);
+            setSubjects(subjects.filter(s => s.id !== subject.id));
+            closeModal();
+          } catch (error) {
+            console.error('Error al eliminar asignatura:', error);
+            alert('Error al eliminar la asignatura');
+          }
+        }}
+        onCancel={closeModal}
+      />,
+      '⚠️ Confirmar eliminación'
+    );
+  };
 
   const handleTemplateSelect = (
     template: (typeof SUBJECT_TEMPLATES)[0]["subjects"][0]
@@ -237,12 +263,15 @@ export default function SubjectsPage() {
     setError("");
     setIsLoading(true);
 
-    console.log('Submitting subject with data:', {
+    console.log("Submitting subject with data:", {
       schoolId: formData.schoolId,
       name: formData.name,
       code: formData.code,
     });
-    console.log('Available schools:', schools.map(s => ({ id: s.id, name: s.name })));
+    console.log(
+      "Available schools:",
+      schools.map((s) => ({ id: s.id, name: s.name }))
+    );
 
     try {
       await createSubject({
@@ -356,54 +385,62 @@ export default function SubjectsPage() {
                           type="button"
                           className="template-category-toggle"
                           onClick={() => toggleCategory(category.category)}
-                          aria-label={openCategories[category.category] ? 'Cerrar' : 'Abrir'}
+                          aria-label={
+                            openCategories[category.category]
+                              ? "Cerrar"
+                              : "Abrir"
+                          }
                         >
-                          <span className={`toggle-icon ${openCategories[category.category] ? 'open' : ''}`}>
+                          <span
+                            className={`toggle-icon ${
+                              openCategories[category.category] ? "open" : ""
+                            }`}
+                          >
                             ▼
                           </span>
                         </button>
                       </div>
                       {openCategories[category.category] && (
                         <div className="template-grid">
-                        {category.subjects.map((template) => (
-                          <button
-                            key={template.code}
-                            type="button"
-                            className={`template-card ${
-                              selectedTemplate?.code === template.code
-                                ? "selected"
-                                : ""
-                            }`}
-                            onClick={() => handleTemplateSelect(template)}
-                            style={
-                              {
-                                "--template-color": template.color,
-                              } as React.CSSProperties
-                            }
-                          >
-                            <div className="template-selected-badge">
-                              ✓ Seleccionada
-                            </div>
-                            <div className="template-header">
-                              <div className="template-info">
-                                <h5 className="template-name">
-                                  {template.name}
-                                </h5>
-                                <span className="template-code">
-                                  {template.code}
-                                </span>
+                          {category.subjects.map((template) => (
+                            <button
+                              key={template.code}
+                              type="button"
+                              className={`template-card ${
+                                selectedTemplate?.code === template.code
+                                  ? "selected"
+                                  : ""
+                              }`}
+                              onClick={() => handleTemplateSelect(template)}
+                              style={
+                                {
+                                  "--template-color": template.color,
+                                } as React.CSSProperties
+                              }
+                            >
+                              <div className="template-selected-badge">
+                                ✓ Seleccionada
                               </div>
-                              <div
-                                className="template-color"
-                                style={{ backgroundColor: template.color }}
-                              />
-                            </div>
-                            <p className="template-description">
-                              {template.description}
-                            </p>
-                          </button>
-                        ))}
-                      </div>
+                              <div className="template-header">
+                                <div className="template-info">
+                                  <h5 className="template-name">
+                                    {template.name}
+                                  </h5>
+                                  <span className="template-code">
+                                    {template.code}
+                                  </span>
+                                </div>
+                                <div
+                                  className="template-color"
+                                  style={{ backgroundColor: template.color }}
+                                />
+                              </div>
+                              <p className="template-description">
+                                {template.description}
+                              </p>
+                            </button>
+                          ))}
+                        </div>
                       )}
                     </div>
                   ))}
@@ -422,7 +459,7 @@ export default function SubjectsPage() {
                   disabled={isLoading}
                   value={formData.schoolId}
                   onChange={(e) => {
-                    console.log('Select changed to:', e.target.value);
+                    console.log("Select changed to:", e.target.value);
                     setFormData((prev) => ({
                       ...prev,
                       schoolId: e.target.value,
@@ -626,6 +663,12 @@ export default function SubjectsPage() {
                       </button>
                       <button className="schools-card-btn schools-card-btn-ghost">
                         Editar
+                      </button>
+                      <button 
+                        className="schools-card-btn schools-card-btn-danger"
+                        onClick={() => handleDeleteSubject(subject)}
+                      >
+                        Eliminar
                       </button>
                     </div>
                   </div>

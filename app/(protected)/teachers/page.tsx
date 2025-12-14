@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTeachers } from '@/modules/teachers/actions';
+import { getTeachers, deleteTeacher } from '@/modules/teachers/actions';
 import { getSchools } from '@/modules/schools/actions';
 import { AddTeacherButton } from '@/modules/teachers/components/AddTeacherButton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Card, Badge, Button } from '@/components/ui';
+import { useModal } from '@/contexts/ModalContext';
 import type { School } from '@/types';
 import '../../teachers.css';
 
@@ -15,19 +18,45 @@ export default function TeachersPage() {
   const [selectedSchool, setSelectedSchool] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const { openModal, closeModal } = useModal();
 
   useEffect(() => {
-    const loadData = async () => {
-      const [teachersData, schoolsData] = await Promise.all([
-        getTeachers(),
-        getSchools()
-      ]);
-      setTeachers(teachersData);
-      setSchools(schoolsData);
-      setIsLoading(false);
-    };
     loadData();
   }, []);
+
+  const loadData = async () => {
+    const [teachersData, schoolsData] = await Promise.all([
+      getTeachers(),
+      getSchools()
+    ]);
+    setTeachers(teachersData);
+    setSchools(schoolsData);
+    setIsLoading(false);
+  };
+
+  const handleDeleteTeacher = (teacher: Teacher) => {
+    openModal(
+      <ConfirmDialog
+        title="¿Eliminar profesor?"
+        message={`¿Estás seguro de que quieres eliminar a ${teacher.firstName} ${teacher.lastName}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={async () => {
+          try {
+            await deleteTeacher(teacher.id);
+            setTeachers(teachers.filter(t => t.id !== teacher.id));
+            closeModal();
+          } catch (error) {
+            console.error('Error al eliminar profesor:', error);
+            alert('Error al eliminar el profesor');
+          }
+        }}
+        onCancel={closeModal}
+      />,
+      '⚠️ Confirmar eliminación'
+    );
+  };
 
   const filteredTeachers = selectedSchool === 'all' 
     ? teachers 
@@ -79,7 +108,7 @@ export default function TeachersPage() {
                 </svg>
                 Filtros
               </button>
-              <AddTeacherButton />
+              <AddTeacherButton onTeacherCreated={loadData} />
             </div>
           </div>
           <p className="schools-description">
@@ -177,6 +206,12 @@ export default function TeachersPage() {
                   <button className="schools-card-btn schools-card-btn-ghost">
                     Editar
                   </button>
+                  <button 
+                    className="schools-card-btn schools-card-btn-danger"
+                    onClick={() => handleDeleteTeacher(teacher)}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
             ))}
@@ -202,45 +237,43 @@ function DemoTeacherCard({
 }: DemoTeacherCardProps) {
   return (
     <Card>
-      <CardContent>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-neutral-900 mb-1">{name}</h3>
-            <p className="text-sm text-neutral-600 mb-3">{email}</p>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-neutral-900 mb-1">{name}</h3>
+          <p className="text-sm text-neutral-600 mb-3">{email}</p>
 
-            <div className="space-y-2">
-              <div>
-                <span className="text-sm font-medium text-neutral-700">
-                  Asignaturas:
-                </span>
-                <div className="flex gap-2 mt-1">
-                  {subjects.map((subject) => (
-                    <Badge key={subject} variant="accent">
-                      {subject}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <span className="text-sm font-medium text-neutral-700">
-                  Disponibilidad:
-                </span>
-                <p className="text-sm text-neutral-600 mt-1">{availability}</p>
+          <div className="space-y-2">
+            <div>
+              <span className="text-sm font-medium text-neutral-700">
+                Asignaturas:
+              </span>
+              <div className="flex gap-2 mt-1">
+                {subjects.map((subject) => (
+                  <Badge key={subject} variant="accent">
+                    {subject}
+                  </Badge>
+                ))}
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm">
-              Editar
-            </Button>
-            <Button variant="primary" size="sm">
-              Ver Horario
-            </Button>
+            <div>
+              <span className="text-sm font-medium text-neutral-700">
+                Disponibilidad:
+              </span>
+              <p className="text-sm text-neutral-600 mt-1">{availability}</p>
+            </div>
           </div>
         </div>
-      </CardContent>
+
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm">
+            Editar
+          </Button>
+          <Button variant="primary" size="sm">
+            Ver Horario
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 }

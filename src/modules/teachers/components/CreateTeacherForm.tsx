@@ -5,7 +5,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useModal } from '@/contexts/ModalContext';
 import { createTeacher } from '@/modules/teachers/actions';
 import { getSchools } from '@/modules/schools/actions';
@@ -13,8 +12,11 @@ import { Input, Select } from '@/components/ui';
 import type { School } from '@/types';
 import './TeacherForms.css';
 
-export function CreateTeacherForm() {
-  const router = useRouter();
+interface CreateTeacherFormProps {
+  onTeacherCreated?: () => void;
+}
+
+export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) {
   const { closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
@@ -46,7 +48,9 @@ export function CreateTeacherForm() {
     try {
       await createTeacher(data);
       closeModal();
-      router.refresh();
+      if (onTeacherCreated) {
+        onTeacherCreated();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el profesor');
     } finally {

@@ -7,11 +7,15 @@
 import { useModal } from '@/contexts/ModalContext';
 import { CreateSchoolForm } from './CreateSchoolForm';
 
-export function AddSchoolButton() {
+interface AddSchoolButtonProps {
+  onSchoolCreated?: () => void;
+}
+
+export function AddSchoolButton({ onSchoolCreated }: AddSchoolButtonProps) {
   const { openModal } = useModal();
 
   const handleClick = () => {
-    openModal(<CreateSchoolForm />, '🏫 Crear Nuevo Colegio');
+    openModal(<CreateSchoolForm onSchoolCreated={onSchoolCreated} />, '🏫 Crear Nuevo Colegio');
   };
 
   return (

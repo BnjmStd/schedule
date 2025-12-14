@@ -4,6 +4,9 @@ import { siteConfig } from "@/config/site";
 import { getSession } from "@/lib/session";
 import { LogoutButton } from "./LogoutButton";
 import { getSchools } from "@/modules/schools/actions";
+import { countTeachers } from "@/modules/teachers/actions";
+import { countCourses } from "@/modules/courses/actions";
+import { countSchedules } from "@/modules/schedules/actions";
 import "../dashboard.css";
 
 export default async function DashboardPage() {
@@ -15,10 +18,17 @@ export default async function DashboardPage() {
 
   // Obtener colegios del usuario
   let schools = [];
+  let teachersCount = 0;
+  let coursesCount = 0;
+  let schedulesCount = 0;
+
   try {
     schools = await getSchools();
+    teachersCount = await countTeachers();
+    coursesCount = await countCourses();
+    schedulesCount = await countSchedules();
   } catch (error) {
-    console.error('Error al obtener colegios:', error);
+    console.error('Error al obtener datos:', error);
   }
 
   const quickActions = [
@@ -62,9 +72,9 @@ export default async function DashboardPage() {
 
   const stats = [
     { label: "Colegios", value: schools.length.toString(), icon: "🏫" },
-    { label: "Profesores", value: "0", icon: "👨‍🏫" },
-    { label: "Cursos", value: "0", icon: "🎓" },
-    { label: "Horarios", value: "0", icon: "🗓️" },
+    { label: "Profesores", value: teachersCount.toString(), icon: "👨‍🏫" },
+    { label: "Cursos", value: coursesCount.toString(), icon: "🎓" },
+    { label: "Horarios", value: schedulesCount.toString(), icon: "🗓️" },
   ];
 
   return (
