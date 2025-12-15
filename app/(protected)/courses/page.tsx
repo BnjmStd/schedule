@@ -5,6 +5,7 @@ import { getCourses, deleteCourse } from "@/modules/courses/actions";
 import { getSchools } from "@/modules/schools/actions";
 import { AddCourseButton } from "@/modules/courses/components/AddCourseButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { GenerateScheduleModal } from "@/modules/schedules/components/GenerateScheduleModal";
 import { useModal } from "@/contexts/ModalContext";
 import type { School } from "@/types";
 import "../../courses.css";
@@ -30,6 +31,8 @@ export default function CoursesPage() {
   const [schools, setSchools] = useState<School[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [selectedCourseForGeneration, setSelectedCourseForGeneration] = useState<CourseWithRelations | null>(null);
   const { openModal, closeModal } = useModal();
 
   useEffect(() => {
@@ -71,6 +74,15 @@ export default function CoursesPage() {
       />,
       "⚠️ Confirmar eliminación"
     );
+  };
+
+  const handleGenerateSchedule = (course: CourseWithRelations) => {
+    setSelectedCourseForGeneration(course);
+    setShowGenerateModal(true);
+  };
+
+  const handleGenerationSuccess = () => {
+    reloadCourses();
   };
 
   const filteredCourses =
@@ -214,6 +226,13 @@ export default function CoursesPage() {
                 </div>
 
                 <div className="schools-card-footer">
+                  <button 
+                    className="schools-card-btn schools-card-btn-secondary"
+                    onClick={() => handleGenerateSchedule(course)}
+                    title="Generar horario automáticamente"
+                  >
+                    🤖 Generar
+                  </button>
                   <button className="schools-card-btn schools-card-btn-primary">
                     {course.schedules.length > 0
                       ? "Ver Horario"
@@ -228,6 +247,21 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de Generación Automática */}
+      {showGenerateModal && selectedCourseForGeneration && (
+        <GenerateScheduleModal
+          isOpen={showGenerateModal}
+          onClose={() => {
+            setShowGenerateModal(false);
+            setSelectedCourseForGeneration(null);
+          }}
+          courseId={selectedCourseForGeneration.id}
+          courseName={selectedCourseForGeneration.name}
+          schoolId={selectedCourseForGeneration.schoolId}
+          onSuccess={handleGenerationSuccess}
+        />
+      )}
     </div>
   );
 }

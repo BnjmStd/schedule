@@ -127,18 +127,21 @@ model Teacher {
 // 👨‍🏫 TEACHER AVAILABILITY
 // ============================================
 model TeacherAvailability {
-  id        String   @id @default(cuid())
-  teacherId String
-  dayOfWeek String // MONDAY, TUESDAY, etc.
-  startTime String // HH:mm format
-  endTime   String // HH:mm format
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  teacherId    String
+  academicYear Int      // Año académico (2024, 2025, etc.) para historial
+  dayOfWeek    String   // MONDAY, TUESDAY, etc.
+  startTime    String   // HH:mm format
+  endTime      String   // HH:mm format
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
   teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
+  @@unique([teacherId, academicYear, dayOfWeek, startTime, endTime])
   @@index([teacherId])
+  @@index([teacherId, academicYear])
   @@map("teacher_availability")
 }
 

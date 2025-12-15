@@ -175,30 +175,35 @@ async function main() {
     data: [
       {
         teacherId: mariaGonzalez.id,
+        academicYear: 2025,
         dayOfWeek: "MONDAY",
         startTime: "08:00",
         endTime: "17:00",
       },
       {
         teacherId: mariaGonzalez.id,
+        academicYear: 2025,
         dayOfWeek: "TUESDAY",
         startTime: "08:00",
         endTime: "17:00",
       },
       {
         teacherId: mariaGonzalez.id,
+        academicYear: 2025,
         dayOfWeek: "WEDNESDAY",
         startTime: "08:00",
         endTime: "17:00",
       },
       {
         teacherId: mariaGonzalez.id,
+        academicYear: 2025,
         dayOfWeek: "THURSDAY",
         startTime: "08:00",
         endTime: "17:00",
       },
       {
         teacherId: mariaGonzalez.id,
+        academicYear: 2025,
         dayOfWeek: "FRIDAY",
         startTime: "08:00",
         endTime: "17:00",
@@ -211,24 +216,28 @@ async function main() {
     data: [
       {
         teacherId: pedroRamirez.id,
+        academicYear: 2025,
         dayOfWeek: "MONDAY",
         startTime: "09:00",
         endTime: "16:00",
       },
       {
         teacherId: pedroRamirez.id,
+        academicYear: 2025,
         dayOfWeek: "TUESDAY",
         startTime: "09:00",
         endTime: "16:00",
       },
       {
         teacherId: pedroRamirez.id,
+        academicYear: 2025,
         dayOfWeek: "WEDNESDAY",
         startTime: "09:00",
         endTime: "16:00",
       },
       {
         teacherId: pedroRamirez.id,
+        academicYear: 2025,
         dayOfWeek: "THURSDAY",
         startTime: "09:00",
         endTime: "16:00",
@@ -241,24 +250,28 @@ async function main() {
     data: [
       {
         teacherId: anaTorres.id,
+        academicYear: 2025,
         dayOfWeek: "TUESDAY",
         startTime: "08:30",
         endTime: "15:30",
       },
       {
         teacherId: anaTorres.id,
+        academicYear: 2025,
         dayOfWeek: "WEDNESDAY",
         startTime: "08:30",
         endTime: "15:30",
       },
       {
         teacherId: anaTorres.id,
+        academicYear: 2025,
         dayOfWeek: "THURSDAY",
         startTime: "08:30",
         endTime: "15:30",
       },
       {
         teacherId: anaTorres.id,
+        academicYear: 2025,
         dayOfWeek: "FRIDAY",
         startTime: "08:30",
         endTime: "15:30",

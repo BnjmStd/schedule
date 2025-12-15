@@ -3,6 +3,9 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
+import { validateTeacherSchedule } from "@/modules/teachers/actions";
+import { generateScheduleForCourse } from "./generation";
+import type { ScheduleGenerationConfig } from "../types";
 
 // Funciones auxiliares
 async function findOrCreateSubject(
@@ -256,6 +259,41 @@ export async function saveSchedule(data: {
 
     // Si es horario de CURSO
     if (entityType === "course" && courseId) {
+      // ✨ NUEVA VALIDACIÓN: Verificar conflictos ANTES de guardar
+      const validationErrors: string[] = [];
+
+      for (const block of blocks) {
+        if (!block.teacherId) continue;
+
+        const validation = await validateTeacherSchedule(
+          block.teacherId,
+          block.day,
+          block.startTime,
+          block.endTime,
+          { academicYear }
+        );
+
+        if (!validation.isValid) {
+          const teacherInfo = await prisma.teacher.findUnique({
+            where: { id: block.teacherId },
+          });
+          const teacherName = teacherInfo
+            ? `${teacherInfo.firstName} ${teacherInfo.lastName}`
+            : 'Profesor';
+
+          validationErrors.push(
+            `${teacherName} (${block.subject}, ${block.day} ${block.startTime}-${block.endTime}): ${validation.errors.join(', ')}`
+          );
+        }
+      }
+
+      // Si hay errores, no guardar y devolver mensaje
+      if (validationErrors.length > 0) {
+        throw new Error(
+          `No se puede guardar el horario. Conflictos encontrados:\n\n${validationErrors.join('\n\n')}`
+        );
+      }
+
       let schedule = await prisma.schedule.findFirst({
         where: { courseId, academicYear, isActive: true },
       });
@@ -473,4 +511,76 @@ export async function countSchedules() {
     console.error("Error contando horarios:", error);
     return 0;
   }
+}
+
+/**
+ * Genera y guarda horario automáticamente
+ * @param config - Configuración de generación con asignaturas y restricciones
+ * @returns Resultado de la generación con estadísticas
+ */
+export async function generateAndSaveSchedule(
+  config: ScheduleGenerationConfig
+) {
+  const session = await getSession();
+  if (!session?.id) {
+    throw new Error("No autorizado");
+  }
+
+  console.log("[generateAndSaveSchedule] Iniciando generación automática");
+
+  // Verificar acceso al curso
+  const course = await prisma.course.findFirst({
+    where: {
+      id: config.courseId,
+      school: {
+        users: {
+          some: { userId: session.id },
+        },
+      },
+    },
+  });
+
+  if (!course) {
+    throw new Error("No tienes acceso a este curso");
+  }
+
+  console.log("[generateAndSaveSchedule] Curso validado:", course.name);
+
+  // Generar horario
+  const result = await generateScheduleForCourse(config);
+
+  console.log("[generateAndSaveSchedule] Resultado de generación:", {
+    success: result.success,
+    blocksCount: result.blocks?.length || 0,
+    errorsCount: result.errors?.length || 0,
+    warningsCount: result.warnings?.length || 0,
+  });
+
+  if (!result.success || !result.blocks || result.blocks.length === 0) {
+    const errorMsg = result.errors?.join(", ") || "No se pudo generar horario";
+    throw new Error(`Error generando horario: ${errorMsg}`);
+  }
+
+  // Guardar usando la función existente
+  console.log("[generateAndSaveSchedule] Guardando bloques generados...");
+  
+  try {
+    await saveSchedule({
+      entityId: config.courseId,
+      entityType: "course",
+      blocks: result.blocks,
+    });
+
+    console.log("[generateAndSaveSchedule] Horario guardado exitosamente");
+  } catch (saveError) {
+    console.error("[generateAndSaveSchedule] Error al guardar:", saveError);
+    throw new Error(
+      `El horario se generó pero no se pudo guardar: ${
+        saveError instanceof Error ? saveError.message : "Error desconocido"
+      }`
+    );
+  }
+
+  revalidatePath("/schedules");
+  return result;
 }
