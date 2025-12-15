@@ -4,15 +4,7 @@
  * Ejecutar con: npx prisma db seed
  */
 
-import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-
-const adapter = new PrismaBetterSqlite3({ url: "file:./prisma/dev.db" });
-
-const prisma = new PrismaClient({
-  adapter,
-  log: ["error"],
-});
+import { prisma } from "../src/lib/prisma";
 
 async function main() {
   console.log("🌱 Iniciando seed de la base de datos...");

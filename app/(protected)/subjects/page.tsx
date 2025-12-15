@@ -476,7 +476,14 @@ export default function SubjectsPage() {
                 style={{
                   background: "linear-gradient(135deg, #10B981, #059669)",
                 }}
-                onClick={() => setShowImportModal(true)}
+                onClick={() => {
+                  if (!formData.schoolId && schools.length > 1) {
+                    alert('Por favor, selecciona un colegio primero en el formulario de abajo');
+                    setShowCreateForm(true);
+                    return;
+                  }
+                  setShowImportModal(true);
+                }}
                 title="Importar desde Excel"
               >
                 📥 Importar

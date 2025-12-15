@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import './ImportSubjectsModal.css';
 
 interface ImportSubjectsModalProps {
@@ -26,49 +26,87 @@ export function ImportSubjectsModal({ schoolId, onImport, onCancel }: ImportSubj
     { Nombre: 'Química', Código: 'QUI', Descripción: 'Química orgánica', Color: '#06B6D4' },
   ];
 
-  const downloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet(exampleData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Asignaturas');
-    XLSX.writeFile(wb, 'plantilla_asignaturas.xlsx');
+  const downloadTemplate = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Asignaturas');
+
+    // Añadir columnas
+    worksheet.columns = [
+      { header: 'Nombre', key: 'Nombre', width: 20 },
+      { header: 'Código', key: 'Código', width: 10 },
+      { header: 'Descripción', key: 'Descripción', width: 30 },
+      { header: 'Color', key: 'Color', width: 10 },
+    ];
+
+    // Añadir datos de ejemplo
+    exampleData.forEach(row => worksheet.addRow(row));
+
+    // Generar y descargar archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla_asignaturas.xlsx';
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const data = evt.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
 
-        if (jsonData.length === 0) {
-          setError('El archivo está vacío');
-          return;
-        }
-
-        // Validar columnas
-        const firstRow: any = jsonData[0];
-        const requiredColumns = ['Nombre', 'Código'];
-        const hasRequiredColumns = requiredColumns.every(col => col in firstRow);
-
-        if (!hasRequiredColumns) {
-          setError(`El archivo debe tener las columnas: ${requiredColumns.join(', ')}`);
-          return;
-        }
-
-        setPreviewData(jsonData);
-        setStep('preview');
-        setError('');
-      } catch (err) {
-        setError('Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.');
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) {
+        setError('El archivo no contiene hojas');
+        return;
       }
-    };
-    reader.readAsBinaryString(file);
+
+      const jsonData: any[] = [];
+      const headers: string[] = [];
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) {
+          // Primera fila son los headers
+          row.eachCell((cell) => {
+            headers.push(cell.value?.toString() || '');
+          });
+        } else {
+          // Resto de filas son datos
+          const rowData: any = {};
+          row.eachCell((cell, colNumber) => {
+            rowData[headers[colNumber - 1]] = cell.value;
+          });
+          jsonData.push(rowData);
+        }
+      });
+
+      if (jsonData.length === 0) {
+        setError('El archivo está vacío');
+        return;
+      }
+
+      // Validar columnas
+      const firstRow: any = jsonData[0];
+      const requiredColumns = ['Nombre', 'Código'];
+      const hasRequiredColumns = requiredColumns.every(col => col in firstRow);
+
+      if (!hasRequiredColumns) {
+        setError(`El archivo debe tener las columnas: ${requiredColumns.join(', ')}`);
+        return;
+      }
+
+      setPreviewData(jsonData);
+      setStep('preview');
+      setError('');
+    } catch (err) {
+      setError('Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.');
+    }
   };
 
   const handleImport = () => {

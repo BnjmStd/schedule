@@ -33,39 +33,21 @@ async function findOrCreateSubject(
   return subject;
 }
 
-async function findOrCreateTeacher(
-  schoolId: string,
-  fullName: string
-): Promise<string> {
-  const [firstName, ...lastNameParts] = fullName.split(" ");
-  const lastName = lastNameParts.join(" ") || firstName;
-
-  let teacher = await prisma.teacher.findFirst({
-    where: {
-      schoolId,
-      firstName: { contains: firstName },
-      lastName: { contains: lastName },
-    },
+async function findTeacherById(
+  teacherId: string
+): Promise<string | null> {
+  // Solo buscar profesor por ID, no crear
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
   });
 
-  if (!teacher) {
-    teacher = await prisma.teacher.create({
-      data: {
-        schoolId,
-        firstName,
-        lastName,
-        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@school.edu`,
-      },
-    });
-  }
-
-  return teacher.id;
+  return teacher ? teacher.id : null;
 }
 
 async function findOrCreateCourse(
   schoolId: string,
   name: string
-): Promise<string | null> {
+): Promise<string | undefined> {
   let course = await prisma.course.findFirst({
     where: { schoolId, name },
   });
@@ -85,7 +67,7 @@ async function findOrCreateCourse(
     });
   }
 
-  return course?.id || null;
+  return course?.id;
 }
 
 function calculateDuration(startTime: string, endTime: string): number {
@@ -106,7 +88,9 @@ interface ScheduleBlock {
   endTime: string;
   subject: string;
   teacher?: string;
+  teacherId?: string; // ID del profesor
   course?: string;
+  courseId?: string; // ID del curso
   color: string;
 }
 
@@ -309,9 +293,18 @@ export async function saveSchedule(data: {
           block.subject,
           block.color
         );
-        const blockTeacherId = block.teacher
-          ? await findOrCreateTeacher(schoolId, block.teacher)
-          : "";
+        
+        // Usar teacherId si está disponible, sino buscar por nombre (legacy)
+        let blockTeacherId = "";
+        if (block.teacherId) {
+          // Verificar que el profesor existe
+          const teacherExists = await findTeacherById(block.teacherId);
+          if (teacherExists) {
+            blockTeacherId = block.teacherId;
+          } else {
+            console.warn(`[saveSchedule] Profesor con ID ${block.teacherId} no encontrado`);
+          }
+        }
 
         const duration = calculateDuration(block.startTime, block.endTime);
         const blockNumber = calculateBlockNumber(block.startTime);
@@ -344,16 +337,21 @@ export async function saveSchedule(data: {
 
       // Crear nuevos bloques (asignando el profesor a CURSOS)
       for (const block of blocks) {
-        if (!block.course) continue;
+        // Usar courseId si está disponible
+        let blockCourseId = block.courseId;
+        
+        // Si no hay courseId pero hay nombre de curso, buscar/crear (legacy)
+        if (!blockCourseId && block.course) {
+          blockCourseId = await findOrCreateCourse(schoolId, block.course);
+        }
+        
+        if (!blockCourseId) continue;
 
         const subject = await findOrCreateSubject(
           schoolId,
           block.subject,
           block.color
         );
-        const blockCourseId = await findOrCreateCourse(schoolId, block.course);
-
-        if (!blockCourseId) continue;
 
         // Buscar o crear schedule para ese curso
         let schedule = await prisma.schedule.findFirst({

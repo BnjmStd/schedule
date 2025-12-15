@@ -2,20 +2,30 @@
  * 🔌 Cliente de Prisma para el proyecto
  *
  * Singleton pattern para evitar múltiples instancias en desarrollo
- * Usando better-sqlite3 adapter para Prisma 7
+ * Usando PostgreSQL adapter para Prisma 7
  */
 
+import 'dotenv/config';
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  pool: Pool | undefined;
 };
 
 function createPrismaClient() {
-  const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL || "file:./prisma/dev.db",
+  // Crear pool de conexiones para PostgreSQL
+  const pool = globalForPrisma.pool ?? new Pool({
+    connectionString: process.env.DATABASE_URL,
   });
+  
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.pool = pool;
+  }
+
+  const adapter = new PrismaPg(pool);
 
   return new PrismaClient({
     adapter,

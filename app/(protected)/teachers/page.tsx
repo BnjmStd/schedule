@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getTeachers, deleteTeacher, createTeacher } from "@/modules/teachers/actions";
+import {
+  getTeachers,
+  deleteTeacher,
+  createTeacher,
+} from "@/modules/teachers/actions";
 import { getSchools } from "@/modules/schools/actions";
 import { AddTeacherButton } from "@/modules/teachers/components/AddTeacherButton";
 import { ImportTeachersModal } from "@/modules/teachers/components/ImportTeachersModal";
@@ -73,21 +77,21 @@ export default function TeachersPage() {
     } else {
       // Mostrar selector de colegio
       openModal(
-        <div style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Selecciona un colegio</h3>
-          <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem' }}>
+        <div style={{ padding: "2rem" }}>
+          <h3 style={{ marginBottom: "1rem" }}>Selecciona un colegio</h3>
+          <p style={{ color: "rgba(255,255,255,0.7)", marginBottom: "1.5rem" }}>
             ¿A qué colegio deseas importar los profesores?
           </p>
           <select
             style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '0.5rem',
-              color: '#fff',
-              fontSize: '1rem',
-              marginBottom: '1.5rem',
+              width: "100%",
+              padding: "0.75rem",
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: "0.5rem",
+              color: "#fff",
+              fontSize: "1rem",
+              marginBottom: "1.5rem",
             }}
             value={importSchoolId}
             onChange={(e) => setImportSchoolId(e.target.value)}
@@ -99,16 +103,18 @@ export default function TeachersPage() {
               </option>
             ))}
           </select>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <div
+            style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}
+          >
             <button
               onClick={closeModal}
               style={{
-                padding: '0.75rem 1.5rem',
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '0.5rem',
-                color: '#fff',
-                cursor: 'pointer',
+                padding: "0.75rem 1.5rem",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "0.5rem",
+                color: "#fff",
+                cursor: "pointer",
               }}
             >
               Cancelar
@@ -119,17 +125,19 @@ export default function TeachersPage() {
                   closeModal();
                   setShowImportModal(true);
                 } else {
-                  alert('Por favor selecciona un colegio');
+                  alert("Por favor selecciona un colegio");
                 }
               }}
               disabled={!importSchoolId}
               style={{
-                padding: '0.75rem 1.5rem',
-                background: importSchoolId ? 'linear-gradient(135deg, var(--primary-500), var(--accent-500))' : 'rgba(255,255,255,0.1)',
-                border: 'none',
-                borderRadius: '0.5rem',
-                color: '#fff',
-                cursor: importSchoolId ? 'pointer' : 'not-allowed',
+                padding: "0.75rem 1.5rem",
+                background: importSchoolId
+                  ? "linear-gradient(135deg, var(--primary-500), var(--accent-500))"
+                  : "rgba(255,255,255,0.1)",
+                border: "none",
+                borderRadius: "0.5rem",
+                color: "#fff",
+                cursor: importSchoolId ? "pointer" : "not-allowed",
                 opacity: importSchoolId ? 1 : 0.5,
               }}
             >
@@ -137,18 +145,20 @@ export default function TeachersPage() {
             </button>
           </div>
         </div>,
-        '🏫 Seleccionar Colegio'
+        "🏫 Seleccionar Colegio"
       );
     }
   };
 
-  const handleImportTeachers = async (importedTeachers: Array<{
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    specialization?: string;
-  }>) => {
+  const handleImportTeachers = async (
+    importedTeachers: Array<{
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone?: string;
+      specialization?: string;
+    }>
+  ) => {
     if (!importSchoolId) {
       alert("Por favor selecciona un colegio primero");
       return;
@@ -171,7 +181,10 @@ export default function TeachersPage() {
           });
           successCount++;
         } catch (error) {
-          console.error(`Error al importar ${teacher.firstName} ${teacher.lastName}:`, error);
+          console.error(
+            `Error al importar ${teacher.firstName} ${teacher.lastName}:`,
+            error
+          );
           errorCount++;
         }
       }
@@ -182,31 +195,31 @@ export default function TeachersPage() {
 
       // Mostrar resultado
       openModal(
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
-            {errorCount === 0 ? '✅' : '⚠️'}
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>
+            {errorCount === 0 ? "✅" : "⚠️"}
           </div>
           <h3>Importación completada</h3>
-          <p style={{ marginTop: '1rem', color: 'rgba(255,255,255,0.7)' }}>
+          <p style={{ marginTop: "1rem", color: "rgba(255,255,255,0.7)" }}>
             {successCount} profesores importados correctamente
             {errorCount > 0 && ` · ${errorCount} errores`}
           </p>
-          <button 
+          <button
             onClick={closeModal}
             style={{
-              marginTop: '1.5rem',
-              padding: '0.75rem 1.5rem',
-              background: 'var(--primary-500)',
-              border: 'none',
-              borderRadius: '0.5rem',
-              color: '#fff',
-              cursor: 'pointer',
+              marginTop: "1.5rem",
+              padding: "0.75rem 1.5rem",
+              background: "var(--primary-500)",
+              border: "none",
+              borderRadius: "0.5rem",
+              color: "#fff",
+              cursor: "pointer",
             }}
           >
             Entendido
           </button>
         </div>,
-        '📥 Resultado de importación'
+        "📥 Resultado de importación"
       );
     } catch (error) {
       console.error("Error en la importación:", error);
@@ -274,7 +287,9 @@ export default function TeachersPage() {
               </button>
               <button
                 className="schools-add-btn"
-                style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
+                style={{
+                  background: "linear-gradient(135deg, #10B981, #059669)",
+                }}
                 onClick={handleOpenImportModal}
                 title="Importar desde Excel"
               >
@@ -291,25 +306,29 @@ export default function TeachersPage() {
 
         {/* Modal de Importación */}
         {showImportModal && (
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '1rem',
-          }}>
-            <div style={{
-              background: 'rgba(17, 24, 39, 0.98)',
-              borderRadius: '1rem',
-              maxWidth: '900px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}>
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.8)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              padding: "1rem",
+            }}
+          >
+            <div
+              style={{
+                background: "rgba(17, 24, 39, 0.98)",
+                borderRadius: "1rem",
+                maxWidth: "900px",
+                width: "100%",
+                maxHeight: "90vh",
+                overflow: "auto",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
               <ImportTeachersModal
                 schoolId={importSchoolId}
                 onImport={handleImportTeachers}
@@ -412,9 +431,11 @@ export default function TeachersPage() {
                 </div>
 
                 <div className="schools-card-footer">
-                  <button 
+                  <button
                     className="schools-card-btn schools-card-btn-primary"
-                    onClick={() => router.push(`/teachers/${teacher.id}/availability`)}
+                    onClick={() =>
+                      router.push(`/teachers/${teacher.id}/availability`)
+                    }
                     title="Gestionar disponibilidad horaria"
                   >
                     📅 Disponibilidad
