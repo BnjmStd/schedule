@@ -117,11 +117,41 @@ model ScheduleLevelConfig {
   updatedAt DateTime @updatedAt
 
   // Relations
-  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school  School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  history ScheduleLevelConfigHistory[] // 🆕 Historial de cambios
 
   @@unique([schoolId, academicLevel])
   @@index([schoolId])
   @@map("schedule_level_configs")
+}
+
+// ============================================
+// 📜 SCHEDULE LEVEL CONFIG HISTORY
+// ============================================
+model ScheduleLevelConfigHistory {
+  id            String   @id @default(cuid())
+  configId      String
+  schoolId      String
+  academicLevel String
+  
+  // Configuración histórica
+  startTime     String
+  endTime       String
+  blockDuration Int
+  breaks        String // JSON array
+  
+  // Metadata del cambio
+  changedBy     String? // userId del que hizo el cambio
+  changeReason  String? // Razón del cambio
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  config ScheduleLevelConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId])
+  @@index([schoolId])
+  @@index([createdAt])
+  @@map("schedule_level_config_history")
 }
 
 // ============================================

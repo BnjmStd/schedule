@@ -5,6 +5,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { validateTeacherSchedule } from "@/modules/teachers/actions";
+import { getScheduleConfigForCourse } from "@/modules/schools/actions/schedule-config";
+import { generateTimeSlotsWithBreaks } from "@/lib/utils/time-slots";
 import type {
   ScheduleGenerationConfig,
   ScheduleGenerationResult,
@@ -19,79 +21,6 @@ const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
-}
-
-/**
- * Convierte minutos desde medianoche a formato HH:MM
- */
-function minutesToTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
-}
-
-/**
- * Genera slots de tiempo basados en configuración del colegio
- */
-function generateTimeSlots(config: {
-  startTime: string;
-  endTime: string;
-  blockDuration: number;
-  breakDuration: number;
-  lunchBreakConfig: Record<
-    string,
-    { enabled: boolean; start: string; end: string }
-  >;
-  day: string;
-}): TimeSlot[] {
-  const slots: TimeSlot[] = [];
-
-  let currentMinutes = timeToMinutes(config.startTime);
-  const endMinutes = timeToMinutes(config.endTime);
-
-  // Obtener configuración de almuerzo para este día
-  const lunchConfig = config.lunchBreakConfig[config.day];
-  let lunchStartMinutes = 0;
-  let lunchEndMinutes = 0;
-
-  if (lunchConfig && lunchConfig.enabled) {
-    lunchStartMinutes = timeToMinutes(lunchConfig.start);
-    lunchEndMinutes = timeToMinutes(lunchConfig.end);
-  }
-
-  while (currentMinutes < endMinutes) {
-    const blockEndMinutes = currentMinutes + config.blockDuration;
-
-    // Verificar si este slot se solapa con el almuerzo
-    const isLunchTime =
-      lunchConfig &&
-      lunchConfig.enabled &&
-      currentMinutes >= lunchStartMinutes &&
-      currentMinutes < lunchEndMinutes;
-
-    if (!isLunchTime && blockEndMinutes <= endMinutes) {
-      slots.push({
-        startTime: minutesToTime(currentMinutes),
-        endTime: minutesToTime(blockEndMinutes),
-        duration: config.blockDuration,
-      });
-    }
-
-    // Avanzar al siguiente bloque (bloque + recreo)
-    currentMinutes += config.blockDuration + config.breakDuration;
-
-    // Si estamos en el almuerzo, saltar al final del almuerzo
-    if (
-      lunchConfig &&
-      lunchConfig.enabled &&
-      currentMinutes > lunchStartMinutes &&
-      currentMinutes < lunchEndMinutes
-    ) {
-      currentMinutes = lunchEndMinutes;
-    }
-  }
-
-  return slots;
 }
 
 /**
@@ -143,13 +72,13 @@ export async function generateScheduleForCourse(
       throw new Error("Curso no encontrado");
     }
 
-    const schoolConfig = {
-      startTime: course.school.scheduleStartTime,
-      endTime: course.school.scheduleEndTime,
-      blockDuration: course.school.blockDuration,
-      breakDuration: course.school.breakDuration,
-      lunchBreakConfig: JSON.parse(course.school.lunchBreakConfig),
-    };
+    // ✅ Usar configuración nueva basada en nivel académico
+    const scheduleConfig = await getScheduleConfigForCourse(config.courseId);
+    console.log("[Generation] ⚙️ Configuración cargada:", {
+      academicLevel: scheduleConfig.academicLevel,
+      blockDuration: scheduleConfig.blockDuration,
+      breaks: scheduleConfig.breaks,
+    });
 
     // Cargar todas las asignaturas de una vez
     const subjects = await prisma.subject.findMany({
@@ -229,16 +158,28 @@ export async function generateScheduleForCourse(
       subjectBlocksPerDay.set(s.subjectId, new Map());
     });
 
-    // 3. Generar todos los slots de tiempo para toda la semana de una vez
+    // 3. Generar todos los slots de tiempo usando la configuración nueva
+    const allTimeSlotsRaw = generateTimeSlotsWithBreaks(scheduleConfig);
+    
+    // Filtrar solo bloques (type='block'), no recreos
+    const blockSlots = allTimeSlotsRaw.filter(slot => slot.type === 'block');
+    
+    console.log("[Generation] 🕐 TimeSlots generados:", {
+      total: allTimeSlotsRaw.length,
+      blocks: blockSlots.length,
+      breaks: allTimeSlotsRaw.filter(s => s.type === 'break').length,
+    });
+    
+    // Crear mapa de slots por día (todos los días usan los mismos slots)
     const allTimeSlots = new Map<string, TimeSlot[]>();
     for (const day of DAYS) {
-      allTimeSlots.set(
-        day,
-        generateTimeSlots({
-          ...schoolConfig,
-          day,
-        })
-      );
+      // Convertir formato de slot
+      const daySlots = blockSlots.map(slot => ({
+        startTime: slot.time,
+        endTime: slot.endTime,
+        duration: timeToMinutes(slot.endTime) - timeToMinutes(slot.time),
+      }));
+      allTimeSlots.set(day, daySlots);
     }
 
     // Crear lista de todas las combinaciones (día, slot, asignatura) para distribución uniforme

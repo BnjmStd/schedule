@@ -66,7 +66,8 @@ export async function getScheduleConfigForLevel(
  * Crear o actualizar configuración de horario para un nivel
  */
 export async function saveScheduleConfigForLevel(
-  config: ScheduleLevelConfig
+  config: ScheduleLevelConfig,
+  changeReason?: string
 ): Promise<ScheduleLevelConfig> {
   const schoolIds = await getUserSchoolIds();
 
@@ -103,7 +104,8 @@ export async function saveScheduleConfigForLevel(
     previousConfig &&
     (previousConfig.startTime !== config.startTime ||
       previousConfig.endTime !== config.endTime ||
-      previousConfig.blockDuration !== config.blockDuration);
+      previousConfig.blockDuration !== config.blockDuration ||
+      previousConfig.breaks !== breaksJson);
 
   const savedConfig = await prisma.scheduleLevelConfig.upsert({
     where: {
@@ -127,6 +129,34 @@ export async function saveScheduleConfigForLevel(
       breaks: breaksJson,
     },
   });
+
+  // 🆕 Guardar en historial si hubo cambios
+  if (previousConfig && hasCriticalChanges) {
+    const session = await prisma.session.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { userId: true },
+    });
+
+    await prisma.scheduleLevelConfigHistory.create({
+      data: {
+        configId: savedConfig.id,
+        schoolId: previousConfig.schoolId,
+        academicLevel: previousConfig.academicLevel,
+        startTime: previousConfig.startTime,
+        endTime: previousConfig.endTime,
+        blockDuration: previousConfig.blockDuration,
+        breaks: previousConfig.breaks,
+        changedBy: session?.userId,
+        changeReason: changeReason || "Actualización de jornada",
+      },
+    });
+
+    console.log("[Config] 📜 Cambio guardado en historial:", {
+      academicLevel: config.academicLevel,
+      from: `${previousConfig.startTime}-${previousConfig.endTime}`,
+      to: `${config.startTime}-${config.endTime}`,
+    });
+  }
 
   // Si hubo cambios críticos, marcar schedules existentes como obsoletos
   if (hasCriticalChanges) {
@@ -254,4 +284,134 @@ export async function getAllScheduleConfigsForSchool(
     blockDuration: config.blockDuration,
     breaks: JSON.parse(config.breaks),
   }));
+}
+/**
+ * 🆕 Obtener historial de cambios de una jornada
+ */
+export async function getScheduleConfigHistory(
+  schoolId: string,
+  academicLevel: AcademicLevel,
+  limit: number = 10
+) {
+  const schoolIds = await getUserSchoolIds();
+
+  if (!schoolIds.includes(schoolId)) {
+    throw new Error("No tienes acceso a este colegio");
+  }
+
+  const config = await prisma.scheduleLevelConfig.findUnique({
+    where: {
+      schoolId_academicLevel: {
+        schoolId,
+        academicLevel,
+      },
+    },
+  });
+
+  if (!config) {
+    return [];
+  }
+
+  const history = await prisma.scheduleLevelConfigHistory.findMany({
+    where: { configId: config.id },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
+  return history.map((h) => ({
+    id: h.id,
+    startTime: h.startTime,
+    endTime: h.endTime,
+    blockDuration: h.blockDuration,
+    breaks: JSON.parse(h.breaks),
+    changedBy: h.changedBy,
+    changeReason: h.changeReason,
+    changedAt: h.createdAt,
+  }));
+}
+
+/**
+ * 🆕 Validar congruencia de jornadas en el colegio
+ * Verifica que los profesores tengan cursos con jornadas compatibles
+ */
+export async function validateScheduleCongruency(schoolId: string) {
+  const schoolIds = await getUserSchoolIds();
+
+  if (!schoolIds.includes(schoolId)) {
+    throw new Error("No tienes acceso a este colegio");
+  }
+
+  const issues: Array<{
+    type: "teacher" | "course";
+    entityId: string;
+    entityName: string;
+    issue: string;
+    details: any;
+  }> = [];
+
+  // Obtener todos los profesores con sus bloques
+  const teachers = await prisma.teacher.findMany({
+    where: { schoolId },
+    include: {
+      scheduleBlocks: {
+        include: {
+          course: true,
+        },
+      },
+    },
+  });
+
+  // Validar cada profesor
+  for (const teacher of teachers) {
+    const teacherName = `${teacher.firstName} ${teacher.lastName}`;
+    
+    // Obtener niveles académicos únicos de sus cursos
+    const courseLevels = new Set(
+      teacher.scheduleBlocks.map((b) => b.course.academicLevel)
+    );
+
+    // Si tiene cursos de múltiples niveles, verificar compatibilidad
+    if (courseLevels.size > 1) {
+      const configs = await prisma.scheduleLevelConfig.findMany({
+        where: {
+          schoolId,
+          academicLevel: { in: Array.from(courseLevels) },
+        },
+      });
+
+      // Verificar si las jornadas son congruentes
+      const startTimes = configs.map((c) => c.startTime);
+      const endTimes = configs.map((c) => c.endTime);
+      const blockDurations = configs.map((c) => c.blockDuration);
+
+      const hasConflict =
+        new Set(startTimes).size > 1 ||
+        new Set(endTimes).size > 1 ||
+        new Set(blockDurations).size > 1;
+
+      if (hasConflict) {
+        issues.push({
+          type: "teacher",
+          entityId: teacher.id,
+          entityName: teacherName,
+          issue: "Profesor asignado a cursos con jornadas incompatibles",
+          details: {
+            levels: Array.from(courseLevels),
+            configs: configs.map((c) => ({
+              level: c.academicLevel,
+              startTime: c.startTime,
+              endTime: c.endTime,
+              blockDuration: c.blockDuration,
+            })),
+          },
+        });
+      }
+    }
+  }
+
+  return {
+    isValid: issues.length === 0,
+    issuesCount: issues.length,
+    issues,
+  };
 }

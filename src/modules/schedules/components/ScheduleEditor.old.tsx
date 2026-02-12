@@ -15,6 +15,17 @@ import { QuickAssignModal } from "./QuickAssignModal";
 import { generateTimeSlotsWithBreaks } from "@/lib/utils/time-slots";
 import type { ScheduleLevelConfig, TimeSlot } from "@/types/schedule-config";
 
+// Helper para verificar si un horario es recreo (nuevo sistema)
+function isLunchBreak(time: string, day: string, config: ScheduleLevelConfig | null): boolean {
+  if (!config) return false;
+  
+  // Generar slots y verificar si este time corresponde a un break
+  const slots = generateTimeSlotsWithBreaks(config);
+  const slot = slots.find(s => s.time === time);
+  
+  return slot?.type === 'break';
+}
+
 // Tipo para bloques de horario
 interface ScheduleBlock {
   id: string;
@@ -313,11 +324,15 @@ export function ScheduleEditor({
 
     if (!draggedSubject) return;
 
+    // Buscar el slot correspondiente
+    const blockSlots = timeSlots.filter(s => s.type === 'block');
+    const currentSlot = blockSlots[timeIndex];
+
     // Crear bloque pendiente
     const pending = {
       day,
       startTime: time,
-      endTime: timeSlots[timeIndex + 1],
+      endTime: currentSlot?.endTime || time,
       subject: draggedSubject,
     };
 
@@ -580,11 +595,13 @@ export function ScheduleEditor({
 
               {/* Grid cells */}
               <div className="schedule-editor-grid-body">
-                {timeSlots.slice(0, -1).map((time, index) => {
+                {timeSlots.filter(slot => slot.type === 'block').map((slot, index) => {
+                  const time = slot.time;
+                  const endTime = slot.endTime;
                   
                   return (<div key={time} className="schedule-editor-grid-row">
                     <div className="schedule-editor-time-cell">
-                      {time} - {timeSlots[index + 1]}
+                      {time} - {endTime}
                     </div>
                     {DAYS.map((day) => {
                       const isLunch = isLunchBreak(time, day.key, scheduleConfig);
@@ -608,7 +625,7 @@ export function ScheduleEditor({
                                 ...newBlock,
                                 day: day.key,
                                 startTime: time,
-                                endTime: timeSlots[index + 1],
+                                endTime: endTime,
                               });
                               setIsAddingBlock(true);
                             }
@@ -700,9 +717,9 @@ export function ScheduleEditor({
                         setNewBlock({ ...newBlock, startTime: e.target.value })
                       }
                     >
-                      {timeSlots.slice(0, -1).map((time) => (
-                        <option key={time} value={time}>
-                          {time}
+                      {timeSlots.filter(s => s.type === 'block').map((slot) => (
+                        <option key={slot.time} value={slot.time}>
+                          {slot.time}
                         </option>
                       ))}
                     </select>
@@ -716,9 +733,9 @@ export function ScheduleEditor({
                         setNewBlock({ ...newBlock, endTime: e.target.value })
                       }
                     >
-                      {timeSlots.slice(1).map((time) => (
-                        <option key={time} value={time}>
-                          {time}
+                      {timeSlots.filter(s => s.type === 'block').map((slot) => (
+                        <option key={slot.endTime} value={slot.endTime}>
+                          {slot.endTime}
                         </option>
                       ))}
                     </select>

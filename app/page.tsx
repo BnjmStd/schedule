@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { siteConfig } from "@/config/site";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 export default function LandingPage() {
   return (
@@ -16,6 +17,8 @@ export default function LandingPage() {
             </div>
             <span className="landing-logo-text">{siteConfig.name}</span>
           </Link>
+
+          {/* Desktop Menu */}
           <nav className="landing-menu">
             <a href="#features" className="landing-menu-link">
               Características
@@ -27,6 +30,9 @@ export default function LandingPage() {
               <button className="landing-btn-register">Comenzar Gratis</button>
             </Link>
           </nav>
+
+          {/* Mobile Menu */}
+          <MobileNav />
         </div>
       </header>
 
@@ -180,20 +186,9 @@ export default function LandingPage() {
                 </li>
               </ul>
             </div>
-            <div className="landing-footer-links">
-              <h4>Legal</h4>
-              <ul>
-                <li>
-                  <a href="#privacy">Privacidad</a>
-                </li>
-                <li>
-                  <a href="#terms">Términos</a>
-                </li>
-              </ul>
-            </div>
           </div>
           <div className="landing-footer-bottom">
-            <p>&copy; 2025 {siteConfig.name}. Todos los derechos reservados.</p>
+            <p>&copy; 2026 {siteConfig.name}. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
