@@ -78,7 +78,7 @@ export function ScheduleEditor({
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastSavedBlocksRef = useRef<string>("");
   const [selectedBlock, setSelectedBlock] = useState<ScheduleBlock | null>(
-    null
+    null,
   );
   const [isAddingBlock, setIsAddingBlock] = useState(false);
 
@@ -230,7 +230,7 @@ export function ScheduleEditor({
           result.warnings.forEach((warning: string) => {
             // Formato: "Teacher (Subject, DAY HH:MM-HH:MM): ..."
             const match = warning.match(
-              /\(([^,]+),\s+(\w+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})\)/
+              /\(([^,]+),\s+(\w+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})\)/,
             );
             if (match) {
               const [, subject, day, startTime] = match;
@@ -246,7 +246,7 @@ export function ScheduleEditor({
                 ...block,
                 hasConflict: conflictBlocks.has(key) ? true : block.hasConflict,
               };
-            })
+            }),
           );
         }
 
@@ -259,7 +259,7 @@ export function ScheduleEditor({
         setTimeout(() => setSaveStatus("idle"), 3000);
       }
     },
-    [entityId, entityType]
+    [entityId, entityType],
   );
 
   useEffect(() => {
@@ -290,7 +290,7 @@ export function ScheduleEditor({
       blocks
         .map((b) => `${b.id}:${b.teacherId || "none"}:${b.day}:${b.startTime}`)
         .join("|"),
-    [blocks]
+    [blocks],
   );
 
   useEffect(() => {
@@ -300,7 +300,7 @@ export function ScheduleEditor({
       console.log(
         "[Validación] 🔍 Iniciando validación para",
         blocks.length,
-        "bloques"
+        "bloques",
       );
 
       const updatedBlocks = await Promise.all(
@@ -318,7 +318,7 @@ export function ScheduleEditor({
             teacherId,
             block.day,
             block.startTime,
-            block.endTime
+            block.endTime,
           );
 
           // Log solo cuando hay conflicto para reducir ruido
@@ -326,23 +326,24 @@ export function ScheduleEditor({
             console.log(
               `⚠️ Bloque ${index + 1}: ${block.subject} (${block.day} ${
                 block.startTime
-              })`
+              })`,
             );
             console.log(`   Profesor: ${teacherName}`);
             console.log(`   Razón: ${debugInfo.reason}`);
           }
 
           return { ...block, hasConflict: !debugInfo.isAvailable };
-        })
+        }),
       );
 
       const hasChanges = updatedBlocks.some(
-        (newBlock, index) => newBlock.hasConflict !== blocks[index]?.hasConflict
+        (newBlock, index) =>
+          newBlock.hasConflict !== blocks[index]?.hasConflict,
       );
 
       if (hasChanges) {
         console.log(
-          "[Validación] ✅ Actualizando bloques con nuevos estados de conflicto"
+          "[Validación] ✅ Actualizando bloques con nuevos estados de conflicto",
         );
         setBlocks(updatedBlocks);
       }
@@ -380,7 +381,7 @@ export function ScheduleEditor({
     e: React.DragEvent,
     day: string,
     time: string,
-    slot: TimeSlot
+    slot: TimeSlot,
   ) => {
     e.preventDefault();
     setDropTarget(null);
@@ -738,7 +739,7 @@ export function ScheduleEditor({
                     onChange={(e) => {
                       const startTime = e.target.value;
                       const slot = timeSlots.find(
-                        (s) => s.type === "block" && s.time === startTime
+                        (s) => s.type === "block" && s.time === startTime,
                       );
                       setNewBlock({
                         ...newBlock,

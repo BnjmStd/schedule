@@ -14,7 +14,7 @@ import type { ScheduleGenerationConfig } from "../types";
 async function findOrCreateSubject(
   schoolId: string,
   name: string,
-  color: string
+  color: string,
 ) {
   let subject = await prisma.subject.findFirst({
     where: { schoolId, name },
@@ -50,7 +50,7 @@ async function findTeacherById(teacherId: string): Promise<string | null> {
 
 async function findOrCreateCourse(
   schoolId: string,
-  name: string
+  name: string,
 ): Promise<string | undefined> {
   let course = await prisma.course.findFirst({
     where: { schoolId, name },
@@ -111,7 +111,7 @@ export async function getSchedulesForCourse(courseId: string) {
     const currentYear = new Date().getFullYear();
 
     console.log(
-      `[getSchedulesForCourse] 🔍 Buscando schedules para curso: ${courseId}, año: ${currentYear}`
+      `[getSchedulesForCourse] 🔍 Buscando schedules para curso: ${courseId}, año: ${currentYear}`,
     );
 
     const schedules = await prisma.schedule.findMany({
@@ -140,11 +140,11 @@ export async function getSchedulesForCourse(courseId: string) {
     });
 
     console.log(
-      `[getSchedulesForCourse] ✅ Encontrados ${schedules.length} schedules`
+      `[getSchedulesForCourse] ✅ Encontrados ${schedules.length} schedules`,
     );
     if (schedules.length > 0) {
       console.log(
-        `[getSchedulesForCourse] 📋 Schedule ID: ${schedules[0].id}, Total Bloques: ${schedules[0].blocks.length}`
+        `[getSchedulesForCourse] 📋 Schedule ID: ${schedules[0].id}, Total Bloques: ${schedules[0].blocks.length}`,
       );
       schedules[0].blocks.forEach((b, idx) => {
         console.log(
@@ -154,7 +154,7 @@ export async function getSchedulesForCourse(courseId: string) {
             b.teacher
               ? `${b.teacher.firstName} ${b.teacher.lastName}`
               : "Sin asignar"
-          }`
+          }`,
         );
       });
     }
@@ -290,7 +290,7 @@ export async function saveSchedule(data: {
           block.endTime,
           undefined, // excludeBlockId
           academicYear,
-          schedule?.id // Excluir bloques del horario actual
+          schedule?.id, // Excluir bloques del horario actual
         );
 
         // Solo bloquear si hay conflictos REALES con otros cursos
@@ -304,13 +304,13 @@ export async function saveSchedule(data: {
 
           const conflictMessages = conflictCheck.conflictingBlocks!.map(
             (conflict) =>
-              `Ya asignado en ${conflict.schoolName} - ${conflict.courseName} (${conflict.startTime}-${conflict.endTime})`
+              `Ya asignado en ${conflict.schoolName} - ${conflict.courseName} (${conflict.startTime}-${conflict.endTime})`,
           );
 
           validationErrors.push(
             `${teacherName} (${block.subject}, ${block.day} ${
               block.startTime
-            }-${block.endTime}): ${conflictMessages.join(", ")}`
+            }-${block.endTime}): ${conflictMessages.join(", ")}`,
           );
         }
       }
@@ -350,7 +350,7 @@ export async function saveSchedule(data: {
         const subject = await findOrCreateSubject(
           schoolId,
           block.subject,
-          block.color
+          block.color,
         );
 
         // Usar teacherId si está disponible, sino buscar por nombre (legacy)
@@ -362,7 +362,7 @@ export async function saveSchedule(data: {
             blockTeacherId = block.teacherId;
           } else {
             console.warn(
-              `[saveSchedule] Profesor con ID ${block.teacherId} no encontrado`
+              `[saveSchedule] Profesor con ID ${block.teacherId} no encontrado`,
             );
           }
         }
@@ -415,7 +415,7 @@ export async function saveSchedule(data: {
         const subject = await findOrCreateSubject(
           schoolId,
           block.subject,
-          block.color
+          block.color,
         );
 
         // Buscar o crear schedule para ese curso
@@ -546,7 +546,7 @@ export async function countSchedules() {
  * @returns Resultado de la generación con estadísticas
  */
 export async function generateAndSaveSchedule(
-  config: ScheduleGenerationConfig
+  config: ScheduleGenerationConfig,
 ) {
   const session = await getSession();
   if (!session?.id) {
@@ -604,7 +604,7 @@ export async function generateAndSaveSchedule(
     throw new Error(
       `El horario se generó pero no se pudo guardar: ${
         saveError instanceof Error ? saveError.message : "Error desconocido"
-      }`
+      }`,
     );
   }
 

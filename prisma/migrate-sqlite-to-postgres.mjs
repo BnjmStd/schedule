@@ -46,7 +46,7 @@ async function exportDataFromSQLite() {
     if (!fs.existsSync(sqliteDbPath)) {
       log(
         "⚠️  No se encontró base de datos SQLite. Continuando sin datos...",
-        colors.yellow
+        colors.yellow,
       );
       return null;
     }

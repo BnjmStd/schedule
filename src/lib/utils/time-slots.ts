@@ -3,14 +3,14 @@
  * Generación de slots de tiempo con recreos explícitos
  */
 
-import type { ScheduleLevelConfig, TimeSlot } from '@/types/schedule-config';
+import type { ScheduleLevelConfig, TimeSlot } from "@/types/schedule-config";
 
 /**
  * Genera slots de tiempo incluyendo bloques y recreos explícitos
- * 
+ *
  * @param config - Configuración del nivel académico
  * @returns Array de TimeSlots con bloques y recreos
- * 
+ *
  * Ejemplo de salida:
  * [
  *   { time: '08:00', endTime: '08:45', type: 'block', blockNumber: 1 },
@@ -20,21 +20,23 @@ import type { ScheduleLevelConfig, TimeSlot } from '@/types/schedule-config';
  *   ...
  * ]
  */
-export function generateTimeSlotsWithBreaks(config: ScheduleLevelConfig): TimeSlot[] {
+export function generateTimeSlotsWithBreaks(
+  config: ScheduleLevelConfig,
+): TimeSlot[] {
   const slots: TimeSlot[] = [];
-  
+
   // Convertir tiempos a minutos
-  const [startHour, startMin] = config.startTime.split(':').map(Number);
-  const [endHour, endMin] = config.endTime.split(':').map(Number);
-  
+  const [startHour, startMin] = config.startTime.split(":").map(Number);
+  const [endHour, endMin] = config.endTime.split(":").map(Number);
+
   let currentMinutes = startHour * 60 + startMin;
   const endMinutes = endHour * 60 + endMin;
-  
+
   let blockNumber = 1;
 
   // Crear mapa de recreos por número de bloque
   const breakMap = new Map<number, { duration: number; name: string }>();
-  config.breaks.forEach(breakConfig => {
+  config.breaks.forEach((breakConfig) => {
     breakMap.set(breakConfig.afterBlock, {
       duration: breakConfig.duration,
       name: breakConfig.name,
@@ -45,37 +47,39 @@ export function generateTimeSlotsWithBreaks(config: ScheduleLevelConfig): TimeSl
     // Agregar bloque
     const blockStart = minutesToTime(currentMinutes);
     const blockEnd = minutesToTime(currentMinutes + config.blockDuration);
-    
+
     slots.push({
       time: blockStart,
       endTime: blockEnd,
-      type: 'block',
+      type: "block",
       blockNumber,
     });
-    
+
     currentMinutes += config.blockDuration;
-    
+
     // Verificar si hay recreo después de este bloque
     const breakAfter = breakMap.get(blockNumber);
     if (breakAfter && currentMinutes < endMinutes) {
       const breakStart = minutesToTime(currentMinutes);
       const breakEnd = minutesToTime(currentMinutes + breakAfter.duration);
-      
+
       slots.push({
         time: breakStart,
         endTime: breakEnd,
-        type: 'break',
+        type: "break",
         breakName: breakAfter.name,
       });
-      
+
       currentMinutes += breakAfter.duration;
     }
-    
+
     blockNumber++;
-    
+
     // Prevenir loops infinitos
     if (blockNumber > 20) {
-      console.warn('[generateTimeSlotsWithBreaks] Demasiados bloques generados, deteniendo');
+      console.warn(
+        "[generateTimeSlotsWithBreaks] Demasiados bloques generados, deteniendo",
+      );
       break;
     }
   }
@@ -89,14 +93,14 @@ export function generateTimeSlotsWithBreaks(config: ScheduleLevelConfig): TimeSl
 function minutesToTime(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
 }
 
 /**
  * Convierte formato HH:mm a minutos desde medianoche
  */
 export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(':').map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
 }
 
@@ -107,13 +111,13 @@ export function timesOverlap(
   start1: string,
   end1: string,
   start2: string,
-  end2: string
+  end2: string,
 ): boolean {
   const start1Min = timeToMinutes(start1);
   const end1Min = timeToMinutes(end1);
   const start2Min = timeToMinutes(start2);
   const end2Min = timeToMinutes(end2);
-  
+
   return start1Min < end2Min && end1Min > start2Min;
 }
 

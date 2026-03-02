@@ -35,7 +35,7 @@ function generateTimeSlots(
   startTime: string,
   endTime: string,
   blockDuration: number,
-  breakDuration: number
+  breakDuration: number,
 ): string[] {
   const slots: string[] = [];
   const [startHour, startMin] = startTime.split(":").map(Number);
@@ -52,7 +52,7 @@ function generateTimeSlots(
     slots.push(
       `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
-        .padStart(2, "0")}`
+        .padStart(2, "0")}`,
     );
     currentTime += blockDuration; // Solo sumar blockDuration, no breaks
   }
@@ -66,7 +66,7 @@ function generateTimeSlots(
   slots.push(
     `${finalHours.toString().padStart(2, "0")}:${finalMins
       .toString()
-      .padStart(2, "0")}`
+      .padStart(2, "0")}`,
   );
 
   return slots;
@@ -121,7 +121,7 @@ export default function TeacherAvailabilityPage({
         scheduleRange.startTime,
         scheduleRange.endTime,
         scheduleRange.blockDuration,
-        schoolConfig.breakDuration
+        schoolConfig.breakDuration,
       );
       setTimeSlots(slots);
       setScheduleEndTime(scheduleRange.endTime);
@@ -132,7 +132,7 @@ export default function TeacherAvailabilityPage({
       console.log("[Availability] Datos cargados de la BD:", availabilityData);
       console.log(
         "[Availability] Cantidad de registros:",
-        availabilityData.length
+        availabilityData.length,
       );
       setAvailabilityState(availabilityData);
 
@@ -166,7 +166,7 @@ export default function TeacherAvailabilityPage({
 
       console.log(
         "[Availability] Total slots seleccionados:",
-        selectedSet.size
+        selectedSet.size,
       );
       setSelectedSlots(selectedSet);
       setIsLoading(false);
@@ -226,7 +226,7 @@ export default function TeacherAvailabilityPage({
 
       console.log(
         `[convertSlots] ${day.key}: ${daySlots.length} slots`,
-        daySlots
+        daySlots,
       );
 
       // Ordenar por tiempo (por si acaso)
@@ -319,7 +319,7 @@ export default function TeacherAvailabilityPage({
       alert(
         `❌ Error al guardar la disponibilidad: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
     } finally {
       setIsSaving(false);
@@ -345,7 +345,7 @@ export default function TeacherAvailabilityPage({
       dayOfWeek: string;
       startTime: string;
       endTime: string;
-    }>
+    }>,
   ) => {
     // Convertir la disponibilidad importada a slots seleccionados
     const newSlots = new Set<string>();
@@ -528,7 +528,7 @@ export default function TeacherAvailabilityPage({
           <div className="availability-summary-grid">
             {DAYS.map((day) => {
               const daySlots = Array.from(selectedSlots).filter((slot) =>
-                slot.startsWith(`${day.key}-`)
+                slot.startsWith(`${day.key}-`),
               );
 
               if (daySlots.length === 0) {

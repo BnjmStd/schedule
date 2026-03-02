@@ -11,13 +11,13 @@ export async function checkTeacherAvailabilityDebug(
   dayOfWeek: string,
   startTime: string,
   endTime: string,
-  academicYear?: number
+  academicYear?: number,
 ) {
   if (!teacherId) {
     return {
       isAvailable: true,
       reason: "Sin profesor asignado",
-      availabilitySlots: []
+      availabilitySlots: [],
     };
   }
 
@@ -27,37 +27,43 @@ export async function checkTeacherAvailabilityDebug(
     where: {
       teacherId,
       academicYear: year,
-      dayOfWeek
+      dayOfWeek,
     },
     select: {
       startTime: true,
-      endTime: true
-    }
+      endTime: true,
+    },
   });
 
   if (availability.length === 0) {
     return {
       isAvailable: false,
       reason: `Sin disponibilidad para ${dayOfWeek} en ${year}`,
-      availabilitySlots: []
+      availabilitySlots: [],
     };
   }
 
-  const matchingSlot = availability.find(slot => 
-    startTime >= slot.startTime && endTime <= slot.endTime
+  const matchingSlot = availability.find(
+    (slot) => startTime >= slot.startTime && endTime <= slot.endTime,
   );
 
   if (matchingSlot) {
     return {
       isAvailable: true,
       reason: `Slot ${matchingSlot.startTime}-${matchingSlot.endTime}`,
-      availabilitySlots: availability.map(s => ({ start: s.startTime, end: s.endTime }))
+      availabilitySlots: availability.map((s) => ({
+        start: s.startTime,
+        end: s.endTime,
+      })),
     };
   }
 
   return {
     isAvailable: false,
-    reason: `Bloque ${startTime}-${endTime} fuera de slots: ${availability.map(s => `${s.startTime}-${s.endTime}`).join(', ')}`,
-    availabilitySlots: availability.map(s => ({ start: s.startTime, end: s.endTime }))
+    reason: `Bloque ${startTime}-${endTime} fuera de slots: ${availability.map((s) => `${s.startTime}-${s.endTime}`).join(", ")}`,
+    availabilitySlots: availability.map((s) => ({
+      start: s.startTime,
+      end: s.endTime,
+    })),
   };
 }

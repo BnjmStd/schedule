@@ -53,7 +53,7 @@ export function Badge({
         "transition-colors duration-200",
         variantStyles[variant],
         sizeStyles[size],
-        className
+        className,
       )}
       {...props}
     >

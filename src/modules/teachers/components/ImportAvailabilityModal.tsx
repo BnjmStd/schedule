@@ -1,73 +1,81 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import ExcelJS from 'exceljs';
-import '../../subjects/components/ImportSubjectsModal.css';
+import { useState } from "react";
+import ExcelJS from "exceljs";
+import "../../subjects/components/ImportSubjectsModal.css";
 
 interface ImportAvailabilityModalProps {
   teacherName: string;
-  onImport: (availability: Array<{
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-  }>) => void;
+  onImport: (
+    availability: Array<{
+      dayOfWeek: string;
+      startTime: string;
+      endTime: string;
+    }>,
+  ) => void;
   onCancel: () => void;
 }
 
 const DAY_MAP: Record<string, string> = {
-  'LUNES': 'MONDAY',
-  'MARTES': 'TUESDAY',
-  'MIÉRCOLES': 'WEDNESDAY',
-  'MIERCOLES': 'WEDNESDAY',
-  'JUEVES': 'THURSDAY',
-  'VIERNES': 'FRIDAY',
-  'SÁBADO': 'SATURDAY',
-  'SABADO': 'SATURDAY',
-  'DOMINGO': 'SUNDAY',
-  'L': 'MONDAY',
-  'M': 'TUESDAY',
-  'X': 'WEDNESDAY',
-  'J': 'THURSDAY',
-  'V': 'FRIDAY',
-  'S': 'SATURDAY',
-  'D': 'SUNDAY',
+  LUNES: "MONDAY",
+  MARTES: "TUESDAY",
+  MIÉRCOLES: "WEDNESDAY",
+  MIERCOLES: "WEDNESDAY",
+  JUEVES: "THURSDAY",
+  VIERNES: "FRIDAY",
+  SÁBADO: "SATURDAY",
+  SABADO: "SATURDAY",
+  DOMINGO: "SUNDAY",
+  L: "MONDAY",
+  M: "TUESDAY",
+  X: "WEDNESDAY",
+  J: "THURSDAY",
+  V: "FRIDAY",
+  S: "SATURDAY",
+  D: "SUNDAY",
 };
 
-export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: ImportAvailabilityModalProps) {
-  const [step, setStep] = useState<'upload' | 'preview'>('upload');
+export function ImportAvailabilityModal({
+  teacherName,
+  onImport,
+  onCancel,
+}: ImportAvailabilityModalProps) {
+  const [step, setStep] = useState<"upload" | "preview">("upload");
   const [previewData, setPreviewData] = useState<Array<any>>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const exampleData = [
-    { Día: 'Lunes', 'Hora Inicio': '08:00', 'Hora Fin': '12:00' },
-    { Día: 'Lunes', 'Hora Inicio': '14:00', 'Hora Fin': '18:00' },
-    { Día: 'Martes', 'Hora Inicio': '08:00', 'Hora Fin': '13:00' },
-    { Día: 'Miércoles', 'Hora Inicio': '09:00', 'Hora Fin': '17:00' },
-    { Día: 'Jueves', 'Hora Inicio': '08:00', 'Hora Fin': '12:00' },
-    { Día: 'Viernes', 'Hora Inicio': '14:00', 'Hora Fin': '18:00' },
+    { Día: "Lunes", "Hora Inicio": "08:00", "Hora Fin": "12:00" },
+    { Día: "Lunes", "Hora Inicio": "14:00", "Hora Fin": "18:00" },
+    { Día: "Martes", "Hora Inicio": "08:00", "Hora Fin": "13:00" },
+    { Día: "Miércoles", "Hora Inicio": "09:00", "Hora Fin": "17:00" },
+    { Día: "Jueves", "Hora Inicio": "08:00", "Hora Fin": "12:00" },
+    { Día: "Viernes", "Hora Inicio": "14:00", "Hora Fin": "18:00" },
   ];
 
   const downloadTemplate = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Disponibilidad');
+    const worksheet = workbook.addWorksheet("Disponibilidad");
 
     // Añadir columnas
     worksheet.columns = [
-      { header: 'Día', key: 'Día', width: 15 },
-      { header: 'Hora Inicio', key: 'Hora Inicio', width: 15 },
-      { header: 'Hora Fin', key: 'Hora Fin', width: 15 },
+      { header: "Día", key: "Día", width: 15 },
+      { header: "Hora Inicio", key: "Hora Inicio", width: 15 },
+      { header: "Hora Fin", key: "Hora Fin", width: 15 },
     ];
 
     // Añadir datos de ejemplo
-    exampleData.forEach(row => worksheet.addRow(row));
+    exampleData.forEach((row) => worksheet.addRow(row));
 
     // Generar y descargar archivo
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `disponibilidad_${teacherName.replace(/\s+/g, '_')}.xlsx`;
+    a.download = `disponibilidad_${teacherName.replace(/\s+/g, "_")}.xlsx`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -83,7 +91,7 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
 
       const worksheet = workbook.worksheets[0];
       if (!worksheet) {
-        setError('El archivo no contiene hojas');
+        setError("El archivo no contiene hojas");
         return;
       }
 
@@ -94,7 +102,7 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
         if (rowNumber === 1) {
           // Primera fila son los headers
           row.eachCell((cell) => {
-            headers.push(cell.value?.toString() || '');
+            headers.push(cell.value?.toString() || "");
           });
         } else {
           // Resto de filas son datos
@@ -107,28 +115,34 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
       });
 
       if (jsonData.length === 0) {
-        setError('El archivo está vacío');
+        setError("El archivo está vacío");
         return;
       }
 
       // Validar columnas
       const firstRow: any = jsonData[0];
-      const requiredColumns = ['Día', 'Hora Inicio', 'Hora Fin'];
-      const hasRequiredColumns = requiredColumns.some(col => 
-        col in firstRow || 
-        col.toLowerCase() in Object.keys(firstRow).map(k => k.toLowerCase())
+      const requiredColumns = ["Día", "Hora Inicio", "Hora Fin"];
+      const hasRequiredColumns = requiredColumns.some(
+        (col) =>
+          col in firstRow ||
+          col.toLowerCase() in
+            Object.keys(firstRow).map((k) => k.toLowerCase()),
       );
 
       if (!hasRequiredColumns) {
-        setError(`El archivo debe tener las columnas: ${requiredColumns.join(', ')}`);
+        setError(
+          `El archivo debe tener las columnas: ${requiredColumns.join(", ")}`,
+        );
         return;
       }
 
       setPreviewData(jsonData);
-      setStep('preview');
-      setError('');
+      setStep("preview");
+      setError("");
     } catch (err) {
-      setError('Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.');
+      setError(
+        "Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.",
+      );
     }
   };
 
@@ -138,28 +152,36 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
   };
 
   const handleImport = () => {
-    const availability = previewData.map((row: any) => {
-      const dayKey = Object.keys(row).find(k => 
-        k.toLowerCase().includes('día') || k.toLowerCase().includes('dia') || k.toLowerCase() === 'day'
-      );
-      const startKey = Object.keys(row).find(k => 
-        k.toLowerCase().includes('inicio') || k.toLowerCase().includes('start')
-      );
-      const endKey = Object.keys(row).find(k => 
-        k.toLowerCase().includes('fin') || k.toLowerCase().includes('end')
-      );
+    const availability = previewData
+      .map((row: any) => {
+        const dayKey = Object.keys(row).find(
+          (k) =>
+            k.toLowerCase().includes("día") ||
+            k.toLowerCase().includes("dia") ||
+            k.toLowerCase() === "day",
+        );
+        const startKey = Object.keys(row).find(
+          (k) =>
+            k.toLowerCase().includes("inicio") ||
+            k.toLowerCase().includes("start"),
+        );
+        const endKey = Object.keys(row).find(
+          (k) =>
+            k.toLowerCase().includes("fin") || k.toLowerCase().includes("end"),
+        );
 
-      if (!dayKey || !startKey || !endKey) return null;
+        if (!dayKey || !startKey || !endKey) return null;
 
-      const dayOfWeek = normalizeDay(row[dayKey]);
-      if (!dayOfWeek) return null;
+        const dayOfWeek = normalizeDay(row[dayKey]);
+        if (!dayOfWeek) return null;
 
-      return {
-        dayOfWeek,
-        startTime: row[startKey],
-        endTime: row[endKey],
-      };
-    }).filter(Boolean) as Array<{
+        return {
+          dayOfWeek,
+          startTime: row[startKey],
+          endTime: row[endKey],
+        };
+      })
+      .filter(Boolean) as Array<{
       dayOfWeek: string;
       startTime: string;
       endTime: string;
@@ -170,25 +192,26 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
 
   const getDayName = (dayKey: string): string => {
     const names: Record<string, string> = {
-      'MONDAY': 'Lunes',
-      'TUESDAY': 'Martes',
-      'WEDNESDAY': 'Miércoles',
-      'THURSDAY': 'Jueves',
-      'FRIDAY': 'Viernes',
-      'SATURDAY': 'Sábado',
-      'SUNDAY': 'Domingo',
+      MONDAY: "Lunes",
+      TUESDAY: "Martes",
+      WEDNESDAY: "Miércoles",
+      THURSDAY: "Jueves",
+      FRIDAY: "Viernes",
+      SATURDAY: "Sábado",
+      SUNDAY: "Domingo",
     };
-    return names[normalizeDay(dayKey) || ''] || dayKey;
+    return names[normalizeDay(dayKey) || ""] || dayKey;
   };
 
   return (
     <div className="import-modal">
-      {step === 'upload' && (
+      {step === "upload" && (
         <>
           <div className="import-header">
             <h3>📥 Importar Disponibilidad Horaria</h3>
             <p className="import-subtitle">
-              Importa la disponibilidad de <strong>{teacherName}</strong> desde Excel
+              Importa la disponibilidad de <strong>{teacherName}</strong> desde
+              Excel
             </p>
           </div>
 
@@ -207,8 +230,8 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
                   {exampleData.map((row, idx) => (
                     <tr key={idx}>
                       <td>{row.Día}</td>
-                      <td>{row['Hora Inicio']}</td>
-                      <td>{row['Hora Fin']}</td>
+                      <td>{row["Hora Inicio"]}</td>
+                      <td>{row["Hora Fin"]}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -216,8 +239,7 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
             </div>
             <p className="import-note">
               * Puedes agregar múltiples bloques para el mismo día
-              <br />
-              * Formato de hora: HH:mm (ej: 08:00, 14:30)
+              <br />* Formato de hora: HH:mm (ej: 08:00, 14:30)
             </p>
           </div>
 
@@ -239,16 +261,12 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleFileUpload}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
             </div>
           </div>
 
-          {error && (
-            <div className="import-error">
-              ⚠️ {error}
-            </div>
-          )}
+          {error && <div className="import-error">⚠️ {error}</div>}
 
           <div className="modal-footer">
             <button type="button" className="btn-cancel" onClick={onCancel}>
@@ -258,7 +276,7 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
         </>
       )}
 
-      {step === 'preview' && (
+      {step === "preview" && (
         <>
           <div className="import-header">
             <h3>👀 Vista Previa</h3>
@@ -280,32 +298,40 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
               </thead>
               <tbody>
                 {previewData.map((row: any, idx) => {
-                  const dayKey = Object.keys(row).find(k => 
-                    k.toLowerCase().includes('día') || k.toLowerCase().includes('dia') || k.toLowerCase() === 'day'
+                  const dayKey = Object.keys(row).find(
+                    (k) =>
+                      k.toLowerCase().includes("día") ||
+                      k.toLowerCase().includes("dia") ||
+                      k.toLowerCase() === "day",
                   );
-                  const startKey = Object.keys(row).find(k => 
-                    k.toLowerCase().includes('inicio') || k.toLowerCase().includes('start')
+                  const startKey = Object.keys(row).find(
+                    (k) =>
+                      k.toLowerCase().includes("inicio") ||
+                      k.toLowerCase().includes("start"),
                   );
-                  const endKey = Object.keys(row).find(k => 
-                    k.toLowerCase().includes('fin') || k.toLowerCase().includes('end')
+                  const endKey = Object.keys(row).find(
+                    (k) =>
+                      k.toLowerCase().includes("fin") ||
+                      k.toLowerCase().includes("end"),
                   );
 
-                  const day = dayKey ? row[dayKey] : '-';
-                  const start = startKey ? row[startKey] : '-';
-                  const end = endKey ? row[endKey] : '-';
+                  const day = dayKey ? row[dayKey] : "-";
+                  const start = startKey ? row[startKey] : "-";
+                  const end = endKey ? row[endKey] : "-";
 
                   // Calcular duración
-                  let duration = '-';
-                  if (start !== '-' && end !== '-') {
+                  let duration = "-";
+                  if (start !== "-" && end !== "-") {
                     try {
-                      const [startH, startM] = start.split(':').map(Number);
-                      const [endH, endM] = end.split(':').map(Number);
-                      const minutes = (endH * 60 + endM) - (startH * 60 + startM);
+                      const [startH, startM] = start.split(":").map(Number);
+                      const [endH, endM] = end.split(":").map(Number);
+                      const minutes = endH * 60 + endM - (startH * 60 + startM);
                       const hours = Math.floor(minutes / 60);
                       const mins = minutes % 60;
-                      duration = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
+                      duration =
+                        hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
                     } catch (e) {
-                      duration = '?';
+                      duration = "?";
                     }
                   }
 
@@ -324,10 +350,18 @@ export function ImportAvailabilityModal({ teacherName, onImport, onCancel }: Imp
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn-cancel" onClick={() => setStep('upload')}>
+            <button
+              type="button"
+              className="btn-cancel"
+              onClick={() => setStep("upload")}
+            >
               ← Volver
             </button>
-            <button type="button" className="btn-confirm" onClick={handleImport}>
+            <button
+              type="button"
+              className="btn-confirm"
+              onClick={handleImport}
+            >
               ✓ Importar Disponibilidad
             </button>
           </div>

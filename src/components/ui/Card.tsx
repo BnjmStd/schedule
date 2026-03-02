@@ -40,7 +40,7 @@ export function Card({
         "rounded-xl transition-all duration-200",
         variantStyles[variant],
         paddingStyles[padding],
-        className
+        className,
       )}
       {...props}
     >
@@ -76,8 +76,7 @@ export function CardTitle({ children, className, ...props }: CardTitleProps) {
   );
 }
 
-export interface CardDescriptionProps
-  extends HTMLAttributes<HTMLParagraphElement> {
+export interface CardDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {
   children: ReactNode;
 }
 

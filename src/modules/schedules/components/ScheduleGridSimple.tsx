@@ -33,19 +33,26 @@ const DAYS = [
 ];
 
 export function ScheduleGrid({ blocks, type, config }: ScheduleGridProps) {
-  console.log('[ScheduleGrid] 📥 Recibido:', { blocks: blocks.length, type, hasConfig: !!config });
-  
+  console.log("[ScheduleGrid] 📥 Recibido:", {
+    blocks: blocks.length,
+    type,
+    hasConfig: !!config,
+  });
+
   if (blocks.length > 0) {
-    console.log('[ScheduleGrid] 🔍 Primeros bloques:', blocks.slice(0, 3).map(b => ({
-      day: b.day,
-      start: b.startTime,
-      end: b.endTime,
-      subject: b.subject
-    })));
+    console.log(
+      "[ScheduleGrid] 🔍 Primeros bloques:",
+      blocks.slice(0, 3).map((b) => ({
+        day: b.day,
+        start: b.startTime,
+        end: b.endTime,
+        subject: b.subject,
+      })),
+    );
   }
-  
+
   // Usar configuración si está disponible, sino fallback a slots dinámicos
-  const rawTimeSlots = config 
+  const rawTimeSlots = config
     ? generateTimeSlotsWithBreaks(config)
     : generateFallbackTimeSlots(blocks);
 
@@ -53,13 +60,15 @@ export function ScheduleGrid({ blocks, type, config }: ScheduleGridProps) {
   const timeSlots = rawTimeSlots.map((slot: any) => ({
     start: slot.time || slot.start,
     end: slot.endTime || slot.end,
-    isBreak: slot.type === 'break' || slot.isBreak,
-    label: slot.label || (slot.type === 'break' ? 'Recreo' : `Bloque ${slot.blockNumber || ''}`),
+    isBreak: slot.type === "break" || slot.isBreak,
+    label:
+      slot.label ||
+      (slot.type === "break" ? "Recreo" : `Bloque ${slot.blockNumber || ""}`),
     number: slot.blockNumber || slot.number,
   }));
 
-  console.log('[ScheduleGrid] ⏰ TimeSlots normalizados:', timeSlots.length);
-  console.log('[ScheduleGrid] 📋 Primer slot normalizado:', timeSlots[0]);
+  console.log("[ScheduleGrid] ⏰ TimeSlots normalizados:", timeSlots.length);
+  console.log("[ScheduleGrid] 📋 Primer slot normalizado:", timeSlots[0]);
 
   function generateFallbackTimeSlots(blocks: ScheduleBlock[]) {
     if (blocks.length === 0) {
@@ -93,7 +102,12 @@ export function ScheduleGrid({ blocks, type, config }: ScheduleGridProps) {
       if (start >= "13:00" && end <= "14:00") {
         slots.push({ start, end, isBreak: true, label: "Almuerzo" });
       } else {
-        slots.push({ start, end, label: `Bloque ${blockNumber}`, number: blockNumber });
+        slots.push({
+          start,
+          end,
+          label: `Bloque ${blockNumber}`,
+          number: blockNumber,
+        });
         blockNumber++;
       }
     }
@@ -105,12 +119,12 @@ export function ScheduleGrid({ blocks, type, config }: ScheduleGridProps) {
     // Buscar un bloque que caiga dentro del rango del slot
     const block = blocks.find((block) => {
       if (block.day !== day) return false;
-      
+
       // El bloque debe empezar en o después del inicio del slot
       // y antes del final del slot
       return block.startTime >= slotStart && block.startTime < slotEnd;
     });
-    
+
     return block;
   };
 
@@ -129,7 +143,10 @@ export function ScheduleGrid({ blocks, type, config }: ScheduleGridProps) {
 
         {/* Filas de horarios */}
         {timeSlots.map((slot, index) => (
-          <div key={`${slot.start}-${slot.end}-${index}`} className="schedule-row">
+          <div
+            key={`${slot.start}-${slot.end}-${index}`}
+            className="schedule-row"
+          >
             {/* Columna de hora */}
             <div className="schedule-time-cell">
               {slot.start} - {slot.end}

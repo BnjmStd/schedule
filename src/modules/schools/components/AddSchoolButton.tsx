@@ -17,7 +17,7 @@ export function AddSchoolButton({ onSchoolCreated }: AddSchoolButtonProps) {
   const handleClick = () => {
     openModal(
       <CreateSchoolForm onSchoolCreated={onSchoolCreated} />,
-      "🏫 Crear Nuevo Colegio"
+      "🏫 Crear Nuevo Colegio",
     );
   };
 

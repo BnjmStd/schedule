@@ -15,9 +15,9 @@ export default async function ProtectedLayout({
     <ModalProvider>
       <SkipToMain />
       <Navbar userName={userName} />
-      <main 
-        id="main-content" 
-        className="min-h-screen" 
+      <main
+        id="main-content"
+        className="min-h-screen"
         style={{ background: "#000" }}
         role="main"
         aria-label="Contenido principal"

@@ -14,6 +14,7 @@ El menú hamburguesa implementado incluye:
 ## 🎨 Estilos Aplicados
 
 ### Botón Hamburguesa
+
 ```css
 - Transform 3 líneas → X animado
 - Cubic-bezier para animación suave
@@ -21,6 +22,7 @@ El menú hamburguesa implementado incluye:
 ```
 
 ### Sidebar
+
 ```css
 - Width: 85% (max 320px)
 - Transform: translateX(-100%) → translateX(0)
@@ -29,6 +31,7 @@ El menú hamburguesa implementado incluye:
 ```
 
 ### Overlay
+
 ```css
 - Background: rgba(0,0,0,0.8)
 - Backdrop-filter: blur(8px)
@@ -68,6 +71,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 ## 🎨 Personalización
 
 ### Cambiar Ancho del Sidebar
+
 ```css
 .mobile-nav-sidebar {
   max-width: 320px; /* Ajustar aquí */
@@ -75,6 +79,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 ```
 
 ### Cambiar Velocidad de Animación
+
 ```css
 .mobile-nav-sidebar {
   transition: transform 0.4s; /* Ajustar duración */
@@ -82,6 +87,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 ```
 
 ### Cambiar Intensidad del Blur
+
 ```css
 .mobile-nav-overlay {
   backdrop-filter: blur(8px); /* Ajustar blur */
@@ -91,6 +97,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 ## ✅ Verificación
 
 Build exitoso:
+
 ```
 ✓ TypeScript compilation
 ✓ Next.js build

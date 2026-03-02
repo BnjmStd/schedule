@@ -68,7 +68,7 @@ export default function SchedulesPage() {
     console.log(
       "[Schedules] Unique schools:",
       uniqueSchools.length,
-      uniqueSchools
+      uniqueSchools,
     );
     return uniqueSchools;
   }, [courses, teachers]);
@@ -84,7 +84,7 @@ export default function SchedulesPage() {
 
   // Obtener el colegio seleccionado
   const selectedSchool = schools.find(
-    (school: any) => school.id === selectedSchoolId
+    (school: any) => school.id === selectedSchoolId,
   );
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function SchedulesPage() {
               "[Acordeón] Schedule ID:",
               schedules[0].id,
               "Bloques:",
-              schedules[0].blocks.length
+              schedules[0].blocks.length,
             );
             // Transformar bloques para el ScheduleGrid
             const blocks = schedules[0].blocks.map((block: any) => ({
@@ -165,7 +165,7 @@ export default function SchedulesPage() {
             } catch (configError) {
               console.error(
                 "[Acordeón] Error obteniendo config, usando fallback:",
-                configError
+                configError,
               );
               // Guardar sin config si falla
               setScheduleData((prev) => ({
@@ -219,12 +219,12 @@ export default function SchedulesPage() {
             teacherConfig = await getScheduleConfigForTeacher(id);
             console.log(
               "[Acordeón] Config de profesor cargada:",
-              teacherConfig
+              teacherConfig,
             );
           } catch (error) {
             console.error(
               "[Acordeón] Error obteniendo config de profesor:",
-              error
+              error,
             );
           }
 
@@ -242,7 +242,7 @@ export default function SchedulesPage() {
             }));
             console.log(
               "[Acordeón] Bloques transformados:",
-              transformedBlocks.length
+              transformedBlocks.length,
             );
             setScheduleData((prev) => ({
               ...prev,
@@ -289,7 +289,7 @@ export default function SchedulesPage() {
   const handleDownload = async (
     name: string,
     id: string,
-    type: "course" | "teacher"
+    type: "course" | "teacher",
   ) => {
     // Primero expandir el acordeón si no está expandido
     if (expandedId !== id) {
@@ -511,7 +511,7 @@ export default function SchedulesPage() {
                                 handleDownload(
                                   course.name,
                                   course.id,
-                                  "course"
+                                  "course",
                                 );
                               }}
                               title="Descargar horario"
@@ -588,7 +588,7 @@ export default function SchedulesPage() {
                                 {console.log(
                                   `[Render] 🎨 Renderizando ScheduleGrid con ${
                                     scheduleData[course.id].blocks.length
-                                  } bloques`
+                                  } bloques`,
                                 )}
                                 {scheduleData[course.id].isDeprecated && (
                                   <div
@@ -682,7 +682,7 @@ export default function SchedulesPage() {
                                 handleDownload(
                                   `${teacher.firstName} ${teacher.lastName}`,
                                   teacher.id,
-                                  "teacher"
+                                  "teacher",
                                 );
                               }}
                               title="Descargar horario"

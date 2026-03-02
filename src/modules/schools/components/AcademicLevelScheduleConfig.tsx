@@ -9,9 +9,7 @@ import {
   getScheduleConfigForLevel,
   saveScheduleConfigForLevel,
 } from "@/modules/schools/actions/schedule-config";
-import {
-  getSchoolActiveAcademicLevels,
-} from "@/modules/schools/actions";
+import { getSchoolActiveAcademicLevels } from "@/modules/schools/actions";
 import type {
   AcademicLevel,
   BreakConfig,
@@ -44,12 +42,11 @@ const ACADEMIC_LEVELS: { key: AcademicLevel; label: string; emoji: string }[] =
 
 type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
 
-
 // Helper para calcular bloques disponibles
 function calculateAvailableBlocks(
   startTime: string,
   endTime: string,
-  blockDuration: number
+  blockDuration: number,
 ): number {
   const [startHour, startMin] = startTime.split(":").map(Number);
   const [endHour, endMin] = endTime.split(":").map(Number);
@@ -62,7 +59,9 @@ export function AcademicLevelScheduleConfig({
   schoolName,
   onClose,
 }: AcademicLevelScheduleConfigProps) {
-  const [activeTab, setActiveTab] = useState<"config" | AcademicLevel>("config");
+  const [activeTab, setActiveTab] = useState<"config" | AcademicLevel>(
+    "config",
+  );
   const [activeLevel, setActiveLevel] = useState<AcademicLevel>("BASIC");
   const [availableLevels, setAvailableLevels] = useState<AcademicLevel[]>([
     "BASIC",
@@ -82,7 +81,7 @@ export function AcademicLevelScheduleConfig({
 
   // Tracking de configuración original para detectar cambios críticos
   const [originalConfig, setOriginalConfig] = useState<typeof config | null>(
-    null
+    null,
   );
 
   // (Legacy state variables removed - no longer needed)
@@ -102,7 +101,7 @@ export function AcademicLevelScheduleConfig({
       const levelsString = await getSchoolActiveAcademicLevels(schoolId);
       const levels = parseActiveAcademicLevels(levelsString);
       setAvailableLevels(levels);
-      
+
       // Si el nivel activo no está en los disponibles, cambiar al primero disponible
       if (!levels.includes(activeLevel) && levels.length > 0) {
         setActiveLevel(levels[0]);
@@ -137,16 +136,16 @@ export function AcademicLevelScheduleConfig({
       const availableBlocks = calculateAvailableBlocks(
         config.startTime,
         config.endTime,
-        config.blockDuration
+        config.blockDuration,
       );
       const invalidBreaks = config.breaks.filter(
-        (b) => b.afterBlock >= availableBlocks
+        (b) => b.afterBlock >= availableBlocks,
       );
       if (invalidBreaks.length > 0) {
         alert(
           `❌ Hay recreos después del bloque ${
             availableBlocks - 1
-          }, pero solo hay ${availableBlocks} bloques disponibles. Por favor corrige esto antes de guardar.`
+          }, pero solo hay ${availableBlocks} bloques disponibles. Por favor corrige esto antes de guardar.`,
         );
         return;
       }
@@ -167,11 +166,11 @@ export function AcademicLevelScheduleConfig({
         if (criticalChanges.length > 0) {
           const confirmed = window.confirm(
             `⚠️ ADVERTENCIA: Estás cambiando ${criticalChanges.join(
-              ", "
+              ", ",
             )}.\n\n` +
               `Esto puede romper los horarios ya creados para este nivel académico.\n\n` +
               `Los horarios existentes podrían quedar con bloques fuera de rango o en horas incorrectas.\n\n` +
-              `¿Estás seguro de continuar?`
+              `¿Estás seguro de continuar?`,
           );
           if (!confirmed) {
             return;
@@ -191,7 +190,7 @@ export function AcademicLevelScheduleConfig({
       alert(
         `✅ Configuración guardada para ${
           activeLevel === "BASIC" ? "Básica" : "Media"
-        }`
+        }`,
       );
     } catch (error: any) {
       console.error("Error guardando configuración:", error);
@@ -205,12 +204,12 @@ export function AcademicLevelScheduleConfig({
     const availableBlocks = calculateAvailableBlocks(
       config.startTime,
       config.endTime,
-      config.blockDuration
+      config.blockDuration,
     );
 
     if (availableBlocks < 2) {
       alert(
-        "⚠️ No hay suficientes bloques para agregar un recreo. Ajusta el horario de jornada primero."
+        "⚠️ No hay suficientes bloques para agregar un recreo. Ajusta el horario de jornada primero.",
       );
       return;
     }
@@ -222,7 +221,7 @@ export function AcademicLevelScheduleConfig({
 
     if (nextAfterBlock >= availableBlocks) {
       alert(
-        `⚠️ No puedes agregar más recreos. Solo hay ${availableBlocks} bloques disponibles.`
+        `⚠️ No puedes agregar más recreos. Solo hay ${availableBlocks} bloques disponibles.`,
       );
       return;
     }
@@ -290,8 +289,8 @@ export function AcademicLevelScheduleConfig({
               {schoolName}
             </p>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="quick-assign-modal-close"
             aria-label="Cerrar modal de configuración"
             title="Cerrar"
@@ -310,10 +309,12 @@ export function AcademicLevelScheduleConfig({
             onClick={() => setActiveTab("config")}
           >
             <span className="academic-level-tab-emoji">⚙️</span>
-            <span className="academic-level-tab-label">Configuración General</span>
+            <span className="academic-level-tab-label">
+              Configuración General
+            </span>
           </button>
           {ACADEMIC_LEVELS.filter((level) =>
-            availableLevels.includes(level.key)
+            availableLevels.includes(level.key),
           ).map((level) => (
             <button
               key={level.key}
@@ -352,311 +353,322 @@ export function AcademicLevelScheduleConfig({
               >
                 Configura los horarios específicos para{" "}
                 <strong>
-                  {activeLevel === "BASIC" ? "Educación Básica" : "Educación Media"}
+                  {activeLevel === "BASIC"
+                    ? "Educación Básica"
+                    : "Educación Media"}
                 </strong>
                 . Cada nivel puede tener horarios diferentes.
               </p>
 
-          {/* Horario General */}
-          <div className="schedule-config-section">
-            <h4 className="schedule-config-section-title">
-              ⏰ Horario de Jornada
-            </h4>
+              {/* Horario General */}
+              <div className="schedule-config-section">
+                <h4 className="schedule-config-section-title">
+                  ⏰ Horario de Jornada
+                </h4>
 
-            <div
-              style={{
-                marginBottom: "1rem",
-                padding: "0.75rem",
-                background: "rgba(59, 130, 246, 0.1)",
-                borderLeft: "3px solid rgb(59, 130, 246)",
-                borderRadius: "0.5rem",
-                fontSize: "0.875rem",
-                color: "rgba(255, 255, 255, 0.9)",
-              }}
-            >
-              📊 Bloques disponibles:{" "}
-              <strong>
-                {calculateAvailableBlocks(
-                  config.startTime,
-                  config.endTime,
-                  config.blockDuration
-                )}
-              </strong>
-              {originalConfig &&
-                (originalConfig.startTime !== config.startTime ||
-                  originalConfig.endTime !== config.endTime ||
-                  originalConfig.blockDuration !== config.blockDuration) && (
-                  <div
-                    style={{ marginTop: "0.5rem", color: "rgb(251, 191, 36)" }}
-                  >
-                    ⚠️ Has modificado parámetros críticos que pueden afectar
-                    horarios existentes
-                  </div>
-                )}
-            </div>
-
-            <div className="schedule-config-row">
-              <div className="quick-assign-form-group">
-                <label>Hora de Inicio</label>
-                <select
-                  value={config.startTime}
-                  onChange={(e) =>
-                    setConfig({ ...config, startTime: e.target.value })
-                  }
-                >
-                  {TIME_OPTIONS.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="quick-assign-form-group">
-                <label>Hora de Término</label>
-                <select
-                  value={config.endTime}
-                  onChange={(e) =>
-                    setConfig({ ...config, endTime: e.target.value })
-                  }
-                >
-                  {TIME_OPTIONS.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="quick-assign-form-group">
-                <label>Duración Bloque (min)</label>
-                <input
-                  type="number"
-                  min="15"
-                  step="15"
-                  value={config.blockDuration}
-                  onChange={(e) =>
-                    setConfig({
-                      ...config,
-                      blockDuration: parseInt(e.target.value) || 45,
-                    })
-                  }
-                />
-                <small
+                <div
                   style={{
-                    color: "rgba(255, 255, 255, 0.5)",
-                    fontSize: "0.75rem",
+                    marginBottom: "1rem",
+                    padding: "0.75rem",
+                    background: "rgba(59, 130, 246, 0.1)",
+                    borderLeft: "3px solid rgb(59, 130, 246)",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.9)",
                   }}
                 >
-                  Debe ser múltiplo de 15
-                </small>
-              </div>
-            </div>
-          </div>
+                  📊 Bloques disponibles:{" "}
+                  <strong>
+                    {calculateAvailableBlocks(
+                      config.startTime,
+                      config.endTime,
+                      config.blockDuration,
+                    )}
+                  </strong>
+                  {originalConfig &&
+                    (originalConfig.startTime !== config.startTime ||
+                      originalConfig.endTime !== config.endTime ||
+                      originalConfig.blockDuration !==
+                        config.blockDuration) && (
+                      <div
+                        style={{
+                          marginTop: "0.5rem",
+                          color: "rgb(251, 191, 36)",
+                        }}
+                      >
+                        ⚠️ Has modificado parámetros críticos que pueden afectar
+                        horarios existentes
+                      </div>
+                    )}
+                </div>
 
-          {/* Recreos y Almuerzos */}
-          <div className="schedule-config-section">
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "1rem",
-              }}
-            >
-              <h4
-                className="schedule-config-section-title"
-                style={{ margin: 0 }}
-              >
-                🌤️ Recreos y Almuerzos
-              </h4>
-              <button
-                type="button"
-                onClick={addBreak}
-                className="schedule-editor-add-btn"
-                style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
-              >
-                + Agregar Recreo/Almuerzo
-              </button>
-            </div>
-
-            <div
-              style={{
-                marginBottom: "1rem",
-                padding: "0.75rem",
-                background: "rgba(59, 130, 246, 0.1)",
-                borderLeft: "3px solid rgb(59, 130, 246)",
-                borderRadius: "0.375rem",
-                fontSize: "0.875rem",
-                color: "rgba(255, 255, 255, 0.9)",
-              }}
-            >
-              <div style={{ marginBottom: "0.5rem" }}>
-                💡 <strong>Configura todos los descansos aquí</strong>
-              </div>
-              <ul style={{ margin: 0, paddingLeft: "1.5rem" }}>
-                <li>Recreos cortos: 15-20 minutos</li>
-                <li>Almuerzo: 30-60 minutos</li>
-                <li>Se insertan después del bloque que indiques</li>
-              </ul>
-            </div>
-
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "rgba(255, 255, 255, 0.75)",
-                marginBottom: "1rem",
-              }}
-            >
-              📊 Rango válido: Bloque 1 a{" "}
-              {calculateAvailableBlocks(
-                config.startTime,
-                config.endTime,
-                config.blockDuration
-              ) - 1}
-            </p>
-
-            {config.breaks.length === 0 ? (
-              <p
-                style={{
-                  color: "rgba(255, 255, 255, 0.5)",
-                  fontSize: "0.875rem",
-                  textAlign: "center",
-                  padding: "2rem",
-                  background: "rgba(255, 255, 255, 0.03)",
-                  borderRadius: "0.5rem",
-                }}
-              >
-                No hay recreos o almuerzos configurados.
-                <br />
-                Haz clic en "+ Agregar Recreo/Almuerzo" para crear uno.
-              </p>
-            ) : (
-              <div className="breaks-list">
-                {config.breaks.map((breakItem: BreakConfig, index: number) => {
-                  const availableBlocks = calculateAvailableBlocks(
-                    config.startTime,
-                    config.endTime,
-                    config.blockDuration
-                  );
-                  const isOutOfRange = breakItem.afterBlock >= availableBlocks;
-
-                  return (
-                    <div
-                      key={index}
-                      className="break-item"
-                      style={
-                        isOutOfRange
-                          ? { border: "2px solid rgb(239, 68, 68)" }
-                          : {}
+                <div className="schedule-config-row">
+                  <div className="quick-assign-form-group">
+                    <label>Hora de Inicio</label>
+                    <select
+                      value={config.startTime}
+                      onChange={(e) =>
+                        setConfig({ ...config, startTime: e.target.value })
                       }
                     >
-                      <div className="break-item-header">
-                        <span className="break-item-number">#{index + 1}</span>
-                        {isOutOfRange && (
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              color: "rgb(239, 68, 68)",
-                              marginLeft: "0.5rem",
-                            }}
-                          >
-                            ⚠️ Fuera de rango
-                          </span>
-                        )}
-                      </div>
-                      <div className="schedule-config-row">
-                        <div className="quick-assign-form-group">
-                          <label>Después del Bloque</label>
-                          <input
-                            type="number"
-                            min="1"
-                            max={availableBlocks - 1}
-                            value={breakItem.afterBlock}
-                            onChange={(e) =>
-                              updateBreak(index, {
-                                afterBlock: parseInt(e.target.value) || 1,
-                              })
-                            }
+                      {TIME_OPTIONS.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="quick-assign-form-group">
+                    <label>Hora de Término</label>
+                    <select
+                      value={config.endTime}
+                      onChange={(e) =>
+                        setConfig({ ...config, endTime: e.target.value })
+                      }
+                    >
+                      {TIME_OPTIONS.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="quick-assign-form-group">
+                    <label>Duración Bloque (min)</label>
+                    <input
+                      type="number"
+                      min="15"
+                      step="15"
+                      value={config.blockDuration}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          blockDuration: parseInt(e.target.value) || 45,
+                        })
+                      }
+                    />
+                    <small
+                      style={{
+                        color: "rgba(255, 255, 255, 0.5)",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      Debe ser múltiplo de 15
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recreos y Almuerzos */}
+              <div className="schedule-config-section">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <h4
+                    className="schedule-config-section-title"
+                    style={{ margin: 0 }}
+                  >
+                    🌤️ Recreos y Almuerzos
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={addBreak}
+                    className="schedule-editor-add-btn"
+                    style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+                  >
+                    + Agregar Recreo/Almuerzo
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    marginBottom: "1rem",
+                    padding: "0.75rem",
+                    background: "rgba(59, 130, 246, 0.1)",
+                    borderLeft: "3px solid rgb(59, 130, 246)",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.9)",
+                  }}
+                >
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    💡 <strong>Configura todos los descansos aquí</strong>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: "1.5rem" }}>
+                    <li>Recreos cortos: 15-20 minutos</li>
+                    <li>Almuerzo: 30-60 minutos</li>
+                    <li>Se insertan después del bloque que indiques</li>
+                  </ul>
+                </div>
+
+                <p
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.75)",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  📊 Rango válido: Bloque 1 a{" "}
+                  {calculateAvailableBlocks(
+                    config.startTime,
+                    config.endTime,
+                    config.blockDuration,
+                  ) - 1}
+                </p>
+
+                {config.breaks.length === 0 ? (
+                  <p
+                    style={{
+                      color: "rgba(255, 255, 255, 0.5)",
+                      fontSize: "0.875rem",
+                      textAlign: "center",
+                      padding: "2rem",
+                      background: "rgba(255, 255, 255, 0.03)",
+                      borderRadius: "0.5rem",
+                    }}
+                  >
+                    No hay recreos o almuerzos configurados.
+                    <br />
+                    Haz clic en "+ Agregar Recreo/Almuerzo" para crear uno.
+                  </p>
+                ) : (
+                  <div className="breaks-list">
+                    {config.breaks.map(
+                      (breakItem: BreakConfig, index: number) => {
+                        const availableBlocks = calculateAvailableBlocks(
+                          config.startTime,
+                          config.endTime,
+                          config.blockDuration,
+                        );
+                        const isOutOfRange =
+                          breakItem.afterBlock >= availableBlocks;
+
+                        return (
+                          <div
+                            key={index}
+                            className="break-item"
                             style={
                               isOutOfRange
-                                ? { borderColor: "rgb(239, 68, 68)" }
+                                ? { border: "2px solid rgb(239, 68, 68)" }
                                 : {}
                             }
-                          />
-                          <small
-                            style={{
-                              color: isOutOfRange
-                                ? "rgb(239, 68, 68)"
-                                : "rgba(255, 255, 255, 0.5)",
-                              fontSize: "0.7rem",
-                            }}
                           >
-                            Max: {availableBlocks - 1}
-                          </small>
-                        </div>
+                            <div className="break-item-header">
+                              <span className="break-item-number">
+                                #{index + 1}
+                              </span>
+                              {isOutOfRange && (
+                                <span
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "rgb(239, 68, 68)",
+                                    marginLeft: "0.5rem",
+                                  }}
+                                >
+                                  ⚠️ Fuera de rango
+                                </span>
+                              )}
+                            </div>
+                            <div className="schedule-config-row">
+                              <div className="quick-assign-form-group">
+                                <label>Después del Bloque</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max={availableBlocks - 1}
+                                  value={breakItem.afterBlock}
+                                  onChange={(e) =>
+                                    updateBreak(index, {
+                                      afterBlock: parseInt(e.target.value) || 1,
+                                    })
+                                  }
+                                  style={
+                                    isOutOfRange
+                                      ? { borderColor: "rgb(239, 68, 68)" }
+                                      : {}
+                                  }
+                                />
+                                <small
+                                  style={{
+                                    color: isOutOfRange
+                                      ? "rgb(239, 68, 68)"
+                                      : "rgba(255, 255, 255, 0.5)",
+                                    fontSize: "0.7rem",
+                                  }}
+                                >
+                                  Max: {availableBlocks - 1}
+                                </small>
+                              </div>
 
-                        <div className="quick-assign-form-group">
-                          <label>Duración (min)</label>
-                          <input
-                            type="number"
-                            min="5"
-                            step="5"
-                            value={breakItem.duration}
-                            onChange={(e) =>
-                              updateBreak(index, {
-                                duration: parseInt(e.target.value) || 15,
-                              })
-                            }
-                          />
-                        </div>
+                              <div className="quick-assign-form-group">
+                                <label>Duración (min)</label>
+                                <input
+                                  type="number"
+                                  min="5"
+                                  step="5"
+                                  value={breakItem.duration}
+                                  onChange={(e) =>
+                                    updateBreak(index, {
+                                      duration: parseInt(e.target.value) || 15,
+                                    })
+                                  }
+                                />
+                              </div>
 
-                        <div
-                          className="quick-assign-form-group"
-                          style={{ flex: 2 }}
-                        >
-                          <label>Nombre</label>
-                          <input
-                            type="text"
-                            value={breakItem.name}
-                            onChange={(e) =>
-                              updateBreak(index, { name: e.target.value })
-                            }
-                            placeholder="Ej: Recreo, Almuerzo"
-                          />
-                        </div>
+                              <div
+                                className="quick-assign-form-group"
+                                style={{ flex: 2 }}
+                              >
+                                <label>Nombre</label>
+                                <input
+                                  type="text"
+                                  value={breakItem.name}
+                                  onChange={(e) =>
+                                    updateBreak(index, { name: e.target.value })
+                                  }
+                                  placeholder="Ej: Recreo, Almuerzo"
+                                />
+                              </div>
 
-                        <button
-                          type="button"
-                          onClick={() => removeBreak(index)}
-                          className="break-item-remove"
-                          title="Eliminar recreo"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                              <button
+                                type="button"
+                                onClick={() => removeBreak(index)}
+                                className="break-item-remove"
+                                title="Eliminar recreo"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      },
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Info sobre compatibilidad */}
-          <div
-            style={{
-              padding: "1rem",
-              background: "rgba(251, 191, 36, 0.1)",
-              border: "1px solid rgba(251, 191, 36, 0.3)",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-              color: "rgba(251, 191, 36, 0.9)",
-            }}
-          >
-            ℹ️ <strong>Importante:</strong> Los recreos y almuerzos se aplican a
-            toda la semana. Si necesitas horarios diferentes por día, configura
-            múltiples recreos con diferentes duraciones.
-          </div>
+              {/* Info sobre compatibilidad */}
+              <div
+                style={{
+                  padding: "1rem",
+                  background: "rgba(251, 191, 36, 0.1)",
+                  border: "1px solid rgba(251, 191, 36, 0.3)",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.875rem",
+                  color: "rgba(251, 191, 36, 0.9)",
+                }}
+              >
+                ℹ️ <strong>Importante:</strong> Los recreos y almuerzos se
+                aplican a toda la semana. Si necesitas horarios diferentes por
+                día, configura múltiples recreos con diferentes duraciones.
+              </div>
             </>
           )}
         </div>

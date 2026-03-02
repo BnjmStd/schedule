@@ -1,73 +1,81 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import ExcelJS from 'exceljs';
-import '../../subjects/components/ImportSubjectsModal.css';
+import { useState } from "react";
+import ExcelJS from "exceljs";
+import "../../subjects/components/ImportSubjectsModal.css";
 
 interface ImportTeachersModalProps {
   schoolId: string;
-  onImport: (teachers: Array<{
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    specialization?: string;
-  }>) => void;
+  onImport: (
+    teachers: Array<{
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone?: string;
+      specialization?: string;
+    }>,
+  ) => void;
   onCancel: () => void;
 }
 
-export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeachersModalProps) {
-  const [step, setStep] = useState<'upload' | 'preview'>('upload');
+export function ImportTeachersModal({
+  schoolId,
+  onImport,
+  onCancel,
+}: ImportTeachersModalProps) {
+  const [step, setStep] = useState<"upload" | "preview">("upload");
   const [previewData, setPreviewData] = useState<Array<any>>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const exampleData = [
-    { 
-      Nombre: 'Juan', 
-      Apellido: 'Pérez', 
-      Email: 'juan.perez@colegio.cl', 
-      Teléfono: '+56912345678',
-      Especialización: 'Matemáticas'
+    {
+      Nombre: "Juan",
+      Apellido: "Pérez",
+      Email: "juan.perez@colegio.cl",
+      Teléfono: "+56912345678",
+      Especialización: "Matemáticas",
     },
-    { 
-      Nombre: 'María', 
-      Apellido: 'González', 
-      Email: 'maria.gonzalez@colegio.cl', 
-      Teléfono: '+56987654321',
-      Especialización: 'Lenguaje'
+    {
+      Nombre: "María",
+      Apellido: "González",
+      Email: "maria.gonzalez@colegio.cl",
+      Teléfono: "+56987654321",
+      Especialización: "Lenguaje",
     },
-    { 
-      Nombre: 'Pedro', 
-      Apellido: 'Silva', 
-      Email: 'pedro.silva@colegio.cl', 
-      Teléfono: '+56911223344',
-      Especialización: 'Ciencias'
+    {
+      Nombre: "Pedro",
+      Apellido: "Silva",
+      Email: "pedro.silva@colegio.cl",
+      Teléfono: "+56911223344",
+      Especialización: "Ciencias",
     },
   ];
 
   const downloadTemplate = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Profesores');
+    const worksheet = workbook.addWorksheet("Profesores");
 
     // Añadir columnas
     worksheet.columns = [
-      { header: 'Nombre', key: 'Nombre', width: 15 },
-      { header: 'Apellido', key: 'Apellido', width: 15 },
-      { header: 'Email', key: 'Email', width: 30 },
-      { header: 'Teléfono', key: 'Teléfono', width: 15 },
-      { header: 'Especialización', key: 'Especialización', width: 20 },
+      { header: "Nombre", key: "Nombre", width: 15 },
+      { header: "Apellido", key: "Apellido", width: 15 },
+      { header: "Email", key: "Email", width: 30 },
+      { header: "Teléfono", key: "Teléfono", width: 15 },
+      { header: "Especialización", key: "Especialización", width: 20 },
     ];
 
     // Añadir datos de ejemplo
-    exampleData.forEach(row => worksheet.addRow(row));
+    exampleData.forEach((row) => worksheet.addRow(row));
 
     // Generar y descargar archivo
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'plantilla_profesores.xlsx';
+    a.download = "plantilla_profesores.xlsx";
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -83,7 +91,7 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
 
       const worksheet = workbook.worksheets[0];
       if (!worksheet) {
-        setError('El archivo no contiene hojas');
+        setError("El archivo no contiene hojas");
         return;
       }
 
@@ -94,7 +102,7 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
         if (rowNumber === 1) {
           // Primera fila son los headers
           row.eachCell((cell) => {
-            headers.push(cell.value?.toString() || '');
+            headers.push(cell.value?.toString() || "");
           });
         } else {
           // Resto de filas son datos
@@ -107,43 +115,55 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
       });
 
       if (jsonData.length === 0) {
-        setError('El archivo está vacío');
+        setError("El archivo está vacío");
         return;
       }
 
       // Validar columnas
       const firstRow: any = jsonData[0];
-      const requiredColumns = ['Nombre', 'Apellido', 'Email'];
-      const hasRequiredColumns = requiredColumns.every(col => col in firstRow);
+      const requiredColumns = ["Nombre", "Apellido", "Email"];
+      const hasRequiredColumns = requiredColumns.every(
+        (col) => col in firstRow,
+      );
 
       if (!hasRequiredColumns) {
-        setError(`El archivo debe tener las columnas: ${requiredColumns.join(', ')}`);
+        setError(
+          `El archivo debe tener las columnas: ${requiredColumns.join(", ")}`,
+        );
         return;
       }
 
       setPreviewData(jsonData);
-      setStep('preview');
-      setError('');
+      setStep("preview");
+      setError("");
     } catch (err) {
-      setError('Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.');
+      setError(
+        "Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.",
+      );
     }
   };
 
   const handleImport = () => {
-    const teachers = previewData.map((row: any) => ({
-      firstName: row.Nombre || row.nombre || '',
-      lastName: row.Apellido || row.apellido || '',
-      email: row.Email || row.email || '',
-      phone: row.Teléfono || row.telefono || row.phone || undefined,
-      specialization: row.Especialización || row.especializacion || row.specialization || undefined,
-    })).filter(t => t.firstName && t.lastName && t.email);
+    const teachers = previewData
+      .map((row: any) => ({
+        firstName: row.Nombre || row.nombre || "",
+        lastName: row.Apellido || row.apellido || "",
+        email: row.Email || row.email || "",
+        phone: row.Teléfono || row.telefono || row.phone || undefined,
+        specialization:
+          row.Especialización ||
+          row.especializacion ||
+          row.specialization ||
+          undefined,
+      }))
+      .filter((t) => t.firstName && t.lastName && t.email);
 
     onImport(teachers);
   };
 
   return (
     <div className="import-modal">
-      {step === 'upload' && (
+      {step === "upload" && (
         <>
           <div className="import-header">
             <h3>📥 Importar Profesores desde Excel</h3>
@@ -179,7 +199,8 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
               </table>
             </div>
             <p className="import-note">
-              * Las columnas <strong>Nombre</strong>, <strong>Apellido</strong> y <strong>Email</strong> son obligatorias
+              * Las columnas <strong>Nombre</strong>, <strong>Apellido</strong>{" "}
+              y <strong>Email</strong> son obligatorias
             </p>
           </div>
 
@@ -201,16 +222,12 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleFileUpload}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
             </div>
           </div>
 
-          {error && (
-            <div className="import-error">
-              ⚠️ {error}
-            </div>
-          )}
+          {error && <div className="import-error">⚠️ {error}</div>}
 
           <div className="modal-footer">
             <button type="button" className="btn-cancel" onClick={onCancel}>
@@ -220,7 +237,7 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
         </>
       )}
 
-      {step === 'preview' && (
+      {step === "preview" && (
         <>
           <div className="import-header">
             <h3>👀 Vista Previa</h3>
@@ -248,8 +265,13 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
                     <td>{row.Nombre || row.nombre}</td>
                     <td>{row.Apellido || row.apellido}</td>
                     <td>{row.Email || row.email}</td>
-                    <td>{row.Teléfono || row.telefono || row.phone || '-'}</td>
-                    <td>{row.Especialización || row.especializacion || row.specialization || '-'}</td>
+                    <td>{row.Teléfono || row.telefono || row.phone || "-"}</td>
+                    <td>
+                      {row.Especialización ||
+                        row.especializacion ||
+                        row.specialization ||
+                        "-"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -257,10 +279,18 @@ export function ImportTeachersModal({ schoolId, onImport, onCancel }: ImportTeac
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn-cancel" onClick={() => setStep('upload')}>
+            <button
+              type="button"
+              className="btn-cancel"
+              onClick={() => setStep("upload")}
+            >
               ← Volver
             </button>
-            <button type="button" className="btn-confirm" onClick={handleImport}>
+            <button
+              type="button"
+              className="btn-confirm"
+              onClick={handleImport}
+            >
               ✓ Importar {previewData.length} Profesores
             </button>
           </div>

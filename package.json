@@ -19,7 +19,8 @@
     "db:seed:user": "tsx prisma/seed-user.ts",
     "db:studio": "prisma studio",
     "migrate:postgres": "node migrate-sqlite-to-postgres.mjs",
-    "migrate:setup": "node migrate-db.mjs"
+    "migrate:setup": "node migrate-db.mjs",
+    "format": "prettier --write ."
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -50,6 +51,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
+    "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5"
   }

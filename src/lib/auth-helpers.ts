@@ -34,7 +34,7 @@ export async function getUserSchoolIds(): Promise<string[]> {
  * Verifica si un usuario tiene acceso a un colegio específico
  */
 export async function userHasAccessToSchool(
-  schoolId: string
+  schoolId: string,
 ): Promise<boolean> {
   const session = await getSession();
   if (!session) {
@@ -57,7 +57,7 @@ export async function userHasAccessToSchool(
  * Obtiene el rol del usuario en un colegio específico
  */
 export async function getUserSchoolRole(
-  schoolId: string
+  schoolId: string,
 ): Promise<string | null> {
   const session = await getSession();
   if (!session) {

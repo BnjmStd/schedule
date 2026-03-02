@@ -143,8 +143,8 @@ export function SchoolScheduleConfig({
               {schoolName}
             </p>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="quick-assign-modal-close"
             aria-label="Cerrar modal de configuración"
             title="Cerrar"
@@ -185,7 +185,7 @@ export function SchoolScheduleConfig({
                       <option key={time} value={time}>
                         {time}
                       </option>
-                    )
+                    ),
                   )}
                 </select>
               </div>
@@ -203,7 +203,7 @@ export function SchoolScheduleConfig({
                       <option key={time} value={time}>
                         {time}
                       </option>
-                    )
+                    ),
                   )}
                 </select>
               </div>
@@ -298,7 +298,7 @@ export function SchoolScheduleConfig({
                       (t) =>
                         t >= config.startTime &&
                         t < config.lunchBreak.endTime &&
-                        t < config.endTime
+                        t < config.endTime,
                     ).map((time) => (
                       <option key={time} value={time}>
                         {time}
@@ -323,7 +323,7 @@ export function SchoolScheduleConfig({
                   >
                     {TIME_OPTIONS.filter(
                       (t) =>
-                        t > config.lunchBreak.startTime && t <= config.endTime
+                        t > config.lunchBreak.startTime && t <= config.endTime,
                     ).map((time) => (
                       <option key={time} value={time}>
                         {time}
@@ -499,7 +499,7 @@ export function SchoolScheduleConfig({
                                 (t) =>
                                   t >= config.startTime &&
                                   t < dayConfig.end &&
-                                  t < config.endTime
+                                  t < config.endTime,
                               ).map((time) => (
                                 <option key={time} value={time}>
                                   {time}
@@ -527,7 +527,7 @@ export function SchoolScheduleConfig({
                             >
                               {TIME_OPTIONS.filter(
                                 (t) =>
-                                  t > dayConfig.start && t <= config.endTime
+                                  t > dayConfig.start && t <= config.endTime,
                               ).map((time) => (
                                 <option key={time} value={time}>
                                   {time}

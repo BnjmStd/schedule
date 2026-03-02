@@ -17,7 +17,7 @@ export function AddCourseButton({ onCourseCreated }: AddCourseButtonProps) {
   const handleClick = () => {
     openModal(
       <CreateCourseForm onSuccess={onCourseCreated} />,
-      "🎓 Crear Nuevo Curso"
+      "🎓 Crear Nuevo Curso",
     );
   };
 

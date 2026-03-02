@@ -10,10 +10,7 @@ export async function getTeacherAvailability(teacherId: string) {
       teacherId,
       academicYear: year,
     },
-    orderBy: [
-      { dayOfWeek: "asc" },
-      { startTime: "asc" },
-    ],
+    orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
   });
 
   return availability;

@@ -88,7 +88,7 @@ export async function createSchool(data: CreateSchoolInput): Promise<School> {
 }
 
 export async function updateSchool(
-  data: UpdateSchoolInput
+  data: UpdateSchoolInput,
 ): Promise<School | null> {
   const { id, ...updateData } = data;
 
@@ -235,7 +235,7 @@ export async function updateSchoolScheduleConfig(
       string,
       { enabled: boolean; start: string; end: string }
     >; // NUEVO
-  }
+  },
 ) {
   const hasAccess = await userHasAccessToSchool(schoolId);
   if (!hasAccess) {
@@ -275,7 +275,7 @@ export async function updateSchoolScheduleConfig(
  * Obtener niveles académicos activos de un colegio
  */
 export async function getSchoolActiveAcademicLevels(
-  schoolId: string
+  schoolId: string,
 ): Promise<string> {
   const hasAccess = await userHasAccessToSchool(schoolId);
   if (!hasAccess) {
@@ -295,7 +295,7 @@ export async function getSchoolActiveAcademicLevels(
  */
 export async function updateSchoolActiveAcademicLevels(
   schoolId: string,
-  activeLevels: string[] // ["BASIC", "MIDDLE"] o ["BASIC"] o ["MIDDLE"]
+  activeLevels: string[], // ["BASIC", "MIDDLE"] o ["BASIC"] o ["MIDDLE"]
 ): Promise<void> {
   const hasAccess = await userHasAccessToSchool(schoolId);
   if (!hasAccess) {
@@ -309,7 +309,7 @@ export async function updateSchoolActiveAcademicLevels(
 
   // Validar que solo sean BASIC o MIDDLE
   const validLevels = activeLevels.every((level) =>
-    ["BASIC", "MIDDLE"].includes(level)
+    ["BASIC", "MIDDLE"].includes(level),
   );
   if (!validLevels) {
     throw new Error("Niveles académicos inválidos");

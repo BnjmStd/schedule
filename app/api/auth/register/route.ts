@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     if (existingUser) {
       return NextResponse.json(
         { error: "Este email ya está registrado" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -55,20 +55,20 @@ export async function POST(request: Request) {
         message: "Usuario creado exitosamente",
         user,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json(
         { error: err.issues[0]?.message || "Error de validación" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.error("Error en registro:", err);
     return NextResponse.json(
       { error: "Error al crear la cuenta" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

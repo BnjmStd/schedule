@@ -82,8 +82,8 @@ export async function createSubject(data: {
   if (!schoolIds.includes(data.schoolId)) {
     throw new Error(
       `No tienes acceso a esta escuela. Tienes acceso a: ${schoolIds.join(
-        ", "
-      )}`
+        ", ",
+      )}`,
     );
   }
 
@@ -97,7 +97,7 @@ export async function createSubject(data: {
 
   if (existingSubject) {
     throw new Error(
-      `Ya existe una asignatura con el código "${data.code}" en esta escuela`
+      `Ya existe una asignatura con el código "${data.code}" en esta escuela`,
     );
   }
 
@@ -116,7 +116,7 @@ export async function updateSubject(
     code?: string;
     description?: string;
     color?: string;
-  }
+  },
 ) {
   const schoolIds = await getUserSchoolIds();
 
@@ -148,7 +148,7 @@ export async function updateSubject(
 
     if (existingSubject) {
       throw new Error(
-        `Ya existe otra asignatura con el código "${data.code}" en esta escuela`
+        `Ya existe otra asignatura con el código "${data.code}" en esta escuela`,
       );
     }
   }

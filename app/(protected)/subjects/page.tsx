@@ -12,7 +12,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { Input, Select } from "@/components/ui";
 import { ImportSubjectsModal } from "@/modules/subjects/components/ImportSubjectsModal";
 import type { School } from "@/types";
-import "../../subjects.css"; 
+import "../../subjects.css";
 
 // Tipo para subject con relaciones incluidas
 type SubjectWithRelations = {
@@ -174,7 +174,7 @@ export default function SubjectsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [creationMode, setCreationMode] = useState<"template" | "custom">(
-    "template"
+    "template",
   );
   const [selectedTemplate, setSelectedTemplate] = useState<
     (typeof SUBJECT_TEMPLATES)[0]["subjects"][0] | null
@@ -186,10 +186,13 @@ export default function SubjectsPage() {
 
   // Accordion state - todas las categorías abiertas por defecto
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
-    SUBJECT_TEMPLATES.reduce((acc, cat) => {
-      acc[cat.category] = true;
-      return acc;
-    }, {} as Record<string, boolean>)
+    SUBJECT_TEMPLATES.reduce(
+      (acc, cat) => {
+        acc[cat.category] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    ),
   );
 
   // Form state
@@ -248,12 +251,12 @@ export default function SubjectsPage() {
         }}
         onCancel={closeModal}
       />,
-      "⚠️ Confirmar eliminación"
+      "⚠️ Confirmar eliminación",
     );
   };
 
   const handleTemplateSelect = (
-    template: (typeof SUBJECT_TEMPLATES)[0]["subjects"][0]
+    template: (typeof SUBJECT_TEMPLATES)[0]["subjects"][0],
   ) => {
     setSelectedTemplate(template);
     setFormData((prev) => ({
@@ -269,7 +272,8 @@ export default function SubjectsPage() {
   const isCodeTaken = (code: string) => {
     if (!formData.schoolId) return false;
     return subjects.some(
-      subject => subject.schoolId === formData.schoolId && subject.code === code
+      (subject) =>
+        subject.schoolId === formData.schoolId && subject.code === code,
     );
   };
 
@@ -286,7 +290,7 @@ export default function SubjectsPage() {
     });
     console.log(
       "Available schools:",
-      schools.map((s) => ({ id: s.id, name: s.name }))
+      schools.map((s) => ({ id: s.id, name: s.name })),
     );
 
     try {
@@ -321,7 +325,11 @@ export default function SubjectsPage() {
       }, 1500);
     } catch (error) {
       console.error("Error al crear asignatura:", error);
-      setError(error instanceof Error ? error.message : "Error al crear la asignatura. Por favor intenta nuevamente.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Error al crear la asignatura. Por favor intenta nuevamente.",
+      );
       setIsLoading(false);
     }
   };
@@ -385,7 +393,7 @@ export default function SubjectsPage() {
                   Entendido
                 </button>
               </div>,
-              "✨ Éxito"
+              "✨ Éxito",
             );
           } catch (error) {
             console.error("Error al crear grupo de asignaturas:", error);
@@ -396,7 +404,7 @@ export default function SubjectsPage() {
         }}
         onCancel={closeModal}
       />,
-      "📚 Confirmar creación"
+      "📚 Confirmar creación",
     );
   };
 
@@ -407,7 +415,7 @@ export default function SubjectsPage() {
       code: string;
       description?: string;
       color?: string;
-    }>
+    }>,
   ) => {
     if (!formData.schoolId) {
       alert("Por favor selecciona un colegio primero");
@@ -466,7 +474,7 @@ export default function SubjectsPage() {
             Entendido
           </button>
         </div>,
-        "📥 Resultado de importación"
+        "📥 Resultado de importación",
       );
     } catch (error) {
       console.error("Error en la importación:", error);
@@ -495,7 +503,7 @@ export default function SubjectsPage() {
                 onClick={() => {
                   if (!formData.schoolId && schools.length > 1) {
                     alert(
-                      "Por favor, selecciona un colegio primero en el formulario de abajo"
+                      "Por favor, selecciona un colegio primero en el formulario de abajo",
                     );
                     setShowCreateForm(true);
                     return;
@@ -708,7 +716,9 @@ export default function SubjectsPage() {
                                   {template.description}
                                 </p>
                                 {isTaken && (
-                                  <p className="template-hint">Puedes modificar el código abajo</p>
+                                  <p className="template-hint">
+                                    Puedes modificar el código abajo
+                                  </p>
                                 )}
                               </button>
                             );

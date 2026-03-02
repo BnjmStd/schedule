@@ -31,14 +31,14 @@ async function main() {
   }
 
   console.log(
-    `⚠️  Se encontraron ${orphanSchools.length} escuelas sin usuarios:`
+    `⚠️  Se encontraron ${orphanSchools.length} escuelas sin usuarios:`,
   );
   orphanSchools.forEach((school) => {
     console.log(`   - ${school.name} (ID: ${school.id})`);
   });
 
   console.log(
-    "\n🗑️  Eliminando escuelas huérfanas y todos sus datos relacionados..."
+    "\n🗑️  Eliminando escuelas huérfanas y todos sus datos relacionados...",
   );
 
   // Eliminar escuelas huérfanas (esto eliminará en cascada todos los datos relacionados)
@@ -51,7 +51,7 @@ async function main() {
   });
 
   console.log(
-    `✅ Se eliminaron ${deleteResult.count} escuelas y todos sus datos relacionados.`
+    `✅ Se eliminaron ${deleteResult.count} escuelas y todos sus datos relacionados.`,
   );
   console.log("\nDatos eliminados incluyen:");
   console.log("   - Profesores de estas escuelas");

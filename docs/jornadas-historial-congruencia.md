@@ -3,27 +3,33 @@
 ## 🎯 Problemas Resueltos
 
 ### ❌ Problema 1: Sin Historial de Cambios
+
 **Antes**: Cuando se modificaba una jornada, no había registro del cambio.
 
 **Ahora**: Sistema completo de historial con:
+
 - ✅ Nuevo modelo `ScheduleLevelConfigHistory`
 - ✅ Registro automático de cada cambio
 - ✅ Información de quién y cuándo cambió
 - ✅ Razón del cambio (opcional)
 
 ### ❌ Problema 2: Congruencia Débil Curso-Profesor
+
 **Antes**: Un profesor podía tener cursos con jornadas incompatibles sin advertencia.
 
 **Ahora**: Sistema de validación que:
+
 - ✅ Detecta profesores con múltiples niveles académicos
 - ✅ Verifica compatibilidad de jornadas
 - ✅ Genera reporte de conflictos
 - ✅ Función específica `validateScheduleCongruency()`
 
 ### ❌ Problema 3: Schedules Obsoletos Sin Tracking
+
 **Antes**: Se marcaban como obsoletos pero sin contexto.
 
 **Ahora**:
+
 - ✅ Campo `configSnapshot` guarda la config original
 - ✅ Campo `isDeprecated` marca obsoletos
 - ✅ Función para ver compatibilidad: `getScheduleCompatibilityInfo()`
@@ -32,19 +38,20 @@
 ## 📊 Nuevo Modelo de Datos
 
 ### ScheduleLevelConfigHistory
+
 ```prisma
 model ScheduleLevelConfigHistory {
   id            String   @id @default(cuid())
   configId      String   // Relación con la config actual
   schoolId      String
   academicLevel String
-  
+
   // Configuración histórica
   startTime     String
   endTime       String
   blockDuration Int
   breaks        String // JSON array
-  
+
   // Metadata del cambio
   changedBy     String? // userId
   changeReason  String? // "Cambio de horario verano"
@@ -55,6 +62,7 @@ model ScheduleLevelConfigHistory {
 ## 🔧 Nuevas Funciones
 
 ### 1. Guardar Historial Automáticamente
+
 ```typescript
 // En saveScheduleConfigForLevel
 if (previousConfig && hasCriticalChanges) {
@@ -75,6 +83,7 @@ if (previousConfig && hasCriticalChanges) {
 ```
 
 ### 2. Obtener Historial
+
 ```typescript
 const history = await getScheduleConfigHistory(
   schoolId,
@@ -98,6 +107,7 @@ const history = await getScheduleConfigHistory(
 ```
 
 ### 3. Validar Congruencia
+
 ```typescript
 const validation = await validateScheduleCongruency(schoolId);
 
@@ -126,17 +136,20 @@ const validation = await validateScheduleCongruency(schoolId);
 ## 🧪 Test de Congruencia
 
 ### Ejecutar Test
+
 ```bash
 npm run test:congruency
 ```
 
 ### Qué Verifica
+
 1. ✅ **Configuraciones de jornada**: Lista todas las configs del colegio
 2. ✅ **Historial de cambios**: Muestra últimos 5 cambios
 3. ✅ **Congruencia curso-profesor**: Detecta conflictos
 4. ✅ **Schedules obsoletos**: Cuenta cuántos necesitan actualización
 
 ### Ejemplo de Output
+
 ```
 ╔═══════════════════════════════════════════════════╗
 ║  Test: Congruencia de Jornadas Curso-Profesor    ║
@@ -193,6 +206,7 @@ Conflictos encontrados: 1
 ## 🔄 Flujo de Trabajo
 
 ### 1. Usuario Modifica Jornada
+
 ```typescript
 await saveScheduleConfigForLevel(
   {
@@ -208,12 +222,14 @@ await saveScheduleConfigForLevel(
 ```
 
 ### 2. Sistema Automáticamente
+
 - ✅ Guarda config anterior en `ScheduleLevelConfigHistory`
 - ✅ Marca schedules afectados como `isDeprecated`
 - ✅ Registra quién hizo el cambio
 - ✅ Log en consola del cambio
 
 ### 3. Validación de Congruencia
+
 ```typescript
 // Ejecutar periódicamente o antes de generar horarios
 const validation = await validateScheduleCongruency(schoolId);
@@ -221,7 +237,7 @@ const validation = await validateScheduleCongruency(schoolId);
 if (!validation.isValid) {
   // Mostrar advertencia al usuario
   console.warn(`⚠️  ${validation.issuesCount} conflictos encontrados`);
-  validation.issues.forEach(issue => {
+  validation.issues.forEach((issue) => {
     console.log(`  - ${issue.entityName}: ${issue.issue}`);
   });
 }
@@ -230,16 +246,19 @@ if (!validation.isValid) {
 ## 📈 Mejoras Implementadas
 
 ### En `schedule-config.ts`
+
 - ✅ `getScheduleConfigHistory()` - Ver historial
 - ✅ `validateScheduleCongruency()` - Validar conflictos
 - ✅ `saveScheduleConfigForLevel()` - Guarda historial automáticamente
 
 ### En Base de Datos
+
 - ✅ Nueva tabla `schedule_level_config_history`
 - ✅ Relación uno-a-muchos con `schedule_level_configs`
 - ✅ Índices optimizados para consultas
 
 ### En Tests
+
 - ✅ `test/congruency-validation.test.ts` - Test completo
 - ✅ Verifica configuraciones, historial y conflictos
 - ✅ Output visual con colores
@@ -247,17 +266,20 @@ if (!validation.isValid) {
 ## 🚀 Uso en Producción
 
 ### Dashboard de Admin
+
 ```tsx
 // Mostrar historial de cambios
-const history = await getScheduleConfigHistory(schoolId, 'BASIC', 5);
+const history = await getScheduleConfigHistory(schoolId, "BASIC", 5);
 
 return (
   <div>
     <h3>Últimos Cambios</h3>
-    {history.map(h => (
+    {history.map((h) => (
       <div key={h.id}>
         <span>{h.changedAt.toLocaleDateString()}</span>
-        <span>{h.startTime} - {h.endTime}</span>
+        <span>
+          {h.startTime} - {h.endTime}
+        </span>
         <span>{h.changeReason}</span>
       </div>
     ))}
@@ -266,6 +288,7 @@ return (
 ```
 
 ### Validación Pre-Generación
+
 ```typescript
 // Antes de generar horarios automáticos
 const validation = await validateScheduleCongruency(schoolId);
@@ -273,8 +296,8 @@ const validation = await validateScheduleCongruency(schoolId);
 if (!validation.isValid) {
   return {
     success: false,
-    error: 'No se puede generar horarios con conflictos de jornada',
-    details: validation.issues
+    error: "No se puede generar horarios con conflictos de jornada",
+    details: validation.issues,
   };
 }
 

@@ -5,7 +5,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { saveSchedule, getSchedulesForCourse, getSchedulesForTeacher } from "@/modules/schedules/actions";
+import {
+  saveSchedule,
+  getSchedulesForCourse,
+  getSchedulesForTeacher,
+} from "@/modules/schedules/actions";
 import { getScheduleConfigForCourse } from "@/modules/schools/actions/schedule-config";
 import { getSubjects } from "@/modules/subjects/actions";
 import { getTeachers, isTeacherAvailable } from "@/modules/teachers/actions";
@@ -16,14 +20,18 @@ import { generateTimeSlotsWithBreaks } from "@/lib/utils/time-slots";
 import type { ScheduleLevelConfig, TimeSlot } from "@/types/schedule-config";
 
 // Helper para verificar si un horario es recreo (nuevo sistema)
-function isLunchBreak(time: string, day: string, config: ScheduleLevelConfig | null): boolean {
+function isLunchBreak(
+  time: string,
+  day: string,
+  config: ScheduleLevelConfig | null,
+): boolean {
   if (!config) return false;
-  
+
   // Generar slots y verificar si este time corresponde a un break
   const slots = generateTimeSlotsWithBreaks(config);
-  const slot = slots.find(s => s.time === time);
-  
-  return slot?.type === 'break';
+  const slot = slots.find((s) => s.time === time);
+
+  return slot?.type === "break";
 }
 
 // Tipo para bloques de horario
@@ -82,7 +90,7 @@ export function ScheduleEditor({
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastSavedBlocksRef = useRef<string>("");
   const [selectedBlock, setSelectedBlock] = useState<ScheduleBlock | null>(
-    null
+    null,
   );
   const [isAddingBlock, setIsAddingBlock] = useState(false);
 
@@ -93,7 +101,8 @@ export function ScheduleEditor({
   const [loadingData, setLoadingData] = useState(true);
 
   // Estados para configuración de horario
-  const [scheduleConfig, setScheduleConfig] = useState<ScheduleLevelConfig | null>(null);
+  const [scheduleConfig, setScheduleConfig] =
+    useState<ScheduleLevelConfig | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
   // Estados para drag and drop
@@ -132,50 +141,72 @@ export function ScheduleEditor({
 
         // Cargar configuración del nivel académico del curso/profesor
         let config: ScheduleLevelConfig;
-        if (entityType === 'course') {
+        if (entityType === "course") {
           config = await getScheduleConfigForCourse(entityId);
         } else {
           // Para profesores, usar la configuración por defecto (o podríamos pedir el nivel)
           // Por ahora asumimos BASIC, pero esto se podría mejorar
           config = await getScheduleConfigForCourse(entityId);
         }
-        
-        console.log('[Editor] ⚙️ Config del nivel académico:', config);
+
+        console.log("[Editor] ⚙️ Config del nivel académico:", config);
         const generatedSlots = generateTimeSlotsWithBreaks(config);
-        console.log('[Editor] 🕐 TimeSlots generados (con recreos):', generatedSlots);
+        console.log(
+          "[Editor] 🕐 TimeSlots generados (con recreos):",
+          generatedSlots,
+        );
         setScheduleConfig(config);
         setTimeSlots(generatedSlots);
 
         // Cargar bloques existentes según el tipo
-        if (entityType === 'course') {
-          console.log('[Editor] 🔄 Cargando schedules para curso:', entityId);
+        if (entityType === "course") {
+          console.log("[Editor] 🔄 Cargando schedules para curso:", entityId);
           const schedules = await getSchedulesForCourse(entityId);
-          console.log('[Editor] 📦 Schedules recibidos:', schedules.length);
+          console.log("[Editor] 📦 Schedules recibidos:", schedules.length);
           if (schedules.length > 0) {
             const schedule = schedules[0];
-            console.log('[Editor] 📋 Schedule ID:', schedule.id, 'Total Bloques RAW:', schedule.blocks.length);
-            console.log('[Editor] 🔍 Bloques RAW del servidor:', schedule.blocks);
+            console.log(
+              "[Editor] 📋 Schedule ID:",
+              schedule.id,
+              "Total Bloques RAW:",
+              schedule.blocks.length,
+            );
+            console.log(
+              "[Editor] 🔍 Bloques RAW del servidor:",
+              schedule.blocks,
+            );
             const transformedBlocks = schedule.blocks.map((block: any) => ({
               id: block.id,
               day: block.dayOfWeek,
               startTime: block.startTime,
               endTime: block.endTime,
               subject: block.subject.name,
-              teacher: block.teacher ? `${block.teacher.firstName} ${block.teacher.lastName}` : '',
+              teacher: block.teacher
+                ? `${block.teacher.firstName} ${block.teacher.lastName}`
+                : "",
               teacherId: block.teacher?.id,
               color: block.subject.color || PREDEFINED_COLORS[0],
             }));
-            console.log('[Editor] ✨ Bloques transformados:', transformedBlocks.length);
+            console.log(
+              "[Editor] ✨ Bloques transformados:",
+              transformedBlocks.length,
+            );
             transformedBlocks.forEach((b, idx) => {
-              console.log(`[Editor] Bloque ${idx + 1}: ${b.day} ${b.startTime} ${b.subject} - ${b.teacher || 'Sin profesor'}`);
+              console.log(
+                `[Editor] Bloque ${idx + 1}: ${b.day} ${b.startTime} ${b.subject} - ${b.teacher || "Sin profesor"}`,
+              );
             });
             setBlocks(transformedBlocks);
-            console.log('[Editor] ✅ Estado blocks actualizado con', transformedBlocks.length, 'bloques');
+            console.log(
+              "[Editor] ✅ Estado blocks actualizado con",
+              transformedBlocks.length,
+              "bloques",
+            );
             lastSavedBlocksRef.current = JSON.stringify(transformedBlocks);
           } else {
-            console.log('[Editor] ⚠️ No se encontraron schedules');
+            console.log("[Editor] ⚠️ No se encontraron schedules");
           }
-        } else if (entityType === 'teacher') {
+        } else if (entityType === "teacher") {
           const teacherBlocks = await getSchedulesForTeacher(entityId);
           const transformedBlocks = teacherBlocks.map((block: any) => ({
             id: block.id,
@@ -183,7 +214,7 @@ export function ScheduleEditor({
             startTime: block.startTime,
             endTime: block.endTime,
             subject: block.subject.name,
-            course: block.course?.name || '',
+            course: block.course?.name || "",
             courseId: block.course?.id,
             teacherId: block.teacherId,
             color: block.subject.color || PREDEFINED_COLORS[0],
@@ -229,7 +260,7 @@ export function ScheduleEditor({
         }, 3000);
       }
     },
-    [entityId, entityType]
+    [entityId, entityType],
   );
 
   // Effect para guardado automático con debounce
@@ -265,8 +296,9 @@ export function ScheduleEditor({
       const updatedBlocks = await Promise.all(
         blocks.map(async (block) => {
           // Validar si hay un profesor asignado (en ambos tipos)
-          const teacherId = entityType === 'course' ? block.teacherId : entityId;
-          
+          const teacherId =
+            entityType === "course" ? block.teacherId : entityId;
+
           if (!teacherId) {
             return { ...block, hasConflict: false };
           }
@@ -275,16 +307,16 @@ export function ScheduleEditor({
             teacherId,
             block.day,
             block.startTime,
-            block.endTime
+            block.endTime,
           );
 
           return { ...block, hasConflict: !available };
-        })
+        }),
       );
 
       // Solo actualizar si hay cambios en los conflictos
-      const hasChanges = updatedBlocks.some((updated, index) => 
-        updated.hasConflict !== blocks[index].hasConflict
+      const hasChanges = updatedBlocks.some(
+        (updated, index) => updated.hasConflict !== blocks[index].hasConflict,
       );
 
       if (hasChanges) {
@@ -317,7 +349,7 @@ export function ScheduleEditor({
     e: React.DragEvent,
     day: string,
     time: string,
-    timeIndex: number
+    timeIndex: number,
   ) => {
     e.preventDefault();
     setDropTarget(null);
@@ -325,7 +357,7 @@ export function ScheduleEditor({
     if (!draggedSubject) return;
 
     // Buscar el slot correspondiente
-    const blockSlots = timeSlots.filter(s => s.type === 'block');
+    const blockSlots = timeSlots.filter((s) => s.type === "block");
     const currentSlot = blockSlots[timeIndex];
 
     // Crear bloque pendiente
@@ -341,7 +373,10 @@ export function ScheduleEditor({
     setDraggedSubject(null);
   };
 
-  const handleQuickAssignConfirm = async (detailId: string, detailName: string) => {
+  const handleQuickAssignConfirm = async (
+    detailId: string,
+    detailName: string,
+  ) => {
     if (!pendingBlock) return;
 
     // Validar disponibilidad del profesor si estamos editando un curso
@@ -350,12 +385,12 @@ export function ScheduleEditor({
         detailId,
         pendingBlock.day,
         pendingBlock.startTime,
-        pendingBlock.endTime
+        pendingBlock.endTime,
       );
 
       if (!available) {
         const confirm = window.confirm(
-          `⚠️ El profesor ${detailName} no está disponible en este horario.\n\n¿Deseas asignarlo de todas formas?`
+          `⚠️ El profesor ${detailName} no está disponible en este horario.\n\n¿Deseas asignarlo de todas formas?`,
         );
         if (!confirm) {
           return;
@@ -410,12 +445,12 @@ export function ScheduleEditor({
         detailId,
         newBlock.day,
         newBlock.startTime,
-        newBlock.endTime
+        newBlock.endTime,
       );
 
       if (!available) {
         const confirm = window.confirm(
-          `⚠️ El profesor ${detailName} no está disponible en este horario.\n\n¿Deseas asignarlo de todas formas?`
+          `⚠️ El profesor ${detailName} no está disponible en este horario.\n\n¿Deseas asignarlo de todas formas?`,
         );
         if (!confirm) {
           return;
@@ -458,9 +493,14 @@ export function ScheduleEditor({
   };
 
   const getBlocksForSlot = (day: string, time: string) => {
-    const filtered = blocks.filter((b) => b.day === day && b.startTime === time);
+    const filtered = blocks.filter(
+      (b) => b.day === day && b.startTime === time,
+    );
     if (filtered.length > 0) {
-      console.log(`[getBlocksForSlot] 🎯 Encontrados ${filtered.length} bloques para ${day} ${time}:`, filtered.map(b => b.subject));
+      console.log(
+        `[getBlocksForSlot] 🎯 Encontrados ${filtered.length} bloques para ${day} ${time}:`,
+        filtered.map((b) => b.subject),
+      );
     }
     return filtered;
   };
@@ -522,30 +562,39 @@ export function ScheduleEditor({
 
         <div className="schedule-editor" style={{ flex: 1 }}>
           {/* Banner de advertencia para profesores con conflictos */}
-          {entityType === 'teacher' && blocks.some(b => b.hasConflict) && (
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1))',
-              border: '1px solid rgba(255, 193, 7, 0.3)',
-              borderRadius: '0.75rem',
-              padding: '1rem',
-              margin: '0 0 1rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem'
-            }}>
-              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+          {entityType === "teacher" && blocks.some((b) => b.hasConflict) && (
+            <div
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1))",
+                border: "1px solid rgba(255, 193, 7, 0.3)",
+                borderRadius: "0.75rem",
+                padding: "1rem",
+                margin: "0 0 1rem 0",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+              }}
+            >
+              <span style={{ fontSize: "1.5rem" }}>⚠️</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+                <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>
                   Tienes bloques fuera de tu disponibilidad
                 </div>
-                <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                  Los bloques marcados con ⚠️ están fuera de tu horario de disponibilidad. 
-                  Ve a tu perfil para actualizar tu disponibilidad.
+                <div
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.7)",
+                  }}
+                >
+                  Los bloques marcados con ⚠️ están fuera de tu horario de
+                  disponibilidad. Ve a tu perfil para actualizar tu
+                  disponibilidad.
                 </div>
               </div>
             </div>
           )}
-          
+
           {/* Toolbar */}
           <div className="schedule-editor-toolbar">
             <button
@@ -595,77 +644,94 @@ export function ScheduleEditor({
 
               {/* Grid cells */}
               <div className="schedule-editor-grid-body">
-                {timeSlots.filter(slot => slot.type === 'block').map((slot, index) => {
-                  const time = slot.time;
-                  const endTime = slot.endTime;
-                  
-                  return (<div key={time} className="schedule-editor-grid-row">
-                    <div className="schedule-editor-time-cell">
-                      {time} - {endTime}
-                    </div>
-                    {DAYS.map((day) => {
-                      const isLunch = isLunchBreak(time, day.key, scheduleConfig);
-                      const cellBlocks = getBlocksForSlot(day.key, time);
-                      const isDropTarget =
-                        dropTarget?.day === day.key &&
-                        dropTarget?.time === time;
+                {timeSlots
+                  .filter((slot) => slot.type === "block")
+                  .map((slot, index) => {
+                    const time = slot.time;
+                    const endTime = slot.endTime;
 
-                      return (
-                        <div
-                          key={`${day.key}-${time}`}
-                          className={`schedule-editor-cell ${
-                            isLunch ? "lunch-break" : ""
-                          } ${isDropTarget ? "drop-hover" : ""} ${draggedSubject ? "drop-active" : ""}`}
-                          onDragOver={(e) => !isLunch && handleDragOver(e, day.key, time)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => !isLunch && handleDrop(e, day.key, time, index)}
-                          onClick={() => {
-                            if (!isLunch && cellBlocks.length === 0) {
-                              setNewBlock({
-                                ...newBlock,
-                                day: day.key,
-                                startTime: time,
-                                endTime: endTime,
-                              });
-                              setIsAddingBlock(true);
-                            }
-                          }}
-                        >
-                          {cellBlocks.map((block) => {
-                            const conflictMessage = entityType === 'course' 
-                              ? `⚠️ El profesor ${block.teacher} no está disponible en este horario`
-                              : `⚠️ No tienes disponibilidad marcada en este horario. Ve a tu perfil para configurarla.`;
-                            
-                            return (
-                            <div
-                              key={block.id}
-                              className={`schedule-editor-block ${block.hasConflict ? 'has-conflict' : ''}`}
-                              style={{ backgroundColor: block.color }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedBlock(block);
-                              }}
-                              title={block.hasConflict ? conflictMessage : ''}
-                            >
-                              {block.hasConflict && (
-                                <div className="schedule-editor-block-warning">⚠️</div>
-                              )}
-                              <div className="schedule-editor-block-subject">
-                                {block.subject}
-                              </div>
-                              <div className="schedule-editor-block-detail">
-                                {entityType === "course"
-                                  ? block.teacher
-                                  : block.course}
-                              </div>
-                            </div>
-                            );
-                          })}
+                    return (
+                      <div key={time} className="schedule-editor-grid-row">
+                        <div className="schedule-editor-time-cell">
+                          {time} - {endTime}
                         </div>
-                      );
-                    })}
-                  </div>);
-                })}
+                        {DAYS.map((day) => {
+                          const isLunch = isLunchBreak(
+                            time,
+                            day.key,
+                            scheduleConfig,
+                          );
+                          const cellBlocks = getBlocksForSlot(day.key, time);
+                          const isDropTarget =
+                            dropTarget?.day === day.key &&
+                            dropTarget?.time === time;
+
+                          return (
+                            <div
+                              key={`${day.key}-${time}`}
+                              className={`schedule-editor-cell ${
+                                isLunch ? "lunch-break" : ""
+                              } ${isDropTarget ? "drop-hover" : ""} ${draggedSubject ? "drop-active" : ""}`}
+                              onDragOver={(e) =>
+                                !isLunch && handleDragOver(e, day.key, time)
+                              }
+                              onDragLeave={handleDragLeave}
+                              onDrop={(e) =>
+                                !isLunch && handleDrop(e, day.key, time, index)
+                              }
+                              onClick={() => {
+                                if (!isLunch && cellBlocks.length === 0) {
+                                  setNewBlock({
+                                    ...newBlock,
+                                    day: day.key,
+                                    startTime: time,
+                                    endTime: endTime,
+                                  });
+                                  setIsAddingBlock(true);
+                                }
+                              }}
+                            >
+                              {cellBlocks.map((block) => {
+                                const conflictMessage =
+                                  entityType === "course"
+                                    ? `⚠️ El profesor ${block.teacher} no está disponible en este horario`
+                                    : `⚠️ No tienes disponibilidad marcada en este horario. Ve a tu perfil para configurarla.`;
+
+                                return (
+                                  <div
+                                    key={block.id}
+                                    className={`schedule-editor-block ${block.hasConflict ? "has-conflict" : ""}`}
+                                    style={{ backgroundColor: block.color }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedBlock(block);
+                                    }}
+                                    title={
+                                      block.hasConflict ? conflictMessage : ""
+                                    }
+                                  >
+                                    {block.hasConflict && (
+                                      <div className="schedule-editor-block-warning">
+                                        ⚠️
+                                      </div>
+                                    )}
+                                    <div className="schedule-editor-block-subject">
+                                      {block.subject}
+                                    </div>
+                                    <div className="schedule-editor-block-detail">
+                                      {entityType === "course"
+                                        ? block.teacher
+                                        : block.course}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -717,11 +783,13 @@ export function ScheduleEditor({
                         setNewBlock({ ...newBlock, startTime: e.target.value })
                       }
                     >
-                      {timeSlots.filter(s => s.type === 'block').map((slot) => (
-                        <option key={slot.time} value={slot.time}>
-                          {slot.time}
-                        </option>
-                      ))}
+                      {timeSlots
+                        .filter((s) => s.type === "block")
+                        .map((slot) => (
+                          <option key={slot.time} value={slot.time}>
+                            {slot.time}
+                          </option>
+                        ))}
                     </select>
                   </div>
 
@@ -733,11 +801,13 @@ export function ScheduleEditor({
                         setNewBlock({ ...newBlock, endTime: e.target.value })
                       }
                     >
-                      {timeSlots.filter(s => s.type === 'block').map((slot) => (
-                        <option key={slot.endTime} value={slot.endTime}>
-                          {slot.endTime}
-                        </option>
-                      ))}
+                      {timeSlots
+                        .filter((s) => s.type === "block")
+                        .map((slot) => (
+                          <option key={slot.endTime} value={slot.endTime}>
+                            {slot.endTime}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 </div>
@@ -767,7 +837,7 @@ export function ScheduleEditor({
                       value={newBlock.subjectId}
                       onChange={(e) => {
                         const selectedSubject = subjects.find(
-                          (s) => s.id === e.target.value
+                          (s) => s.id === e.target.value,
                         );
                         setNewBlock({
                           ...newBlock,
@@ -816,7 +886,7 @@ export function ScheduleEditor({
                         value={newBlock.detailId}
                         onChange={(e) => {
                           const selectedTeacher = teachers.find(
-                            (t) => t.id === e.target.value
+                            (t) => t.id === e.target.value,
                           );
                           setNewBlock({
                             ...newBlock,
@@ -851,7 +921,7 @@ export function ScheduleEditor({
                       value={newBlock.detailId}
                       onChange={(e) => {
                         const selectedCourse = courses.find(
-                          (c) => c.id === e.target.value
+                          (c) => c.id === e.target.value,
                         );
                         setNewBlock({
                           ...newBlock,

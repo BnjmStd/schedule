@@ -74,7 +74,7 @@ export function Button({
         "focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2",
         variantStyles[variant],
         sizeStyles[size],
-        className
+        className,
       )}
       disabled={disabled || isLoading}
       {...props}

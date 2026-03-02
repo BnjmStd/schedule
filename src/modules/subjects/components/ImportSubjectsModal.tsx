@@ -12,7 +12,7 @@ interface ImportSubjectsModalProps {
       code: string;
       description?: string;
       color?: string;
-    }>
+    }>,
   ) => void;
   onCancel: () => void;
 }
@@ -118,12 +118,12 @@ export function ImportSubjectsModal({
       const firstRow: any = jsonData[0];
       const requiredColumns = ["Nombre", "Código"];
       const hasRequiredColumns = requiredColumns.every(
-        (col) => col in firstRow
+        (col) => col in firstRow,
       );
 
       if (!hasRequiredColumns) {
         setError(
-          `El archivo debe tener las columnas: ${requiredColumns.join(", ")}`
+          `El archivo debe tener las columnas: ${requiredColumns.join(", ")}`,
         );
         return;
       }
@@ -133,7 +133,7 @@ export function ImportSubjectsModal({
       setError("");
     } catch (err) {
       setError(
-        "Error al leer el archivo. Asegúrate de que sea un archivo Excel válido."
+        "Error al leer el archivo. Asegúrate de que sea un archivo Excel válido.",
       );
     }
   };

@@ -1,6 +1,6 @@
 /**
  * 📘 Tipos del dominio - Sistema de Gestión de Horarios Escolares
- * 
+ *
  * Siguiendo principios de Domain-Driven Design (DDD)
  * Tipado estricto con TypeScript
  */
@@ -19,7 +19,7 @@ export interface School {
   updatedAt: Date;
 }
 
-export type CreateSchoolInput = Omit<School, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateSchoolInput = Omit<School, "id" | "createdAt" | "updatedAt">;
 export type UpdateSchoolInput = Partial<CreateSchoolInput> & { id: string };
 
 // ============================================
@@ -27,18 +27,18 @@ export type UpdateSchoolInput = Partial<CreateSchoolInput> & { id: string };
 // ============================================
 
 export enum DayOfWeek {
-  MONDAY = 'MONDAY',
-  TUESDAY = 'TUESDAY',
-  WEDNESDAY = 'WEDNESDAY',
-  THURSDAY = 'THURSDAY',
-  FRIDAY = 'FRIDAY',
-  SATURDAY = 'SATURDAY',
-  SUNDAY = 'SUNDAY',
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY",
+  SUNDAY = "SUNDAY",
 }
 
 export interface TimeSlot {
   startTime: string; // Format: "HH:mm" e.g., "08:00"
-  endTime: string;   // Format: "HH:mm" e.g., "09:00"
+  endTime: string; // Format: "HH:mm" e.g., "09:00"
 }
 
 export interface TeacherAvailability {
@@ -61,7 +61,10 @@ export interface Teacher {
   updatedAt: Date;
 }
 
-export type CreateTeacherInput = Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateTeacherInput = Omit<
+  Teacher,
+  "id" | "createdAt" | "updatedAt"
+>;
 export type UpdateTeacherInput = Partial<CreateTeacherInput> & { id: string };
 
 // ============================================
@@ -80,7 +83,10 @@ export interface Subject {
   updatedAt: Date;
 }
 
-export type CreateSubjectInput = Omit<Subject, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateSubjectInput = Omit<
+  Subject,
+  "id" | "createdAt" | "updatedAt"
+>;
 export type UpdateSubjectInput = Partial<CreateSubjectInput> & { id: string };
 
 // ============================================
@@ -88,9 +94,9 @@ export type UpdateSubjectInput = Partial<CreateSubjectInput> & { id: string };
 // ============================================
 
 // Importar AcademicLevel desde schedule-config (fuente única de verdad)
-import type { AcademicLevel } from './schedule-config';
+import type { AcademicLevel } from "./schedule-config";
 
-export type { AcademicLevel } from './schedule-config';
+export type { AcademicLevel } from "./schedule-config";
 
 export interface Course {
   id: string;
@@ -105,7 +111,7 @@ export interface Course {
   updatedAt: Date;
 }
 
-export type CreateCourseInput = Omit<Course, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateCourseInput = Omit<Course, "id" | "createdAt" | "updatedAt">;
 export type UpdateCourseInput = Partial<CreateCourseInput> & { id: string };
 
 // ============================================
@@ -116,8 +122,8 @@ export interface TimeBlock {
   id: string;
   blockNumber: number; // 1, 2, 3... (orden del bloque en el día)
   startTime: string; // "08:00"
-  endTime: string;   // "08:45"
-  duration: number;  // Duración en minutos
+  endTime: string; // "08:45"
+  duration: number; // Duración en minutos
 }
 
 export interface ScheduleBlock {
@@ -149,25 +155,30 @@ export interface Schedule {
   updatedAt: Date;
 }
 
-export type CreateScheduleInput = Omit<Schedule, 'id' | 'blocks' | 'createdAt' | 'updatedAt'>;
+export type CreateScheduleInput = Omit<
+  Schedule,
+  "id" | "blocks" | "createdAt" | "updatedAt"
+>;
 export type UpdateScheduleInput = Partial<CreateScheduleInput> & { id: string };
 
 export type CreateScheduleBlockInput = Omit<
-  ScheduleBlock, 
-  'id' | 'createdAt' | 'updatedAt'
+  ScheduleBlock,
+  "id" | "createdAt" | "updatedAt"
 >;
-export type UpdateScheduleBlockInput = Partial<CreateScheduleBlockInput> & { id: string };
+export type UpdateScheduleBlockInput = Partial<CreateScheduleBlockInput> & {
+  id: string;
+};
 
 // ============================================
 // ⚠️ VALIDACIONES Y CONFLICTOS
 // ============================================
 
 export enum ConflictType {
-  TEACHER_DOUBLE_BOOKING = 'TEACHER_DOUBLE_BOOKING', // Profesor en dos lugares al mismo tiempo
-  TEACHER_UNAVAILABLE = 'TEACHER_UNAVAILABLE',       // Profesor no disponible en ese horario
-  CLASSROOM_CONFLICT = 'CLASSROOM_CONFLICT',         // Sala ocupada
-  COURSE_OVERLAP = 'COURSE_OVERLAP',                 // Curso con bloques superpuestos
-  SUBJECT_TEACHER_MISMATCH = 'SUBJECT_TEACHER_MISMATCH', // Profesor no dicta esa asignatura
+  TEACHER_DOUBLE_BOOKING = "TEACHER_DOUBLE_BOOKING", // Profesor en dos lugares al mismo tiempo
+  TEACHER_UNAVAILABLE = "TEACHER_UNAVAILABLE", // Profesor no disponible en ese horario
+  CLASSROOM_CONFLICT = "CLASSROOM_CONFLICT", // Sala ocupada
+  COURSE_OVERLAP = "COURSE_OVERLAP", // Curso con bloques superpuestos
+  SUBJECT_TEACHER_MISMATCH = "SUBJECT_TEACHER_MISMATCH", // Profesor no dicta esa asignatura
 }
 
 export interface ScheduleConflict {
@@ -175,7 +186,7 @@ export interface ScheduleConflict {
   message: string;
   blockId: string;
   affectedBlocks?: string[];
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
 }
 
 export interface ScheduleValidationResult {
@@ -274,25 +285,73 @@ export const DAYS_OF_WEEK: DayOfWeek[] = [
 ];
 
 export const DAY_LABELS: Record<DayOfWeek, string> = {
-  [DayOfWeek.MONDAY]: 'Lunes',
-  [DayOfWeek.TUESDAY]: 'Martes',
-  [DayOfWeek.WEDNESDAY]: 'Miércoles',
-  [DayOfWeek.THURSDAY]: 'Jueves',
-  [DayOfWeek.FRIDAY]: 'Viernes',
-  [DayOfWeek.SATURDAY]: 'Sábado',
-  [DayOfWeek.SUNDAY]: 'Domingo',
+  [DayOfWeek.MONDAY]: "Lunes",
+  [DayOfWeek.TUESDAY]: "Martes",
+  [DayOfWeek.WEDNESDAY]: "Miércoles",
+  [DayOfWeek.THURSDAY]: "Jueves",
+  [DayOfWeek.FRIDAY]: "Viernes",
+  [DayOfWeek.SATURDAY]: "Sábado",
+  [DayOfWeek.SUNDAY]: "Domingo",
 };
 
 // Etiquetas de niveles académicos (importadas desde schedule-config)
-export { ACADEMIC_LEVEL_LABELS } from './schedule-config';
+export { ACADEMIC_LEVEL_LABELS } from "./schedule-config";
 
 export const DEFAULT_TIME_BLOCKS: TimeBlock[] = [
-  { id: '1', blockNumber: 1, startTime: '08:00', endTime: '08:45', duration: 45 },
-  { id: '2', blockNumber: 2, startTime: '08:45', endTime: '09:30', duration: 45 },
-  { id: '3', blockNumber: 3, startTime: '09:45', endTime: '10:30', duration: 45 },
-  { id: '4', blockNumber: 4, startTime: '10:30', endTime: '11:15', duration: 45 },
-  { id: '5', blockNumber: 5, startTime: '11:30', endTime: '12:15', duration: 45 },
-  { id: '6', blockNumber: 6, startTime: '12:15', endTime: '13:00', duration: 45 },
-  { id: '7', blockNumber: 7, startTime: '14:00', endTime: '14:45', duration: 45 },
-  { id: '8', blockNumber: 8, startTime: '14:45', endTime: '15:30', duration: 45 },
+  {
+    id: "1",
+    blockNumber: 1,
+    startTime: "08:00",
+    endTime: "08:45",
+    duration: 45,
+  },
+  {
+    id: "2",
+    blockNumber: 2,
+    startTime: "08:45",
+    endTime: "09:30",
+    duration: 45,
+  },
+  {
+    id: "3",
+    blockNumber: 3,
+    startTime: "09:45",
+    endTime: "10:30",
+    duration: 45,
+  },
+  {
+    id: "4",
+    blockNumber: 4,
+    startTime: "10:30",
+    endTime: "11:15",
+    duration: 45,
+  },
+  {
+    id: "5",
+    blockNumber: 5,
+    startTime: "11:30",
+    endTime: "12:15",
+    duration: 45,
+  },
+  {
+    id: "6",
+    blockNumber: 6,
+    startTime: "12:15",
+    endTime: "13:00",
+    duration: 45,
+  },
+  {
+    id: "7",
+    blockNumber: 7,
+    startTime: "14:00",
+    endTime: "14:45",
+    duration: 45,
+  },
+  {
+    id: "8",
+    blockNumber: 8,
+    startTime: "14:45",
+    endTime: "15:30",
+    duration: 45,
+  },
 ];

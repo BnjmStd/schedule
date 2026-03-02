@@ -10,7 +10,7 @@ import type { AcademicLevel } from "@/types/schedule-config";
  * @example "BASIC" -> ["BASIC"]
  */
 export function parseActiveAcademicLevels(
-  activeAcademicLevels: string
+  activeAcademicLevels: string,
 ): AcademicLevel[] {
   return activeAcademicLevels.split(",").filter(Boolean) as AcademicLevel[];
 }
@@ -19,9 +19,7 @@ export function parseActiveAcademicLevels(
  * Convierte array de niveles a string
  * @example ["BASIC", "MIDDLE"] -> "BASIC,MIDDLE"
  */
-export function serializeActiveAcademicLevels(
-  levels: AcademicLevel[]
-): string {
+export function serializeActiveAcademicLevels(levels: AcademicLevel[]): string {
   return levels.join(",");
 }
 
@@ -30,7 +28,7 @@ export function serializeActiveAcademicLevels(
  */
 export function isLevelActive(
   schoolActiveLevels: string,
-  level: AcademicLevel
+  level: AcademicLevel,
 ): boolean {
   return parseActiveAcademicLevels(schoolActiveLevels).includes(level);
 }
@@ -40,7 +38,7 @@ export function isLevelActive(
  */
 export function validateLevelIsActive(
   schoolActiveLevels: string,
-  level: AcademicLevel
+  level: AcademicLevel,
 ): { valid: boolean; error?: string } {
   const activeLevels = parseActiveAcademicLevels(schoolActiveLevels);
 
@@ -70,8 +68,16 @@ export function getActiveLevelsWithLabels(schoolActiveLevels: string): Array<{
   const activeLevels = parseActiveAcademicLevels(schoolActiveLevels);
 
   const allLevels = [
-    { value: "BASIC" as const, label: "Educación Básica (1° - 8°)", emoji: "🎒" },
-    { value: "MIDDLE" as const, label: "Educación Media (1° - 4°)", emoji: "🎓" },
+    {
+      value: "BASIC" as const,
+      label: "Educación Básica (1° - 8°)",
+      emoji: "🎒",
+    },
+    {
+      value: "MIDDLE" as const,
+      label: "Educación Media (1° - 4°)",
+      emoji: "🎓",
+    },
   ];
 
   return allLevels.filter((level) => activeLevels.includes(level.value));

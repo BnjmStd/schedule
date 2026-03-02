@@ -1,6 +1,9 @@
 "use server";
 
-import { getScheduleConfigForCourse, getScheduleConfigForTeacher } from "./schedule-config";
+import {
+  getScheduleConfigForCourse,
+  getScheduleConfigForTeacher,
+} from "./schedule-config";
 import { prisma } from "@/lib/prisma";
 import type { ScheduleLevelConfig } from "@/types/schedule-config";
 
@@ -12,7 +15,7 @@ import type { ScheduleLevelConfig } from "@/types/schedule-config";
  */
 export async function getScheduleConfigForEntity(
   entityType: "course" | "teacher",
-  entityId: string
+  entityId: string,
 ): Promise<ScheduleLevelConfig> {
   if (entityType === "course") {
     return getScheduleConfigForCourse(entityId);
@@ -25,13 +28,13 @@ export async function getScheduleConfigForEntity(
     include: { course: true },
   });
   const courseIds = Array.from(
-    new Set(blocks.map((b) => b.course?.id).filter(Boolean))
+    new Set(blocks.map((b) => b.course?.id).filter(Boolean)),
   ) as string[];
 
   // Si el profesor tiene cursos asignados, obtener la jornada más temprana de esos cursos
   if (courseIds.length > 0) {
     const configs = await Promise.all(
-      courseIds.map((courseId) => getScheduleConfigForCourse(courseId))
+      courseIds.map((courseId) => getScheduleConfigForCourse(courseId)),
     );
     // Ordenar por startTime más temprano
     configs.sort((a, b) => a.startTime.localeCompare(b.startTime));

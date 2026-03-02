@@ -7,8 +7,8 @@
 
 export function SkipToMain() {
   return (
-    <a 
-      href="#main-content" 
+    <a
+      href="#main-content"
       className="skip-to-main"
       style={{
         position: "absolute",

@@ -8,7 +8,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/contexts/ModalContext";
 import { createCourse } from "@/modules/courses/actions";
-import { getSchools, getSchoolActiveAcademicLevels } from "@/modules/schools/actions";
+import {
+  getSchools,
+  getSchoolActiveAcademicLevels,
+} from "@/modules/schools/actions";
 import { getActiveLevelsWithLabels } from "@/lib/utils/academic-levels";
 import { Input, Select } from "@/components/ui";
 import type { School } from "@/types";
@@ -50,7 +53,7 @@ export function CreateCourseForm({ onSuccess }: CreateCourseFormProps) {
       const levelsString = await getSchoolActiveAcademicLevels(schoolId);
       const levels = getActiveLevelsWithLabels(levelsString);
       setAvailableLevels(
-        levels.map((l) => ({ value: l.value, label: l.label }))
+        levels.map((l) => ({ value: l.value, label: l.label })),
       );
     } catch (error) {
       console.error("Error cargando niveles activos:", error);
@@ -174,9 +177,15 @@ export function CreateCourseForm({ onSuccess }: CreateCourseFormProps) {
             id="academicLevel"
             name="academicLevel"
             required
-            disabled={isLoading || !formData.schoolId || availableLevels.length === 0}
+            disabled={
+              isLoading || !formData.schoolId || availableLevels.length === 0
+            }
             options={availableLevels}
-            placeholder={!formData.schoolId ? "Primero selecciona un colegio" : "Selecciona nivel"}
+            placeholder={
+              !formData.schoolId
+                ? "Primero selecciona un colegio"
+                : "Selecciona nivel"
+            }
           />
         </div>
       </div>

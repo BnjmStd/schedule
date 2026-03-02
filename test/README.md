@@ -23,12 +23,14 @@ npm run test
 ## Lo que se verifica
 
 ### Time Slots (Unitarios)
+
 - ✅ Generación correcta de bloques y recreos
 - ✅ Recreos en posiciones especificadas
 - ✅ Duración correcta de bloques
 - ✅ Continuidad sin gaps
 
 ### Integración
+
 - ✅ Bloques generados encajan en slots del editor
 - ✅ No hay bloques durante recreos
 - ✅ Recreos respetan configuración del colegio

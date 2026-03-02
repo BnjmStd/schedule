@@ -6,17 +6,18 @@
 
 **Ubicaciones con definiciones diferentes:**
 
-| Archivo | Valores | Estado |
-|---------|---------|--------|
-| `prisma/schema.prisma` (BD) | `BASIC`, `MIDDLE` | ✅ Usado en BD |
-| `src/types/schedule-config.ts` | `BASIC`, `MIDDLE` | ✅ Correcto |
-| `src/types/index.ts` | `PRIMARY`, `SECONDARY`, `HIGH_SCHOOL` | ❌ No se usa |
-| `CreateCourseForm.tsx` | `PRIMARIA`, `SECUNDARIA`, `MEDIA` | ❌ ERROR |
+| Archivo                        | Valores                               | Estado         |
+| ------------------------------ | ------------------------------------- | -------------- |
+| `prisma/schema.prisma` (BD)    | `BASIC`, `MIDDLE`                     | ✅ Usado en BD |
+| `src/types/schedule-config.ts` | `BASIC`, `MIDDLE`                     | ✅ Correcto    |
+| `src/types/index.ts`           | `PRIMARY`, `SECONDARY`, `HIGH_SCHOOL` | ❌ No se usa   |
+| `CreateCourseForm.tsx`         | `PRIMARIA`, `SECUNDARIA`, `MEDIA`     | ❌ ERROR       |
 
 **Consecuencia:**  
 ❌ Al crear un curso, el formulario envía `"PRIMARIA"` pero la BD espera `"BASIC"`, causando inconsistencias.
 
 **Solución recomendada:**
+
 1. Usar **solo** `BASIC` y `MIDDLE` en toda la aplicación
 2. Actualizar el formulario de creación de cursos
 3. Limpiar tipos duplicados en `index.ts`
@@ -26,6 +27,7 @@
 ### 2. ❌ **No hay selector de niveles activos por colegio**
 
 **Situación actual:**
+
 - Cuando se crea un colegio, automáticamente se generan configuraciones para BÁSICA y MEDIA
 - No hay forma de especificar si el colegio:
   - Solo tiene Básica (1° a 8°)
@@ -33,6 +35,7 @@
   - Tiene ambos niveles
 
 **Problema:**
+
 - Todos los colegios muestran ambas pestañas en la configuración de jornadas
 - No se puede filtrar cursos por niveles activos
 - No se puede validar que un curso pertenezca a un nivel válido del colegio
@@ -40,6 +43,7 @@
 **Propuesta:**
 
 #### Opción A: Campo en School (Simple) ⭐ RECOMENDADO
+
 ```prisma
 model School {
   // ...existente...
@@ -48,17 +52,20 @@ model School {
 ```
 
 **Ventajas:**
+
 - ✅ Simple de implementar
 - ✅ Compatible con datos existentes
 - ✅ Fácil de validar
 
 **Implementación:**
+
 1. Agregar campo a schema
 2. Migración con valor default "BASIC,MIDDLE" para todos
 3. Agregar selector en configuración del colegio
 4. Crear solo las ScheduleLevelConfig necesarias
 
 #### Opción B: Tabla separada (Más flexible)
+
 ```prisma
 model SchoolAcademicLevel {
   id            String  @id @default(cuid())
@@ -66,16 +73,18 @@ model SchoolAcademicLevel {
   academicLevel String  // BASIC o MIDDLE
   isActive      Boolean @default(true)
   school        School  @relation(...)
-  
+
   @@unique([schoolId, academicLevel])
 }
 ```
 
 **Ventajas:**
+
 - ✅ Más flexible (puede agregar más campos)
 - ✅ Permite activar/desactivar niveles
 
 **Desventajas:**
+
 - ❌ Más complejo
 - ❌ Requiere más queries
 
@@ -84,6 +93,7 @@ model SchoolAcademicLevel {
 ### 3. ⚠️ **Disponibilidad de profesores es global, no por nivel**
 
 **Situación actual:**
+
 ```prisma
 model TeacherAvailability {
   id           String
@@ -99,10 +109,12 @@ model TeacherAvailability {
 **Escenario problemático:**
 
 Colegio con jornadas diferentes por nivel:
+
 - **Básica**: Lunes a Viernes 08:00 - 13:00
 - **Media**: Lunes a Viernes 14:00 - 18:00
 
 Profesor Juan:
+
 - Debe dictar en ambos niveles
 - Disponibilidad actual: Lunes 08:00-18:00 (genérica)
 - ❌ No puede especificar: "Básica solo mañanas, Media solo tardes"
@@ -110,15 +122,19 @@ Profesor Juan:
 **Análisis de opciones:**
 
 #### Opción A: Disponibilidad global (mantener actual)
+
 **Cuando tiene sentido:**
+
 - Colegios donde BÁSICA y MEDIA tienen la **misma jornada**
 - Ejemplo: Ambas de 08:00 a 17:00
 - El profesor simplemente dice "Lunes 08:00-17:00"
 
 **Limitación:**
+
 - ❌ No funciona si las jornadas son diferentes
 
 #### Opción B: Disponibilidad por nivel ⭐ RECOMENDADO
+
 ```prisma
 model TeacherAvailability {
   id           String
@@ -128,7 +144,7 @@ model TeacherAvailability {
   dayOfWeek    String
   startTime    String
   endTime      String
-  
+
   @@unique([teacherId, academicYear, academicLevel, dayOfWeek, startTime, endTime])
 }
 ```
@@ -145,11 +161,13 @@ model TeacherAvailability {
      - Disponibilidad "MIDDLE": Lunes 14:00-18:00
 
 **Ventajas:**
+
 - ✅ Flexible: funciona para ambos casos
 - ✅ Validación: solo asignar en horarios donde está disponible
 - ✅ Claro: el profesor sabe exactamente cuándo trabaja con cada nivel
 
 **Implementación:**
+
 1. Agregar campo `academicLevel String?` a TeacherAvailability
 2. Migración: disponibilidades actuales quedan con `academicLevel = NULL`
 3. UI: detectar si el colegio tiene jornadas diferentes
@@ -158,6 +176,7 @@ model TeacherAvailability {
 4. Validación al asignar: verificar que el profesor tenga disponibilidad para el nivel del curso
 
 #### Opción C: Validación manual (no recomendado)
+
 - Mantener disponibilidad global
 - Confiar en que el administrador no cometa errores
 - ❌ Propenso a errores
@@ -169,13 +188,16 @@ model TeacherAvailability {
 **Respuesta: SÍ, y está bien diseñado**
 
 **Lo que funciona bien:**
+
 1. ✅ El sistema permite asignar profesores a cursos de ambos niveles
 2. ✅ Existe `validateScheduleCongruency()` que detecta conflictos
 3. ✅ Se alerta cuando las jornadas son incompatibles
 4. ✅ Se guarda historial de cambios de configuración
 
 **Lo que falta:**
+
 1. ❌ **Validación preventiva** al asignar un profesor a un curso:
+
    ```typescript
    // Antes de permitir asignar profesor a curso:
    - Verificar que tenga disponibilidad para el nivel del curso
@@ -203,7 +225,7 @@ model TeacherAvailability {
    - [ ] Eliminar enums duplicados en `src/types/index.ts`
    - [ ] Actualizar `CreateCourseForm.tsx` para usar `BASIC` y `MIDDLE`
    - [ ] Verificar que el seed y migraciones usen los valores correctos
-   
+
    **Archivos a modificar:**
    - `src/types/index.ts` - Eliminar AcademicLevel viejo
    - `src/modules/courses/components/CreateCourseForm.tsx` - Cambiar opciones del select
@@ -241,6 +263,7 @@ model TeacherAvailability {
 ### **Fase 3: Disponibilidad por nivel académico** (Opcional, si se necesita)
 
 **¿Cuándo implementar esto?**
+
 - ✅ Si colegios reportan problemas con jornadas diferentes por nivel
 - ✅ Si hay quejas de que la disponibilidad no es suficientemente flexible
 - ⏸️ Si todos los colegios tienen jornadas iguales: no prioritario
@@ -284,12 +307,12 @@ model TeacherAvailability {
 
 ## 🎯 Resumen de decisiones
 
-| Pregunta | Respuesta | Acción |
-|----------|-----------|--------|
-| ¿Hay que unificar tipos? | ✅ Sí, urgente | Usar solo BASIC y MIDDLE |
-| ¿El colegio elige sus niveles? | ❌ No existe | Agregar campo activeAcademicLevels |
-| ¿Disponibilidad por nivel? | 🤔 Depende del caso de uso | Opcional, ver necesidad real |
-| ¿Profesor en básica Y media? | ✅ Sí, está bien | Mejorar validaciones |
+| Pregunta                       | Respuesta                  | Acción                             |
+| ------------------------------ | -------------------------- | ---------------------------------- |
+| ¿Hay que unificar tipos?       | ✅ Sí, urgente             | Usar solo BASIC y MIDDLE           |
+| ¿El colegio elige sus niveles? | ❌ No existe               | Agregar campo activeAcademicLevels |
+| ¿Disponibilidad por nivel?     | 🤔 Depende del caso de uso | Opcional, ver necesidad real       |
+| ¿Profesor en básica Y media?   | ✅ Sí, está bien           | Mejorar validaciones               |
 
 ---
 

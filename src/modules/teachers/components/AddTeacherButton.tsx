@@ -2,10 +2,10 @@
  * ➕ AddTeacherButton - Botón para abrir el modal de crear profesor
  */
 
-'use client';
+"use client";
 
-import { useModal } from '@/contexts/ModalContext';
-import { CreateTeacherForm } from './CreateTeacherForm';
+import { useModal } from "@/contexts/ModalContext";
+import { CreateTeacherForm } from "./CreateTeacherForm";
 
 interface AddTeacherButtonProps {
   onTeacherCreated?: () => void;
@@ -15,7 +15,10 @@ export function AddTeacherButton({ onTeacherCreated }: AddTeacherButtonProps) {
   const { openModal } = useModal();
 
   const handleClick = () => {
-    openModal(<CreateTeacherForm onTeacherCreated={onTeacherCreated} />, '👨‍🏫 Crear Nuevo Profesor');
+    openModal(
+      <CreateTeacherForm onTeacherCreated={onTeacherCreated} />,
+      "👨‍🏫 Crear Nuevo Profesor",
+    );
   };
 
   return (

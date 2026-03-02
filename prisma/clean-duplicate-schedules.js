@@ -43,7 +43,7 @@ async function cleanDuplicateSchedules() {
         const [keepSchedule, ...duplicates] = schedules;
 
         console.log(
-          `   ✅ Manteniendo: ${keepSchedule.name} (${keepSchedule.blocks.length} bloques)`
+          `   ✅ Manteniendo: ${keepSchedule.name} (${keepSchedule.blocks.length} bloques)`,
         );
 
         // Desactivar los duplicados
@@ -53,7 +53,7 @@ async function cleanDuplicateSchedules() {
             data: { isActive: false },
           });
           console.log(
-            `   ❌ Desactivando: ${duplicate.name} (${duplicate.blocks.length} bloques)`
+            `   ❌ Desactivando: ${duplicate.name} (${duplicate.blocks.length} bloques)`,
           );
           totalCleaned++;
         }
@@ -63,7 +63,7 @@ async function cleanDuplicateSchedules() {
 
     console.log(`\n✅ Limpieza completada!`);
     console.log(
-      `   Total de schedules duplicados desactivados: ${totalCleaned}`
+      `   Total de schedules duplicados desactivados: ${totalCleaned}`,
     );
 
     // Mostrar resumen final
@@ -71,7 +71,7 @@ async function cleanDuplicateSchedules() {
       where: { isActive: true, academicYear: currentYear },
     });
     console.log(
-      `   Schedules activos restantes (${currentYear}): ${activeSchedules}`
+      `   Schedules activos restantes (${currentYear}): ${activeSchedules}`,
     );
   } catch (error) {
     console.error("❌ Error durante la limpieza:", error);

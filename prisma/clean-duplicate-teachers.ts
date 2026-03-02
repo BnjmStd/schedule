@@ -36,7 +36,7 @@ async function cleanDuplicateTeachers() {
 
     // Identificar duplicados
     const duplicateGroups = Array.from(groups.entries()).filter(
-      ([_, group]) => group.length > 1
+      ([_, group]) => group.length > 1,
     );
 
     if (duplicateGroups.length === 0) {
@@ -45,7 +45,7 @@ async function cleanDuplicateTeachers() {
     }
 
     console.log(
-      `⚠️  Encontrados ${duplicateGroups.length} grupos de duplicados:\n`
+      `⚠️  Encontrados ${duplicateGroups.length} grupos de duplicados:\n`,
     );
 
     for (const [key, group] of duplicateGroups) {
@@ -85,7 +85,7 @@ async function cleanDuplicateTeachers() {
         // Si el duplicado tiene bloques, reasignarlos al profesor principal
         if (teacher._count.scheduleBlocks > 0) {
           console.log(
-            `      ⚠️  Reasignando ${teacher._count.scheduleBlocks} bloques al profesor principal...`
+            `      ⚠️  Reasignando ${teacher._count.scheduleBlocks} bloques al profesor principal...`,
           );
           await prisma.scheduleBlock.updateMany({
             where: { teacherId: teacher.id },

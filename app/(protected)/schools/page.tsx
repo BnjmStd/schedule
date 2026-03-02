@@ -52,7 +52,7 @@ export default function SchoolsPage() {
         }}
         onCancel={closeModal}
       />,
-      "⚠️ Confirmar eliminación"
+      "⚠️ Confirmar eliminación",
     );
   };
 

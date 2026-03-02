@@ -90,7 +90,7 @@ export default function TeachersPage() {
         }}
         onCancel={closeModal}
       />,
-      "⚠️ Confirmar eliminación"
+      "⚠️ Confirmar eliminación",
     );
   };
 
@@ -172,7 +172,7 @@ export default function TeachersPage() {
             </button>
           </div>
         </div>,
-        "🏫 Seleccionar Colegio"
+        "🏫 Seleccionar Colegio",
       );
     }
   };
@@ -184,7 +184,7 @@ export default function TeachersPage() {
       email: string;
       phone?: string;
       specialization?: string;
-    }>
+    }>,
   ) => {
     if (!importSchoolId) {
       alert("Por favor selecciona un colegio primero");
@@ -210,7 +210,7 @@ export default function TeachersPage() {
         } catch (error) {
           console.error(
             `Error al importar ${teacher.firstName} ${teacher.lastName}:`,
-            error
+            error,
           );
           errorCount++;
         }
@@ -246,7 +246,7 @@ export default function TeachersPage() {
             Entendido
           </button>
         </div>,
-        "📥 Resultado de importación"
+        "📥 Resultado de importación",
       );
     } catch (error) {
       console.error("Error en la importación:", error);
@@ -382,7 +382,7 @@ export default function TeachersPage() {
                 </option>
                 {schools.map((school) => {
                   const count = teachers.filter(
-                    (t) => t.schoolId === school.id
+                    (t) => t.schoolId === school.id,
                   ).length;
                   return (
                     <option key={school.id} value={school.id}>

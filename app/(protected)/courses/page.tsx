@@ -74,7 +74,7 @@ export default function CoursesPage() {
         }}
         onCancel={closeModal}
       />,
-      "⚠️ Confirmar eliminación"
+      "⚠️ Confirmar eliminación",
     );
   };
 

@@ -35,12 +35,12 @@ export function DownloadScheduleModal({
     try {
       // Buscar el elemento del horario en el DOM
       const scheduleElement = document.getElementById(
-        `schedule-grid-${scheduleId}`
+        `schedule-grid-${scheduleId}`,
       );
 
       if (!scheduleElement) {
         alert(
-          "No se pudo encontrar el elemento del horario. Por favor, asegúrate de que el acordeón esté expandido."
+          "No se pudo encontrar el elemento del horario. Por favor, asegúrate de que el acordeón esté expandido.",
         );
         setIsDownloading(false);
         return;

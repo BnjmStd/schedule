@@ -26,7 +26,7 @@ export interface ScheduleGridProps {
   onBlockClick?: (
     block: ScheduleBlock | null,
     day: DayOfWeek,
-    timeBlock: TimeBlock
+    timeBlock: TimeBlock,
   ) => void;
   showConflicts?: boolean;
 }
@@ -125,7 +125,7 @@ interface ScheduleCellProps {
   onClick?: (
     block: ScheduleBlock | null,
     day: DayOfWeek,
-    timeBlock: TimeBlock
+    timeBlock: TimeBlock,
   ) => void;
 }
 
@@ -150,7 +150,7 @@ function ScheduleCell({ block, day, timeBlock, onClick }: ScheduleCellProps) {
       onClick={() => onClick?.(block, day, timeBlock)}
       className={cn(
         "min-h-20 rounded-lg border-2 p-3 text-left transition-all duration-200 cursor-pointer hover:shadow-md",
-        colorClass
+        colorClass,
       )}
     >
       <div className="space-y-1">

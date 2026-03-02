@@ -23,7 +23,7 @@ import {
  */
 export async function getScheduleConfigForLevel(
   schoolId: string,
-  academicLevel: AcademicLevel
+  academicLevel: AcademicLevel,
 ): Promise<ScheduleLevelConfig> {
   const schoolIds = await getUserSchoolIds();
 
@@ -67,7 +67,7 @@ export async function getScheduleConfigForLevel(
  */
 export async function saveScheduleConfigForLevel(
   config: ScheduleLevelConfig,
-  changeReason?: string
+  changeReason?: string,
 ): Promise<ScheduleLevelConfig> {
   const schoolIds = await getUserSchoolIds();
 
@@ -162,7 +162,7 @@ export async function saveScheduleConfigForLevel(
   if (hasCriticalChanges) {
     await markSchedulesAsDeprecatedForLevel(
       config.schoolId,
-      config.academicLevel
+      config.academicLevel,
     );
   }
 
@@ -181,7 +181,7 @@ export async function saveScheduleConfigForLevel(
  * Obtener configuración para un curso específico (basado en su nivel)
  */
 export async function getScheduleConfigForCourse(
-  courseId: string
+  courseId: string,
 ): Promise<ScheduleLevelConfig> {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
@@ -197,7 +197,7 @@ export async function getScheduleConfigForCourse(
 
   return getScheduleConfigForLevel(
     course.schoolId,
-    course.academicLevel as AcademicLevel
+    course.academicLevel as AcademicLevel,
   );
 }
 
@@ -206,7 +206,7 @@ export async function getScheduleConfigForCourse(
  * Para profesores, usamos una configuración flexible que cubre todos los niveles
  */
 export async function getScheduleConfigForTeacher(
-  teacherId: string
+  teacherId: string,
 ): Promise<ScheduleLevelConfig> {
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
@@ -249,7 +249,7 @@ export async function getScheduleConfigForTeacher(
     const bStart = parseInt(b.startTime.replace(":", ""));
     const aEnd = parseInt(a.endTime.replace(":", ""));
     const bEnd = parseInt(b.endTime.replace(":", ""));
-    
+
     // Preferir inicio más temprano
     if (aStart !== bStart) return aStart - bStart;
     // Si tienen mismo inicio, preferir fin más tardío
@@ -263,7 +263,7 @@ export async function getScheduleConfigForTeacher(
  * Obtener todas las configuraciones de un colegio
  */
 export async function getAllScheduleConfigsForSchool(
-  schoolId: string
+  schoolId: string,
 ): Promise<ScheduleLevelConfig[]> {
   const schoolIds = await getUserSchoolIds();
 
@@ -291,7 +291,7 @@ export async function getAllScheduleConfigsForSchool(
 export async function getScheduleConfigHistory(
   schoolId: string,
   academicLevel: AcademicLevel,
-  limit: number = 10
+  limit: number = 10,
 ) {
   const schoolIds = await getUserSchoolIds();
 
@@ -364,10 +364,10 @@ export async function validateScheduleCongruency(schoolId: string) {
   // Validar cada profesor
   for (const teacher of teachers) {
     const teacherName = `${teacher.firstName} ${teacher.lastName}`;
-    
+
     // Obtener niveles académicos únicos de sus cursos
     const courseLevels = new Set(
-      teacher.scheduleBlocks.map((b) => b.course.academicLevel)
+      teacher.scheduleBlocks.map((b) => b.course.academicLevel),
     );
 
     // Si tiene cursos de múltiples niveles, verificar compatibilidad

@@ -30,7 +30,7 @@ function timesOverlap(
   start1: string,
   end1: string,
   start2: string,
-  end2: string
+  end2: string,
 ): boolean {
   const start1Minutes = timeToMinutes(start1);
   const end1Minutes = timeToMinutes(end1);
@@ -47,7 +47,7 @@ function timesOverlap(
  * Genera horario automáticamente para un curso
  */
 export async function generateScheduleForCourse(
-  config: ScheduleGenerationConfig
+  config: ScheduleGenerationConfig,
 ): Promise<ScheduleGenerationResult> {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -57,7 +57,7 @@ export async function generateScheduleForCourse(
   try {
     console.log(
       "[Generation] Iniciando generación para curso:",
-      config.courseId
+      config.courseId,
     );
 
     // 1. Cargar todos los datos necesarios de una vez (evitar N+1)
@@ -110,13 +110,13 @@ export async function generateScheduleForCourse(
     const teachersBySubject = new Map<string, typeof allTeachers>();
     config.subjects.forEach((sc) => {
       const subjectTeachers = allTeachers.filter((t) =>
-        t.teacherSubjects.some((ts) => ts.subjectId === sc.subjectId)
+        t.teacherSubjects.some((ts) => ts.subjectId === sc.subjectId),
       );
 
       // Priorizar profesor preferido si existe
       if (sc.preferredTeacherId) {
         const preferredIndex = subjectTeachers.findIndex(
-          (t) => t.id === sc.preferredTeacherId
+          (t) => t.id === sc.preferredTeacherId,
         );
         if (preferredIndex > 0) {
           const preferred = subjectTeachers.splice(preferredIndex, 1)[0];
@@ -140,7 +140,7 @@ export async function generateScheduleForCourse(
       teacherId: string,
       day: string,
       startTime: string,
-      endTime: string
+      endTime: string,
     ) => `${teacherId}:${day}:${startTime}:${endTime}`;
 
     // 2. Rastreo de horas asignadas por asignatura
@@ -160,21 +160,21 @@ export async function generateScheduleForCourse(
 
     // 3. Generar todos los slots de tiempo usando la configuración nueva
     const allTimeSlotsRaw = generateTimeSlotsWithBreaks(scheduleConfig);
-    
+
     // Filtrar solo bloques (type='block'), no recreos
-    const blockSlots = allTimeSlotsRaw.filter(slot => slot.type === 'block');
-    
+    const blockSlots = allTimeSlotsRaw.filter((slot) => slot.type === "block");
+
     console.log("[Generation] 🕐 TimeSlots generados:", {
       total: allTimeSlotsRaw.length,
       blocks: blockSlots.length,
-      breaks: allTimeSlotsRaw.filter(s => s.type === 'break').length,
+      breaks: allTimeSlotsRaw.filter((s) => s.type === "break").length,
     });
-    
+
     // Crear mapa de slots por día (todos los días usan los mismos slots)
     const allTimeSlots = new Map<string, TimeSlot[]>();
     for (const day of DAYS) {
       // Convertir formato de slot
-      const daySlots = blockSlots.map(slot => ({
+      const daySlots = blockSlots.map((slot) => ({
         startTime: slot.time,
         endTime: slot.endTime,
         duration: timeToMinutes(slot.endTime) - timeToMinutes(slot.time),
@@ -228,7 +228,7 @@ export async function generateScheduleForCourse(
     possibleAssignments.sort((a, b) => b.priority - a.priority);
 
     console.log(
-      `[Generation] Total de posibles asignaciones: ${possibleAssignments.length}`
+      `[Generation] Total de posibles asignaciones: ${possibleAssignments.length}`,
     );
 
     // 4. Iterar sobre asignaciones en orden de prioridad
@@ -245,7 +245,7 @@ export async function generateScheduleForCourse(
       const courseHasBlock = generatedBlocks.some(
         (b) =>
           b.day === day &&
-          timesOverlap(b.startTime, b.endTime, slot.startTime, slot.endTime)
+          timesOverlap(b.startTime, b.endTime, slot.startTime, slot.endTime),
       );
 
       if (courseHasBlock) continue;
@@ -256,7 +256,7 @@ export async function generateScheduleForCourse(
           (b) =>
             b.day === day &&
             b.subjectId === subject.id &&
-            b.endTime === slot.startTime
+            b.endTime === slot.startTime,
         );
         if (hasPreviousBlock) continue;
       }
@@ -294,7 +294,7 @@ export async function generateScheduleForCourse(
           (b) =>
             b.day === day &&
             b.teacherId === teacher.id &&
-            (b.endTime === slot.startTime || b.startTime === slot.endTime)
+            (b.endTime === slot.startTime || b.startTime === slot.endTime),
         );
         if (hasConsecutive) continue;
 
@@ -303,7 +303,7 @@ export async function generateScheduleForCourse(
           teacher.id,
           day,
           slot.startTime,
-          slot.endTime
+          slot.endTime,
         );
         let isValid = teacherValidationCache.get(cacheKey);
 
@@ -313,7 +313,7 @@ export async function generateScheduleForCourse(
             day,
             slot.startTime,
             slot.endTime,
-            { academicYear: config.academicYear }
+            { academicYear: config.academicYear },
           );
           isValid = validation.isValid;
           teacherValidationCache.set(cacheKey, isValid);
@@ -354,7 +354,7 @@ export async function generateScheduleForCourse(
     // 5. Calcular estadísticas
     const totalRequiredHours = config.subjects.reduce(
       (sum, s) => sum + s.hoursPerWeek,
-      0
+      0,
     );
     const totalAssignedBlocks = generatedBlocks.length;
 
@@ -374,17 +374,17 @@ export async function generateScheduleForCourse(
 
     const totalAssignedHours = Object.values(subjectHoursAssigned).reduce(
       (sum, hours) => sum + hours,
-      0
+      0,
     );
     const coveragePercentage = Math.round(
-      (totalAssignedHours / totalRequiredHours) * 100
+      (totalAssignedHours / totalRequiredHours) * 100,
     );
 
     // Agregar warnings para asignaturas incompletas
     subjectsCoverage.forEach((sc) => {
       if (sc.percentage < 100) {
         warnings.push(
-          `${sc.subject}: solo se asignaron ${sc.assigned}/${sc.required} horas (${sc.percentage}%)`
+          `${sc.subject}: solo se asignaron ${sc.assigned}/${sc.required} horas (${sc.percentage}%)`,
         );
       }
     });

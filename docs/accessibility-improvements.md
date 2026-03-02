@@ -14,11 +14,13 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
 ### Archivos CSS Mejorados:
 
 **Cambios en opacidad de texto:**
+
 - ❌ `rgba(255, 255, 255, 0.4)` → ✅ `rgba(255, 255, 255, 0.7)`
 - ❌ `rgba(255, 255, 255, 0.5)` → ✅ `rgba(255, 255, 255, 0.7)`
 - ❌ `rgba(255, 255, 255, 0.6)` → ✅ `rgba(255, 255, 255, 0.75)`
 
 **Archivos actualizados:**
+
 - `src/modules/schools/components/SchoolForms.css` - Placeholders
 - `src/modules/courses/components/CourseForms.css` - Placeholders
 - `src/components/ui/Modal.css` - Botón de cerrar y textos
@@ -32,6 +34,7 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
 ### Componentes TSX Mejorados:
 
 **Componentes con mejor contraste:**
+
 - `ActiveAcademicLevelsConfig.tsx` - Descripciones y textos de ayuda
 - `SchoolScheduleConfig.tsx` - Subtítulos y descripciones
 - `AcademicLevelScheduleConfig.tsx` - Textos explicativos
@@ -44,28 +47,28 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
 ### Modales Mejorados:
 
 **Modal.tsx:**
+
 ```tsx
-<div 
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-title"
->
+<div role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <h2 id="modal-title">{title}</h2>
-  <button aria-label="Cerrar modal" title="Cerrar (Esc)">✕</button>
+  <button aria-label="Cerrar modal" title="Cerrar (Esc)">
+    ✕
+  </button>
 </div>
 ```
 
 **SchoolScheduleConfig.tsx y AcademicLevelScheduleConfig.tsx:**
+
 ```tsx
-<button 
-  aria-label="Cerrar modal de configuración"
-  title="Cerrar"
->×</button>
+<button aria-label="Cerrar modal de configuración" title="Cerrar">
+  ×
+</button>
 ```
 
 ### Inputs de Búsqueda:
 
 **SchoolList.tsx:**
+
 ```tsx
 <label htmlFor="school-search" className="sr-only">
   Buscar colegios
@@ -80,8 +83,9 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
 ### Layout Principal:
 
 **layout.tsx:**
+
 ```tsx
-<main 
+<main
   id="main-content"
   role="main"
   aria-label="Contenido principal"
@@ -95,6 +99,7 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
 ### Skip Navigation Link:
 
 **Nuevo componente: `SkipToMain.tsx`**
+
 - Link oculto visualmente hasta que recibe focus
 - Permite saltar directamente al contenido principal
 - Mejora la navegación para usuarios de lectores de pantalla
@@ -108,6 +113,7 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
 ### Focus Indicators:
 
 **accessibility.css:**
+
 ```css
 *:focus-visible {
   outline: 2px solid var(--primary-400);
@@ -115,7 +121,9 @@ Se han implementado mejoras exhaustivas de accesibilidad para cumplir con las di
   border-radius: 0.25rem;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   border-color: var(--primary-400) !important;
   box-shadow: 0 0 0 3px rgba(13, 139, 255, 0.15) !important;
 }
@@ -151,6 +159,7 @@ input:focus, select:focus, textarea:focus {
 ### Preferencias del Usuario:
 
 **Alto Contraste:**
+
 ```css
 @media (prefers-contrast: high) {
   /* Aumenta contraste automáticamente */
@@ -160,6 +169,7 @@ input:focus, select:focus, textarea:focus {
 ```
 
 **Reducción de Movimiento:**
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -175,17 +185,20 @@ input:focus, select:focus, textarea:focus {
 ## 6. 🔘 Mejoras en Componentes Interactivos
 
 ### Botones:
+
 - Todos los botones tienen `aria-label` cuando solo contienen iconos
 - Área de click mejorada (mínimo 44x44px)
 - Focus states visibles
 - Estados disabled claramente indicados
 
 ### Checkboxes:
+
 - Siempre dentro de `<label>` para área de click ampliada
 - Focus ring visible
 - Estados asociados correctamente
 
 ### Inputs:
+
 - Labels asociados con `htmlFor` e `id`
 - Placeholders con contraste mejorado (0.65+)
 - Focus states con borde y sombra
@@ -198,6 +211,7 @@ input:focus, select:focus, textarea:focus {
 ### Estándares Cumplidos:
 
 ✅ **WCAG 2.1 Level AA:**
+
 - 1.4.3 Contrast (Minimum) - Ratio 4.5:1 para texto normal
 - 1.4.11 Non-text Contrast - Ratio 3:1 para componentes UI
 - 2.1.1 Keyboard - Toda funcionalidad accesible por teclado
@@ -307,6 +321,6 @@ Se han realizado **mejoras exhaustivas de accesibilidad** en toda la aplicación
 **Contraste mejorado:** 30+ instancias  
 **ARIA labels agregados:** 10+  
 **Nuevo archivo CSS:** accessibility.css  
-**Nuevo componente:** SkipToMain.tsx  
+**Nuevo componente:** SkipToMain.tsx
 
 **Estado:** ✅ Producción Ready

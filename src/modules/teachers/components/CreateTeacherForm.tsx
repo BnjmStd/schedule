@@ -2,25 +2,27 @@
  * 👨‍🏫 CreateTeacherForm - Formulario para crear un nuevo profesor
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useModal } from '@/contexts/ModalContext';
-import { createTeacher } from '@/modules/teachers/actions';
-import { getSchools } from '@/modules/schools/actions';
-import { Input, Select } from '@/components/ui';
-import type { School } from '@/types';
-import './TeacherForms.css';
+import { useState, useEffect } from "react";
+import { useModal } from "@/contexts/ModalContext";
+import { createTeacher } from "@/modules/teachers/actions";
+import { getSchools } from "@/modules/schools/actions";
+import { Input, Select } from "@/components/ui";
+import type { School } from "@/types";
+import "./TeacherForms.css";
 
 interface CreateTeacherFormProps {
   onTeacherCreated?: () => void;
 }
 
-export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) {
+export function CreateTeacherForm({
+  onTeacherCreated,
+}: CreateTeacherFormProps) {
   const { closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const loadSchools = async () => {
@@ -32,17 +34,17 @@ export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      schoolId: formData.get('schoolId') as string,
-      firstName: formData.get('firstName') as string,
-      lastName: formData.get('lastName') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string || undefined,
-      specialization: formData.get('specialization') as string || undefined,
+      schoolId: formData.get("schoolId") as string,
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      email: formData.get("email") as string,
+      phone: (formData.get("phone") as string) || undefined,
+      specialization: (formData.get("specialization") as string) || undefined,
     };
 
     try {
@@ -52,7 +54,9 @@ export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) 
         onTeacherCreated();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el profesor');
+      setError(
+        err instanceof Error ? err.message : "Error al crear el profesor",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -60,11 +64,7 @@ export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="teacher-form">
-      {error && (
-        <div className="form-error">
-          {error}
-        </div>
-      )}
+      {error && <div className="form-error">{error}</div>}
 
       <div className="form-group">
         <label htmlFor="schoolId" className="form-label">
@@ -75,9 +75,9 @@ export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) 
           name="schoolId"
           required
           disabled={isLoading}
-          options={schools.map(school => ({
+          options={schools.map((school) => ({
             value: school.id,
-            label: school.name
+            label: school.name,
           }))}
         />
       </div>
@@ -166,7 +166,7 @@ export function CreateTeacherForm({ onTeacherCreated }: CreateTeacherFormProps) 
           className="auth-button auth-button-primary"
           disabled={isLoading}
         >
-          {isLoading ? 'Creando...' : 'Crear Profesor'}
+          {isLoading ? "Creando..." : "Crear Profesor"}
         </button>
       </div>
     </form>

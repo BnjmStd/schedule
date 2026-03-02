@@ -56,11 +56,7 @@ export function MobileNav() {
         </div>
 
         <nav className="mobile-nav-menu">
-          <a
-            href="#features"
-            className="mobile-nav-link"
-            onClick={closeMenu}
-          >
+          <a href="#features" className="mobile-nav-link" onClick={closeMenu}>
             <span className="mobile-nav-link-icon">✨</span>
             Características
           </a>

@@ -43,7 +43,7 @@ export function CreateSchoolForm({ onSchoolCreated }: CreateSchoolFormProps) {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al crear el colegio"
+        err instanceof Error ? err.message : "Error al crear el colegio",
       );
     } finally {
       setIsLoading(false);

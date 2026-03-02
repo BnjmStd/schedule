@@ -92,7 +92,7 @@ export async function updateCourse(
     academicLevel?: string;
     academicYear?: number;
     studentCount?: number;
-  }
+  },
 ) {
   const schoolIds = await getUserSchoolIds();
 

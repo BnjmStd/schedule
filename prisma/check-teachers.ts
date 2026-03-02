@@ -41,7 +41,7 @@ async function checkTeachers() {
     });
 
     const duplicates = Array.from(nameGroups.entries()).filter(
-      ([_, group]) => group.length > 1
+      ([_, group]) => group.length > 1,
     );
 
     if (duplicates.length > 0) {
@@ -50,7 +50,7 @@ async function checkTeachers() {
         console.log(`Nombre: ${name}`);
         group.forEach((teacher) => {
           console.log(
-            `  - ID: ${teacher.id}, Bloques: ${teacher._count.scheduleBlocks}`
+            `  - ID: ${teacher.id}, Bloques: ${teacher._count.scheduleBlocks}`,
           );
         });
         console.log("");

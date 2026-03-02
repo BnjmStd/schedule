@@ -54,7 +54,7 @@ export async function getSchoolScheduleRange(schoolId: string) {
 
   // La hora más temprana de inicio
   const earliestStart = startTimes.reduce((min, time) =>
-    time < min ? time : min
+    time < min ? time : min,
   );
 
   // La hora más tardía de fin
@@ -62,7 +62,7 @@ export async function getSchoolScheduleRange(schoolId: string) {
 
   // Usar el blockDuration más pequeño para máxima flexibilidad
   const minBlockDuration = Math.min(
-    ...levelConfigs.map((c) => c.blockDuration)
+    ...levelConfigs.map((c) => c.blockDuration),
   );
 
   return {

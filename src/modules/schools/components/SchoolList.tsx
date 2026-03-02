@@ -30,7 +30,7 @@ export function SchoolList({
   const filteredSchools = schools.filter(
     (school) =>
       school.name.toLowerCase().includes(search.toLowerCase()) ||
-      school.address.toLowerCase().includes(search.toLowerCase())
+      school.address.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -40,7 +40,9 @@ export function SchoolList({
         <label htmlFor="school-search" className="sr-only">
           Buscar colegios
         </label>
-        <span className="schools-search-icon" aria-hidden="true">🔍</span>
+        <span className="schools-search-icon" aria-hidden="true">
+          🔍
+        </span>
         <input
           id="school-search"
           type="search"

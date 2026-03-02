@@ -62,7 +62,7 @@ export function GenerateScheduleModal({
 
     // Agregar la primera asignatura que no esté seleccionada
     const unselected = availableSubjects.find(
-      (s) => !selectedSubjects.some((sel) => sel.subjectId === s.id)
+      (s) => !selectedSubjects.some((sel) => sel.subjectId === s.id),
     );
 
     if (unselected) {
@@ -84,7 +84,7 @@ export function GenerateScheduleModal({
   const handleSubjectChange = (
     index: number,
     field: "subjectId" | "hoursPerWeek",
-    value: string | number
+    value: string | number,
   ) => {
     const updated = [...selectedSubjects];
 
@@ -115,7 +115,7 @@ export function GenerateScheduleModal({
 
     const totalHours = selectedSubjects.reduce(
       (sum, s) => sum + s.hoursPerWeek,
-      0
+      0,
     );
 
     if (totalHours === 0) {
@@ -156,13 +156,13 @@ Cobertura por asignatura:
 ${result.stats.subjectsCoverage
   .map(
     (sc) =>
-      `  • ${sc.subject}: ${sc.assigned}/${sc.required} horas (${sc.percentage}%)`
+      `  • ${sc.subject}: ${sc.assigned}/${sc.required} horas (${sc.percentage}%)`,
   )
   .join("\n")}`
           : "";
 
         alert(
-          `✅ ¡Horario generado exitosamente!${statsMsg}${warningsMsg}\n\nPuedes editarlo en el editor de horarios.`
+          `✅ ¡Horario generado exitosamente!${statsMsg}${warningsMsg}\n\nPuedes editarlo en el editor de horarios.`,
         );
 
         if (onSuccess) {
@@ -178,7 +178,7 @@ ${result.stats.subjectsCoverage
       alert(
         `❌ Error al generar horario:\n\n${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
     } finally {
       setLoading(false);
@@ -187,7 +187,7 @@ ${result.stats.subjectsCoverage
 
   const totalHours = selectedSubjects.reduce(
     (sum, s) => sum + s.hoursPerWeek,
-    0
+    0,
   );
 
   if (!isOpen) return null;
@@ -250,7 +250,7 @@ ${result.stats.subjectsCoverage
                             handleSubjectChange(
                               index,
                               "subjectId",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           className="subject-select"
@@ -261,7 +261,7 @@ ${result.stats.subjectsCoverage
                               value={s.id}
                               disabled={selectedSubjects.some(
                                 (sel, i) =>
-                                  i !== index && sel.subjectId === s.id
+                                  i !== index && sel.subjectId === s.id,
                               )}
                             >
                               {s.name}
@@ -279,7 +279,7 @@ ${result.stats.subjectsCoverage
                               handleSubjectChange(
                                 index,
                                 "hoursPerWeek",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="hours-input"

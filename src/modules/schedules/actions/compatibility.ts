@@ -18,7 +18,7 @@ import { getScheduleConfigForLevel } from "@/modules/schools/actions/schedule-co
  */
 export async function markSchedulesAsDeprecatedForLevel(
   schoolId: string,
-  academicLevel: "BASIC" | "MIDDLE"
+  academicLevel: "BASIC" | "MIDDLE",
 ) {
   const session = await getSession();
   if (!session?.id) {
@@ -55,13 +55,13 @@ export async function updateScheduleConfigSnapshot(
   startTime: string,
   endTime: string,
   blockDuration: number,
-  academicLevel: string
+  academicLevel: string,
 ) {
   const snapshot = createConfigSnapshot(
     startTime,
     endTime,
     blockDuration,
-    academicLevel
+    academicLevel,
   );
 
   await prisma.schedule.update({
@@ -91,7 +91,7 @@ export async function getScheduleCompatibilityInfo(scheduleId: string) {
   // Obtener configuración actual del nivel académico
   const currentConfig = await getScheduleConfigForLevel(
     schedule.schoolId,
-    schedule.course.academicLevel as "BASIC" | "MIDDLE"
+    schedule.course.academicLevel as "BASIC" | "MIDDLE",
   );
 
   // Parsear snapshot del schedule

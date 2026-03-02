@@ -125,7 +125,7 @@ export function ScheduleConfigModal({
                         <option key={time} value={time}>
                           {time}
                         </option>
-                      )
+                      ),
                     )}
                   </select>
                 </div>
@@ -227,7 +227,7 @@ export function ScheduleConfigModal({
                     >
                       {TIME_OPTIONS.filter(
                         (t) =>
-                          t >= localConfig.startTime && t < localConfig.endTime
+                          t >= localConfig.startTime && t < localConfig.endTime,
                       ).map((time) => (
                         <option key={time} value={time}>
                           {time}
@@ -254,7 +254,7 @@ export function ScheduleConfigModal({
                       {TIME_OPTIONS.filter(
                         (t) =>
                           t > localConfig.lunchBreak.startTime &&
-                          t <= localConfig.endTime
+                          t <= localConfig.endTime,
                       ).map((time) => (
                         <option key={time} value={time}>
                           {time}

@@ -51,7 +51,7 @@ export const schoolsDb = {
   },
 
   create: async (
-    data: Omit<School, "id" | "createdAt" | "updatedAt">
+    data: Omit<School, "id" | "createdAt" | "updatedAt">,
   ): Promise<School> => {
     await new Promise((resolve) => setTimeout(resolve, 100));
     const newSchool: School = {
