@@ -129,11 +129,12 @@ export interface TimeBlock {
 export interface ScheduleBlock {
   id: string;
   scheduleId: string;
-  courseId: string;
+  // courseId removed — derive via ScheduleBlock → Schedule → Course
   subjectId: string;
   teacherId: string;
   dayOfWeek: DayOfWeek;
   timeBlock: TimeBlock;
+  academicYear: number; // Denormalized from schedule.academicYear for collision detection
   classroom?: string;
   notes?: string;
   createdAt: Date;
@@ -168,6 +169,115 @@ export type CreateScheduleBlockInput = Omit<
 export type UpdateScheduleBlockInput = Partial<CreateScheduleBlockInput> & {
   id: string;
 };
+
+// ============================================
+// 🚫 TEACHER AVAILABILITY EXCEPTION
+// ============================================
+
+export interface TeacherAvailabilityException {
+  id: string;
+  teacherId: string;
+  date: Date;
+  startTime?: string; // null = all-day
+  endTime?: string;   // null = all-day
+  isAvailable: boolean; // false = blocked, true = extra availability
+  reason?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type CreateTeacherAvailabilityExceptionInput = Omit<
+  TeacherAvailabilityException,
+  "id" | "createdAt" | "updatedAt"
+>;
+
+// ============================================
+// 📊 TEACHER WORKLOAD LIMIT
+// ============================================
+
+export interface TeacherWorkloadLimit {
+  id: string;
+  teacherId: string;
+  schoolId: string;
+  academicYear: number;
+  maxBlocksPerDay: number;
+  maxBlocksPerWeek: number;
+  preferredStartTime?: string;
+  preferredEndTime?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================
+// 📋 COURSE SUBJECT REQUIREMENT
+// ============================================
+
+export interface CourseSubjectRequirement {
+  id: string;
+  schoolId: string;
+  courseId: string;
+  subjectId: string;
+  academicYear: number;
+  blocksPerWeek: number;
+  preferredTeacherId?: string;
+  maxConsecutiveBlocks: number;
+  preferredDays: string; // JSON: string[]
+  avoidAfterLunch: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type CreateCourseSubjectRequirementInput = Omit<
+  CourseSubjectRequirement,
+  "id" | "createdAt" | "updatedAt"
+>;
+
+// ============================================
+// 💳 BILLING & SUSCRIPCIONES
+// ============================================
+
+// Re-exportar desde Prisma para que el resto del código no importe desde @prisma/client
+export type { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  plan: import("@prisma/client").SubscriptionPlan;
+  status: import("@prisma/client").SubscriptionStatus;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  trialEndsAt?: Date;
+  canceledAt?: Date;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  metadata: string; // JSON
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SubscriptionHistory {
+  id: string;
+  subscriptionId: string;
+  oldPlan: import("@prisma/client").SubscriptionPlan;
+  newPlan: import("@prisma/client").SubscriptionPlan;
+  oldStatus: import("@prisma/client").SubscriptionStatus;
+  newStatus: import("@prisma/client").SubscriptionStatus;
+  reason?: string;
+  changedAt: Date;
+}
+
+export interface BillingEvent {
+  id: string;
+  userId?: string;
+  stripeEventId: string;
+  type: string;
+  payload: string; // JSON
+  processed: boolean;
+  processedAt?: Date;
+  errorMessage?: string;
+  createdAt: Date;
+}
 
 // ============================================
 // ⚠️ VALIDACIONES Y CONFLICTOS

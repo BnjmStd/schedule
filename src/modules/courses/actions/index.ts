@@ -5,7 +5,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getUserSchoolIds } from "@/lib/auth-helpers";
+import { getUserSchoolIds, getCurrentUser } from "@/lib/auth-helpers";
+import { validateCourseCreation } from "@/lib/billing";
 import { revalidatePath } from "next/cache";
 
 export async function getCourses() {
@@ -74,6 +75,10 @@ export async function createCourse(data: {
   if (!schoolIds.includes(data.schoolId)) {
     throw new Error("No tienes acceso a esta escuela");
   }
+
+  // Verificar límite del plan de suscripción
+  const user = await getCurrentUser();
+  await validateCourseCreation(user.id, data.schoolId);
 
   const course = await prisma.course.create({
     data,

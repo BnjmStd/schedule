@@ -92,11 +92,15 @@ async function testCongruency() {
       include: {
         scheduleBlocks: {
           include: {
-            course: {
-              select: {
-                id: true,
-                name: true,
-                academicLevel: true,
+            schedule: {
+              include: {
+                course: {
+                  select: {
+                    id: true,
+                    name: true,
+                    academicLevel: true,
+                  },
+                },
               },
             },
           },
@@ -116,7 +120,7 @@ async function testCongruency() {
 
       // Obtener niveles académicos únicos
       const courseLevels = new Set(
-        teacher.scheduleBlocks.map((b) => b.course.academicLevel),
+        teacher.scheduleBlocks.map((b) => b.schedule.course.academicLevel),
       );
 
       if (courseLevels.size > 1) {
@@ -125,8 +129,8 @@ async function testCongruency() {
 
         for (const level of courseLevels) {
           const courses = teacher.scheduleBlocks
-            .filter((b) => b.course.academicLevel === level)
-            .map((b) => b.course.name);
+            .filter((b) => b.schedule.course.academicLevel === level)
+            .map((b) => b.schedule.course.name);
 
           const uniqueCourses = Array.from(new Set(courses));
           console.log(`       - ${level}: ${uniqueCourses.length} cursos`);

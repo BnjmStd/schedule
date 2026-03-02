@@ -366,7 +366,7 @@ async function main() {
       // Lunes
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: matematicas.id,
         teacherId: mariaGonzalez.id,
         dayOfWeek: "MONDAY",
@@ -378,7 +378,7 @@ async function main() {
       },
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: lenguaje.id,
         teacherId: anaTorres.id,
         dayOfWeek: "MONDAY",
@@ -390,7 +390,7 @@ async function main() {
       },
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: historia.id,
         teacherId: pedroRamirez.id,
         dayOfWeek: "MONDAY",
@@ -403,7 +403,7 @@ async function main() {
       // Martes
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: fisica.id,
         teacherId: mariaGonzalez.id,
         dayOfWeek: "TUESDAY",
@@ -415,7 +415,7 @@ async function main() {
       },
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: ingles.id,
         teacherId: johnSmith.id,
         dayOfWeek: "TUESDAY",
@@ -428,7 +428,7 @@ async function main() {
       // Miércoles
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: matematicas.id,
         teacherId: mariaGonzalez.id,
         dayOfWeek: "WEDNESDAY",
@@ -440,7 +440,7 @@ async function main() {
       },
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: quimica.id,
         teacherId: lauraFernandez.id,
         dayOfWeek: "WEDNESDAY",
@@ -453,7 +453,7 @@ async function main() {
       // Jueves
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: lenguaje.id,
         teacherId: anaTorres.id,
         dayOfWeek: "THURSDAY",
@@ -465,7 +465,7 @@ async function main() {
       },
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: historia.id,
         teacherId: pedroRamirez.id,
         dayOfWeek: "THURSDAY",
@@ -478,7 +478,7 @@ async function main() {
       // Viernes
       {
         scheduleId: schedule1A.id,
-        courseId: curso1A.id,
+        academicYear: 2025,
         subjectId: matematicas.id,
         teacherId: mariaGonzalez.id,
         dayOfWeek: "FRIDAY",

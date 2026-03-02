@@ -5,7 +5,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getUserSchoolIds } from "@/lib/auth-helpers";
+import { getUserSchoolIds, getCurrentUser } from "@/lib/auth-helpers";
+import { validateTeacherCreation } from "@/lib/billing";
 import { revalidatePath } from "next/cache";
 
 export async function getTeachers() {
@@ -76,12 +77,16 @@ export async function createTeacher(data: {
   phone?: string;
   specialization?: string;
 }) {
+  const user = await getCurrentUser();
   const schoolIds = await getUserSchoolIds();
 
   // Verificar que el usuario tiene acceso a esta escuela
   if (!schoolIds.includes(data.schoolId)) {
     throw new Error("No tienes acceso a esta escuela");
   }
+
+  // 💳 Validar límites de suscripción antes de crear
+  await validateTeacherCreation(user.id, data.schoolId);
 
   const teacher = await prisma.teacher.create({
     data,
@@ -120,29 +125,33 @@ export async function updateTeacher(
 export async function deleteTeacher(id: string) {
   const schoolIds = await getUserSchoolIds();
 
-  // Eliminar registros relacionados primero para evitar violación de FK
-  // 1. Eliminar bloques de horario donde este profesor está asignado
-  await prisma.scheduleBlock.deleteMany({
-    where: {
-      teacherId: id,
-    },
-  });
-
-  // 2. Eliminar disponibilidad del profesor
-  await prisma.teacherAvailability.deleteMany({
-    where: {
-      teacherId: id,
-    },
-  });
-
-  // 3. Ahora sí podemos eliminar el profesor
-  await prisma.teacher.delete({
+  // 1. Verificar que el profesor pertenece a uno de los colegios del usuario ANTES
+  //    de eliminar cualquier dato relacionado (evita bypass de autorización)
+  const teacher = await prisma.teacher.findFirst({
     where: {
       id,
       schoolId: {
         in: schoolIds,
       },
     },
+  });
+
+  if (!teacher) {
+    throw new Error("No tienes acceso a este profesor");
+  }
+
+  // 2. Eliminar registros relacionados para evitar violación de FK
+  await prisma.scheduleBlock.deleteMany({
+    where: { teacherId: id },
+  });
+
+  await prisma.teacherAvailability.deleteMany({
+    where: { teacherId: id },
+  });
+
+  // 3. Eliminar el profesor
+  await prisma.teacher.delete({
+    where: { id },
   });
 
   revalidatePath("/teachers");
@@ -437,9 +446,13 @@ export async function hasTeacherScheduleConflict(
       ...(excludeBlockId ? { NOT: { id: excludeBlockId } } : {}),
     },
     include: {
-      course: {
+      schedule: {
         include: {
-          school: true,
+          course: {
+            include: {
+              school: true,
+            },
+          },
         },
       },
     },
@@ -457,9 +470,9 @@ export async function hasTeacherScheduleConflict(
   return {
     hasConflict: true,
     conflictingBlocks: overlapping.map((block) => ({
-      courseId: block.courseId,
-      courseName: block.course.name,
-      schoolName: block.course.school.name,
+      courseId: block.schedule.courseId,
+      courseName: block.schedule.course.name,
+      schoolName: block.schedule.course.school.name,
       startTime: block.startTime,
       endTime: block.endTime,
     })),

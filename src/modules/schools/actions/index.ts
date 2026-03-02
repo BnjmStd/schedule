@@ -14,6 +14,7 @@ import {
   getUserSchoolIds,
   userHasAccessToSchool,
 } from "@/lib/auth-helpers";
+import { validateSchoolCreation } from "@/lib/billing";
 import { CreateSchoolInput, UpdateSchoolInput, School } from "@/types";
 
 export async function getSchools(): Promise<School[]> {
@@ -59,6 +60,9 @@ export async function getSchoolById(id: string): Promise<School | null> {
 
 export async function createSchool(data: CreateSchoolInput): Promise<School> {
   const user = await getCurrentUser();
+
+  // 💳 Validar límites de suscripción antes de crear
+  await validateSchoolCreation(user.id);
 
   const school = await prisma.school.create({
     data: {
@@ -114,7 +118,8 @@ export async function updateSchool(
       updatedAt: school.updatedAt,
     };
   } catch (error) {
-    return null;
+    console.error("[updateSchool] Error:", error);
+    throw error;
   }
 }
 
@@ -132,7 +137,8 @@ export async function deleteSchool(id: string): Promise<boolean> {
     revalidatePath("/schools");
     return true;
   } catch (error) {
-    return false;
+    console.error("[deleteSchool] Error:", error);
+    throw error;
   }
 }
 

@@ -25,10 +25,10 @@ export async function getScheduleConfigForEntity(
   // Buscar todos los cursos a los que está asignado el profesor
   const blocks = await prisma.scheduleBlock.findMany({
     where: { teacherId: entityId },
-    include: { course: true },
+    include: { schedule: { include: { course: true } } },
   });
   const courseIds = Array.from(
-    new Set(blocks.map((b) => b.course?.id).filter(Boolean)),
+    new Set(blocks.map((b) => b.schedule?.course?.id).filter(Boolean)),
   ) as string[];
 
   // Si el profesor tiene cursos asignados, obtener la jornada más temprana de esos cursos

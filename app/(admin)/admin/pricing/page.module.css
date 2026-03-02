@@ -1,0 +1,347 @@
+/* Admin Pricing — CSS Modules */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 1100px;
+}
+
+/* ── Notice bar ─────────────────────────────────────────────── */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(13, 139, 255, 0.07);
+  border: 1px solid rgba(13, 139, 255, 0.2);
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+}
+
+.noticeIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.0625rem;
+}
+
+.notice strong {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.code {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+  color: #4db8ff;
+}
+
+/* ── Mobile plan cards ──────────────────────────────────────── */
+.mobilePlanCards {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.planCard {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.875rem;
+  padding: 1.125rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* Plan accent borders */
+.planAccentFree {
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.planAccentPro {
+  border-top: 2px solid #3aa6ff;
+}
+
+.planAccentEnt {
+  border-top: 2px solid #a855f7;
+}
+
+.planCardHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.planName {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.planPrice {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3aa6ff;
+}
+
+.planSubtitle {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: -0.5rem;
+}
+
+/* Limit rows */
+.limitGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+}
+
+.limitRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.limitIcon {
+  font-size: 0.875rem;
+  width: 1.125rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.limitLabel {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.limitValue {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9375rem;
+}
+
+/* Feature rows */
+.featureGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  padding: 0.25rem 0;
+}
+
+.featureEnabled {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.featureDisabled {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.featureCheck {
+  font-size: 0.875rem;
+  width: 1.25rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.featureLabelMobile {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* ── Desktop comparison table ───────────────────────────────── */
+.tableCard {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.875rem;
+  overflow: hidden;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+/* Header */
+.table thead tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.featureCol {
+  width: 40%;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.planCol {
+  width: 20%;
+  padding: 0.875rem 1rem;
+  text-align: center;
+  vertical-align: bottom;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Accent border on plan columns */
+.planAccentFree + .planCol,
+.planAccentPro + .planCol,
+.planAccentEnt + .planCol {
+  /* handled via separate classes */
+}
+
+th.planAccentFree {
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+th.planAccentPro {
+  border-top: 2px solid #3aa6ff;
+  background: rgba(13, 139, 255, 0.04);
+}
+
+th.planAccentEnt {
+  border-top: 2px solid #a855f7;
+  background: rgba(168, 85, 247, 0.04);
+}
+
+.thContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.thPlanName {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.thPrice {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+}
+
+/* Section label rows */
+.sectionLabel {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Data rows */
+.tableRow:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tableRow td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.tableRow:last-child td {
+  border-bottom: none;
+}
+
+.featureName {
+  padding: 0.6875rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.featureNameIcon {
+  font-size: 0.9375rem;
+  margin-top: 0.0625rem;
+  flex-shrink: 0;
+}
+
+.featureNameText {
+  display: block;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.featureDesc {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1.4;
+}
+
+.planValue {
+  padding: 0.6875rem 1rem;
+  text-align: center;
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.numericValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.checkYes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 50%;
+  color: #4ade80;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.checkNo {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .mobilePlanCards {
+    display: flex;
+  }
+
+  .tableCard {
+    display: none;
+  }
+}

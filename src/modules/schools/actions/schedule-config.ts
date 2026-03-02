@@ -355,7 +355,9 @@ export async function validateScheduleCongruency(schoolId: string) {
     include: {
       scheduleBlocks: {
         include: {
-          course: true,
+          schedule: {
+            include: { course: true },
+          },
         },
       },
     },
@@ -367,7 +369,7 @@ export async function validateScheduleCongruency(schoolId: string) {
 
     // Obtener niveles académicos únicos de sus cursos
     const courseLevels = new Set(
-      teacher.scheduleBlocks.map((b) => b.course.academicLevel),
+      teacher.scheduleBlocks.map((b) => b.schedule.course.academicLevel),
     );
 
     // Si tiene cursos de múltiples niveles, verificar compatibilidad

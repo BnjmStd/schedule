@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { revalidatePath } from "next/cache";
+import { requireFeature } from "@/lib/billing";
 import {
   validateTeacherSchedule,
   hasTeacherScheduleConflict,
@@ -190,8 +191,9 @@ export async function getSchedulesForTeacher(teacherId: string) {
       },
       include: {
         subject: true,
-        course: true,
-        schedule: true,
+        schedule: {
+          include: { course: true },
+        },
       },
       orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
     });
@@ -373,7 +375,6 @@ export async function saveSchedule(data: {
         await prisma.scheduleBlock.create({
           data: {
             scheduleId: schedule.id,
-            courseId,
             subjectId: subject.id,
             teacherId: blockTeacherId,
             dayOfWeek: block.day,
@@ -381,6 +382,7 @@ export async function saveSchedule(data: {
             startTime: block.startTime,
             endTime: block.endTime,
             duration,
+            academicYear,
           },
         });
       }
@@ -450,7 +452,6 @@ export async function saveSchedule(data: {
         await prisma.scheduleBlock.create({
           data: {
             scheduleId: schedule.id,
-            courseId: blockCourseId,
             subjectId: subject.id,
             teacherId,
             dayOfWeek: block.day,
@@ -458,6 +459,7 @@ export async function saveSchedule(data: {
             startTime: block.startTime,
             endTime: block.endTime,
             duration,
+            academicYear,
           },
         });
       }
@@ -552,6 +554,9 @@ export async function generateAndSaveSchedule(
   if (!session?.id) {
     throw new Error("No autorizado");
   }
+
+  // Verificar que el usuario tiene acceso a la generación automática (plan PRO+)
+  await requireFeature(session.id, "autoScheduleGeneration", "Generación automática de horarios");
 
   console.log("[generateAndSaveSchedule] Iniciando generación automática");
 
