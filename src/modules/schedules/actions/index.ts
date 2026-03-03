@@ -556,7 +556,11 @@ export async function generateAndSaveSchedule(
   }
 
   // Verificar que el usuario tiene acceso a la generación automática (plan PRO+)
-  await requireFeature(session.id, "autoScheduleGeneration", "Generación automática de horarios");
+  await requireFeature(
+    session.id,
+    "autoScheduleGeneration",
+    "Generación automática de horarios",
+  );
 
   console.log("[generateAndSaveSchedule] Iniciando generación automática");
 

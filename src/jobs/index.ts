@@ -16,4 +16,7 @@
  *   2. Directamente en tests o scripts de mantenimiento
  */
 
-export { run as runExpireSubscriptions, JOB_NAME as EXPIRE_SUBSCRIPTIONS } from "./cron/expire-subscriptions";
+export {
+  run as runExpireSubscriptions,
+  JOB_NAME as EXPIRE_SUBSCRIPTIONS,
+} from "./cron/expire-subscriptions";

@@ -45,7 +45,10 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Usuario no encontrado" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({ user });
@@ -75,13 +78,21 @@ export async function PATCH(
     }
 
     if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ error: "No hay campos válidos para actualizar" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No hay campos válidos para actualizar" },
+        { status: 400 },
+      );
     }
 
     // Validar rol si se quiere cambiar
-    if (updates.role && !ALLOWED_ROLES.includes(updates.role as (typeof ALLOWED_ROLES)[number])) {
+    if (
+      updates.role &&
+      !ALLOWED_ROLES.includes(updates.role as (typeof ALLOWED_ROLES)[number])
+    ) {
       return NextResponse.json(
-        { error: `Rol inválido. Valores permitidos: ${ALLOWED_ROLES.join(", ")}` },
+        {
+          error: `Rol inválido. Valores permitidos: ${ALLOWED_ROLES.join(", ")}`,
+        },
         { status: 400 },
       );
     }

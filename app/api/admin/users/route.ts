@@ -15,7 +15,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-    const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize") ?? 20)));
+    const pageSize = Math.min(
+      50,
+      Math.max(1, Number(searchParams.get("pageSize") ?? 20)),
+    );
     const search = searchParams.get("search")?.trim() ?? "";
     const role = searchParams.get("role") ?? "";
     const plan = searchParams.get("plan") ?? "";

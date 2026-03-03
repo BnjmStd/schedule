@@ -28,7 +28,9 @@ function isAuthorized(request: NextRequest): boolean {
   if (!CRON_SECRET) {
     // Si no está configurado el secret, solo permitir en desarrollo local
     if (process.env.NODE_ENV === "development") return true;
-    console.error("[cron/expire-subscriptions] CRON_SECRET no está configurado en producción");
+    console.error(
+      "[cron/expire-subscriptions] CRON_SECRET no está configurado en producción",
+    );
     return false;
   }
 
@@ -63,7 +65,8 @@ export async function GET(request: NextRequest) {
       { status: statusCode },
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Error desconocido";
+    const message =
+      error instanceof Error ? error.message : "Error desconocido";
     console.error("[cron/expire-subscriptions] Error fatal:", message);
 
     return NextResponse.json(

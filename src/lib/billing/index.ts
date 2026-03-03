@@ -22,5 +22,11 @@ export type {
   SubscriptionLimitError,
 } from "./subscription";
 
-export { getPlanFeatures, isFeatureInPlan, planAtLeast, PLAN_LABELS, PLAN_ORDER } from "@/config/plans";
+export {
+  getPlanFeatures,
+  isFeatureInPlan,
+  planAtLeast,
+  PLAN_LABELS,
+  PLAN_ORDER,
+} from "@/config/plans";
 export type { PlanFeatures } from "@/config/plans";

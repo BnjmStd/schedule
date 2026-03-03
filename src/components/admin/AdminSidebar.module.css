@@ -60,7 +60,9 @@
   padding: 0.375rem;
   border-radius: 0.375rem;
   line-height: 1;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .closeBtn:hover {
@@ -89,7 +91,9 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   position: relative;
 }
 
@@ -150,7 +154,9 @@
   text-decoration: none;
   font-size: 0.8125rem;
   color: rgba(255, 255, 255, 0.35);
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .backLink:hover {

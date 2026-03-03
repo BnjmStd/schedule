@@ -54,7 +54,13 @@ function statusClass(status: string) {
 
 export default function AdminUsersPage() {
   return (
-    <Suspense fallback={<div style={{ padding: "2rem", color: "rgba(255,255,255,0.4)" }}>Cargando…</div>}>
+    <Suspense
+      fallback={
+        <div style={{ padding: "2rem", color: "rgba(255,255,255,0.4)" }}>
+          Cargando…
+        </div>
+      }
+    >
       <AdminUsersContent />
     </Suspense>
   );
@@ -135,7 +141,11 @@ function AdminUsersContent() {
   return (
     <div className={styles.page}>
       {/* ── Filters ─────────────────────────────────────────── */}
-      <div className={styles.filters} role="search" aria-label="Filtros de usuarios">
+      <div
+        className={styles.filters}
+        role="search"
+        aria-label="Filtros de usuarios"
+      >
         <input
           type="search"
           className={styles.searchInput}
@@ -176,7 +186,12 @@ function AdminUsersContent() {
       {roleError && (
         <div className={styles.errorBanner} role="alert">
           ⚠️ {roleError}
-          <button onClick={() => setRoleError(null)} className={styles.dismissBtn}>✕</button>
+          <button
+            onClick={() => setRoleError(null)}
+            className={styles.dismissBtn}
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -198,10 +213,14 @@ function AdminUsersContent() {
               <thead>
                 <tr>
                   <th scope="col">Usuario</th>
-                  <th scope="col" className={styles.hideOnMobile}>Colegios</th>
+                  <th scope="col" className={styles.hideOnMobile}>
+                    Colegios
+                  </th>
                   <th scope="col">Rol</th>
                   <th scope="col">Plan</th>
-                  <th scope="col" className={styles.hideOnTablet}>Registro</th>
+                  <th scope="col" className={styles.hideOnTablet}>
+                    Registro
+                  </th>
                   <th scope="col">Acciones</th>
                 </tr>
               </thead>
@@ -215,17 +234,23 @@ function AdminUsersContent() {
                     <td>
                       <div className={styles.userCell}>
                         <div className={styles.avatar} aria-hidden="true">
-                          {(user.name ?? user.email).substring(0, 2).toUpperCase()}
+                          {(user.name ?? user.email)
+                            .substring(0, 2)
+                            .toUpperCase()}
                         </div>
                         <div>
-                          <div className={styles.userName}>{user.name ?? "—"}</div>
+                          <div className={styles.userName}>
+                            {user.name ?? "—"}
+                          </div>
                           <div className={styles.userEmail}>{user.email}</div>
                         </div>
                       </div>
                     </td>
 
                     <td className={styles.hideOnMobile}>
-                      <span className={styles.countBadge}>{user._count.schools}</span>
+                      <span className={styles.countBadge}>
+                        {user._count.schools}
+                      </span>
                     </td>
 
                     <td>
@@ -263,26 +288,29 @@ function AdminUsersContent() {
                             user.role === "super_admin"
                               ? styles.roleSuperAdmin
                               : user.role === "admin"
-                              ? styles.roleAdmin
-                              : styles.roleUser
+                                ? styles.roleAdmin
+                                : styles.roleUser
                           }`}
                         >
                           {user.role === "super_admin"
                             ? "Super Admin"
                             : user.role === "admin"
-                            ? "Admin"
-                            : "User"}
+                              ? "Admin"
+                              : "User"}
                         </span>
                       )}
                     </td>
 
                     <td>
                       <div className={styles.planCell}>
-                        <span className={`${styles.planBadge} ${planClass(user.subscription?.plan ?? "FREE")}`}>
+                        <span
+                          className={`${styles.planBadge} ${planClass(user.subscription?.plan ?? "FREE")}`}
+                        >
                           {user.subscription?.plan ?? "FREE"}
                         </span>
                         {user.subscription && (
-                          <span className={`${styles.statusDot} ${statusClass(user.subscription.status)}`}
+                          <span
+                            className={`${styles.statusDot} ${statusClass(user.subscription.status)}`}
                             title={user.subscription.status}
                             aria-label={`Estado: ${user.subscription.status}`}
                           />
@@ -291,7 +319,9 @@ function AdminUsersContent() {
                     </td>
 
                     <td className={styles.hideOnTablet}>
-                      <span className={styles.dateText}>{formatDate(user.createdAt)}</span>
+                      <span className={styles.dateText}>
+                        {formatDate(user.createdAt)}
+                      </span>
                     </td>
 
                     <td>
@@ -331,10 +361,7 @@ function AdminUsersContent() {
 
           <div className={styles.pageNumbers}>
             {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-              const num = Math.min(
-                Math.max(page - 2 + i, 1),
-                data.totalPages,
-              );
+              const num = Math.min(Math.max(page - 2 + i, 1), data.totalPages);
               return (
                 <button
                   key={num}

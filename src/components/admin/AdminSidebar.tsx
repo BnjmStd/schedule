@@ -14,8 +14,18 @@ import styles from "./AdminSidebar.module.css";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: "📊", exact: true },
   { href: "/admin/users", label: "Usuarios", icon: "👥", exact: false },
-  { href: "/admin/subscriptions", label: "Suscripciones", icon: "💳", exact: false },
-  { href: "/admin/pricing", label: "Planes & Precios", icon: "💰", exact: false },
+  {
+    href: "/admin/subscriptions",
+    label: "Suscripciones",
+    icon: "💳",
+    exact: false,
+  },
+  {
+    href: "/admin/pricing",
+    label: "Planes & Precios",
+    icon: "💰",
+    exact: false,
+  },
 ] as const;
 
 interface AdminSidebarProps {
@@ -67,9 +77,13 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
               href={item.href}
               className={`${styles.navLink} ${isActive(item.href, item.exact) ? styles.navLinkActive : ""}`}
               onClick={() => setMobileOpen(false)}
-              aria-current={isActive(item.href, item.exact) ? "page" : undefined}
+              aria-current={
+                isActive(item.href, item.exact) ? "page" : undefined
+              }
             >
-              <span className={styles.navIcon} aria-hidden="true">{item.icon}</span>
+              <span className={styles.navIcon} aria-hidden="true">
+                {item.icon}
+              </span>
               <span className={styles.navLabel}>{item.label}</span>
               {isActive(item.href, item.exact) && (
                 <span className={styles.activeIndicator} aria-hidden="true" />
@@ -84,7 +98,11 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
 
       {/* Link de regreso a la app */}
       <div className={styles.navBottom}>
-        <Link href="/dashboard" className={styles.backLink} onClick={() => setMobileOpen(false)}>
+        <Link
+          href="/dashboard"
+          className={styles.backLink}
+          onClick={() => setMobileOpen(false)}
+        >
           <span aria-hidden="true">← </span>
           Volver a la App
         </Link>
@@ -130,7 +148,9 @@ export function AdminSidebar({ userName, userRole }: AdminSidebarProps) {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className={`${styles.mobileSidebar} ${styles.mobileSidebarOpen}`}>
+          <div
+            className={`${styles.mobileSidebar} ${styles.mobileSidebarOpen}`}
+          >
             {sidebarContent}
           </div>
         </>

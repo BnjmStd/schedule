@@ -179,7 +179,7 @@ export interface TeacherAvailabilityException {
   teacherId: string;
   date: Date;
   startTime?: string; // null = all-day
-  endTime?: string;   // null = all-day
+  endTime?: string; // null = all-day
   isAvailable: boolean; // false = blocked, true = extra availability
   reason?: string;
   createdAt: Date;

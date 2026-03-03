@@ -31,7 +31,14 @@ interface SubsResponse {
 }
 
 const PLANS = ["FREE", "PRO", "ENTERPRISE"] as const;
-const STATUSES = ["ACTIVE", "TRIALING", "PAST_DUE", "CANCELED", "EXPIRED", "INCOMPLETE"] as const;
+const STATUSES = [
+  "ACTIVE",
+  "TRIALING",
+  "PAST_DUE",
+  "CANCELED",
+  "EXPIRED",
+  "INCOMPLETE",
+] as const;
 
 // ── Helpers ───────────────────────────────────────────────────
 
@@ -151,7 +158,11 @@ export default function AdminSubscriptionsPage() {
   return (
     <div className={styles.page}>
       {/* ── Filters ─────────────────────────────────────────── */}
-      <div className={styles.filters} role="search" aria-label="Filtros de suscripciones">
+      <div
+        className={styles.filters}
+        role="search"
+        aria-label="Filtros de suscripciones"
+      >
         <input
           type="search"
           className={styles.searchInput}
@@ -167,7 +178,11 @@ export default function AdminSubscriptionsPage() {
           aria-label="Filtrar por plan"
         >
           <option value="">Todos los planes</option>
-          {PLANS.map((p) => <option key={p} value={p}>{p}</option>)}
+          {PLANS.map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
         </select>
         <select
           className={styles.filterSelect}
@@ -176,7 +191,11 @@ export default function AdminSubscriptionsPage() {
           aria-label="Filtrar por estado"
         >
           <option value="">Todos los estados</option>
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
         {data && (
           <span className={styles.resultCount} aria-live="polite">
@@ -189,7 +208,9 @@ export default function AdminSubscriptionsPage() {
       {error && (
         <div className={styles.errorBanner} role="alert">
           ⚠️ {error}
-          <button className={styles.dismissBtn} onClick={() => setError(null)}>✕</button>
+          <button className={styles.dismissBtn} onClick={() => setError(null)}>
+            ✕
+          </button>
         </div>
       )}
       {successMsg && (
@@ -218,8 +239,12 @@ export default function AdminSubscriptionsPage() {
                   <th scope="col">Usuario</th>
                   <th scope="col">Plan</th>
                   <th scope="col">Estado</th>
-                  <th scope="col" className={styles.hideOnMobile}>Expira</th>
-                  <th scope="col" className={styles.hideOnMobile}>Colegios</th>
+                  <th scope="col" className={styles.hideOnMobile}>
+                    Expira
+                  </th>
+                  <th scope="col" className={styles.hideOnMobile}>
+                    Colegios
+                  </th>
                   <th scope="col">Acciones</th>
                 </tr>
               </thead>
@@ -233,11 +258,17 @@ export default function AdminSubscriptionsPage() {
                     <td>
                       <div className={styles.userCell}>
                         <div className={styles.avatar} aria-hidden="true">
-                          {(sub.user.name ?? sub.user.email).substring(0, 2).toUpperCase()}
+                          {(sub.user.name ?? sub.user.email)
+                            .substring(0, 2)
+                            .toUpperCase()}
                         </div>
                         <div>
-                          <div className={styles.userName}>{sub.user.name ?? "—"}</div>
-                          <div className={styles.userEmail}>{sub.user.email}</div>
+                          <div className={styles.userName}>
+                            {sub.user.name ?? "—"}
+                          </div>
+                          <div className={styles.userEmail}>
+                            {sub.user.email}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -251,10 +282,16 @@ export default function AdminSubscriptionsPage() {
                           onChange={(e) => setEditPlan(e.target.value)}
                           aria-label="Seleccionar plan"
                         >
-                          {PLANS.map((p) => <option key={p} value={p}>{p}</option>)}
+                          {PLANS.map((p) => (
+                            <option key={p} value={p}>
+                              {p}
+                            </option>
+                          ))}
                         </select>
                       ) : (
-                        <span className={`${styles.planBadge} ${planClass(sub.plan)}`}>
+                        <span
+                          className={`${styles.planBadge} ${planClass(sub.plan)}`}
+                        >
                           {sub.plan}
                         </span>
                       )}
@@ -269,10 +306,16 @@ export default function AdminSubscriptionsPage() {
                           onChange={(e) => setEditStatus(e.target.value)}
                           aria-label="Seleccionar estado"
                         >
-                          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                          {STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
                         </select>
                       ) : (
-                        <span className={`${styles.statusBadge} ${statusClass(sub.status)}`}>
+                        <span
+                          className={`${styles.statusBadge} ${statusClass(sub.status)}`}
+                        >
                           {sub.status}
                         </span>
                       )}
@@ -280,12 +323,16 @@ export default function AdminSubscriptionsPage() {
 
                     {/* Expira */}
                     <td className={styles.hideOnMobile}>
-                      <span className={styles.dateText}>{formatDate(sub.currentPeriodEnd)}</span>
+                      <span className={styles.dateText}>
+                        {formatDate(sub.currentPeriodEnd)}
+                      </span>
                     </td>
 
                     {/* Colegios */}
                     <td className={styles.hideOnMobile}>
-                      <span className={styles.countBadge}>{sub.user._count.schools}</span>
+                      <span className={styles.countBadge}>
+                        {sub.user._count.schools}
+                      </span>
                     </td>
 
                     {/* Acciones */}
@@ -303,7 +350,12 @@ export default function AdminSubscriptionsPage() {
                           <div className={styles.editBtns}>
                             <button
                               className={styles.saveBtn}
-                              onClick={() => saveEdit(sub.user.id, sub.user.name ?? sub.user.email)}
+                              onClick={() =>
+                                saveEdit(
+                                  sub.user.id,
+                                  sub.user.name ?? sub.user.email,
+                                )
+                              }
                               disabled={saving}
                               aria-label="Guardar cambios"
                             >

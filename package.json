@@ -20,8 +20,8 @@
     "db:studio": "prisma studio",
     "migrate:postgres": "node migrate-sqlite-to-postgres.mjs",
     "migrate:setup": "node migrate-db.mjs",
-    "format": "prettier --write ."
-    ,"create:admin": "tsx script/create-admin.ts"
+    "format": "prettier --write .",
+    "create:admin": "tsx script/create-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -57,4 +57,3 @@
     "typescript": "^5"
   }
 }
-

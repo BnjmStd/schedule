@@ -47,9 +47,10 @@ export async function getAdminSession(): Promise<SessionData | null> {
 /**
  * Reusable JSON error responses para API routes de admin.
  */
-export function adminErrorResponse(
-  error: unknown,
-): { body: object; status: number } {
+export function adminErrorResponse(error: unknown): {
+  body: object;
+  status: number;
+} {
   if (error instanceof Error) {
     if (error.message === "UNAUTHENTICATED") {
       return { body: { error: "No autorizado" }, status: 401 };

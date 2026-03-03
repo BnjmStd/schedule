@@ -13,7 +13,11 @@ import styles from "./page.module.css";
 // ── Feature definitions with metadata ────────────────────────
 
 const NUMERIC_FEATURES: Array<{
-  key: "maxSchools" | "maxTeachersPerSchool" | "maxCoursesPerSchool" | "maxSubjectsPerSchool";
+  key:
+    | "maxSchools"
+    | "maxTeachersPerSchool"
+    | "maxCoursesPerSchool"
+    | "maxSubjectsPerSchool";
   label: string;
   icon: string;
   description: string;
@@ -69,7 +73,8 @@ const BOOLEAN_FEATURES: Array<{
     key: "advancedConflictDetection",
     label: "Detección avanzada de conflictos",
     icon: "🔍",
-    description: "Detección de colisiones cross-colegio para profesores compartidos",
+    description:
+      "Detección de colisiones cross-colegio para profesores compartidos",
   },
   {
     key: "exportPDF",
@@ -152,7 +157,9 @@ export default function AdminPricingPage() {
     <div className={styles.page}>
       {/* ── Notice ──────────────────────────────────────────── */}
       <div className={styles.notice} role="note">
-        <span className={styles.noticeIcon} aria-hidden="true">ℹ️</span>
+        <span className={styles.noticeIcon} aria-hidden="true">
+          ℹ️
+        </span>
         <div>
           <strong>Fuente de verdad:</strong> Estos límites provienen de{" "}
           <code className={styles.code}>src/config/plans.ts</code>. Para
@@ -177,9 +184,13 @@ export default function AdminPricingPage() {
             <div className={styles.limitGroup}>
               {NUMERIC_FEATURES.map(({ key, label, icon }) => (
                 <div key={key} className={styles.limitRow}>
-                  <span className={styles.limitIcon} aria-hidden="true">{icon}</span>
+                  <span className={styles.limitIcon} aria-hidden="true">
+                    {icon}
+                  </span>
                   <span className={styles.limitLabel}>{label}</span>
-                  <span className={styles.limitValue}>{formatLimit(features[key])}</span>
+                  <span className={styles.limitValue}>
+                    {formatLimit(features[key])}
+                  </span>
                 </div>
               ))}
             </div>
@@ -214,10 +225,18 @@ export default function AdminPricingPage() {
                   Característica
                 </th>
                 {plans.map(({ plan }) => (
-                  <th key={plan} scope="col" className={`${styles.planCol} ${PLAN_ACCENTS[plan]}`}>
+                  <th
+                    key={plan}
+                    scope="col"
+                    className={`${styles.planCol} ${PLAN_ACCENTS[plan]}`}
+                  >
                     <div className={styles.thContent}>
-                      <span className={styles.thPlanName}>{PLAN_LABELS[plan]}</span>
-                      <span className={styles.thPrice}>{PLAN_PRICES[plan]}</span>
+                      <span className={styles.thPlanName}>
+                        {PLAN_LABELS[plan]}
+                      </span>
+                      <span className={styles.thPrice}>
+                        {PLAN_PRICES[plan]}
+                      </span>
                     </div>
                   </th>
                 ))}
@@ -234,7 +253,9 @@ export default function AdminPricingPage() {
               {NUMERIC_FEATURES.map(({ key, label, icon, description }) => (
                 <tr key={key} className={styles.tableRow}>
                   <td className={styles.featureName}>
-                    <span className={styles.featureNameIcon} aria-hidden="true">{icon}</span>
+                    <span className={styles.featureNameIcon} aria-hidden="true">
+                      {icon}
+                    </span>
                     <div>
                       <span className={styles.featureNameText}>{label}</span>
                       <span className={styles.featureDesc}>{description}</span>
@@ -259,7 +280,9 @@ export default function AdminPricingPage() {
               {BOOLEAN_FEATURES.map(({ key, label, icon, description }) => (
                 <tr key={key} className={styles.tableRow}>
                   <td className={styles.featureName}>
-                    <span className={styles.featureNameIcon} aria-hidden="true">{icon}</span>
+                    <span className={styles.featureNameIcon} aria-hidden="true">
+                      {icon}
+                    </span>
                     <div>
                       <span className={styles.featureNameText}>{label}</span>
                       <span className={styles.featureDesc}>{description}</span>
@@ -268,9 +291,16 @@ export default function AdminPricingPage() {
                   {plans.map(({ plan, features }) => (
                     <td key={plan} className={styles.planValue}>
                       {features[key] ? (
-                        <span className={styles.checkYes} aria-label="Incluido">✓</span>
+                        <span className={styles.checkYes} aria-label="Incluido">
+                          ✓
+                        </span>
                       ) : (
-                        <span className={styles.checkNo} aria-label="No incluido">—</span>
+                        <span
+                          className={styles.checkNo}
+                          aria-label="No incluido"
+                        >
+                          —
+                        </span>
                       )}
                     </td>
                   ))}

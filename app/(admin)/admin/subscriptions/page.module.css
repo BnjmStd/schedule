@@ -94,7 +94,9 @@
   transition: opacity 0.15s;
 }
 
-.dismissBtn:hover { opacity: 0.7; }
+.dismissBtn:hover {
+  opacity: 0.7;
+}
 
 /* ── Table card ─────────────────────────────────────────────── */
 .tableCard {
@@ -123,7 +125,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .emptyState {
@@ -136,7 +140,9 @@
   text-align: center;
 }
 
-.emptyState span { font-size: 2rem; }
+.emptyState span {
+  font-size: 2rem;
+}
 
 /* ── Table ──────────────────────────────────────────────────── */
 .tableWrapper {
@@ -396,7 +402,9 @@
   font-size: 0.75rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .editBtn:hover {
@@ -420,7 +428,9 @@
   color: rgba(255, 255, 255, 0.55);
   font-size: 0.8125rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .pageBtn:hover:not(:disabled) {

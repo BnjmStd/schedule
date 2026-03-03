@@ -155,9 +155,7 @@ export async function isFeatureEnabled(
  * Valida si el usuario puede crear un nuevo colegio.
  * Lanza SubscriptionLimitError si supera el límite.
  */
-export async function validateSchoolCreation(
-  userId: string,
-): Promise<void> {
+export async function validateSchoolCreation(userId: string): Promise<void> {
   const subscription = await getUserActiveSubscription(userId);
 
   if (!subscription.canCreate) {

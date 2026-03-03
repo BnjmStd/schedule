@@ -96,7 +96,11 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className={styles.loading} aria-busy="true" aria-label="Cargando estadísticas">
+      <div
+        className={styles.loading}
+        aria-busy="true"
+        aria-label="Cargando estadísticas"
+      >
         <div className={styles.spinner} />
         <span>Cargando estadísticas…</span>
       </div>
@@ -106,9 +110,14 @@ export default function AdminDashboardPage() {
   if (error || !stats) {
     return (
       <div className={styles.errorState} role="alert">
-        <span className={styles.errorIcon} aria-hidden="true">⚠️</span>
+        <span className={styles.errorIcon} aria-hidden="true">
+          ⚠️
+        </span>
         <p>{error ?? "No se pudieron cargar las estadísticas."}</p>
-        <button className={styles.retryBtn} onClick={() => window.location.reload()}>
+        <button
+          className={styles.retryBtn}
+          onClick={() => window.location.reload()}
+        >
           Reintentar
         </button>
       </div>
@@ -125,9 +134,13 @@ export default function AdminDashboardPage() {
       {/* ── KPI Cards ──────────────────────────────────────── */}
       <section className={styles.kpiGrid} aria-label="Métricas clave">
         <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} aria-hidden="true">👥</div>
+          <div className={styles.kpiIcon} aria-hidden="true">
+            👥
+          </div>
           <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{stats.totalUsers.toLocaleString()}</span>
+            <span className={styles.kpiValue}>
+              {stats.totalUsers.toLocaleString()}
+            </span>
             <span className={styles.kpiLabel}>Usuarios totales</span>
           </div>
           <div className={styles.kpiChip}>
@@ -136,9 +149,13 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} aria-hidden="true">✅</div>
+          <div className={styles.kpiIcon} aria-hidden="true">
+            ✅
+          </div>
           <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{stats.subscriptions.active.toLocaleString()}</span>
+            <span className={styles.kpiValue}>
+              {stats.subscriptions.active.toLocaleString()}
+            </span>
             <span className={styles.kpiLabel}>Suscripciones activas</span>
           </div>
           <div className={styles.kpiChip}>
@@ -147,23 +164,29 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className={`${styles.kpiCard} ${styles.kpiCardHighlight}`}>
-          <div className={styles.kpiIcon} aria-hidden="true">💰</div>
+          <div className={styles.kpiIcon} aria-hidden="true">
+            💰
+          </div>
           <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{formatCurrency(stats.estimatedMRR)}</span>
+            <span className={styles.kpiValue}>
+              {formatCurrency(stats.estimatedMRR)}
+            </span>
             <span className={styles.kpiLabel}>MRR estimado</span>
           </div>
           <div className={styles.kpiChip}>por mes</div>
         </div>
 
         <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} aria-hidden="true">🏫</div>
+          <div className={styles.kpiIcon} aria-hidden="true">
+            🏫
+          </div>
           <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{stats.totalSchools.toLocaleString()}</span>
+            <span className={styles.kpiValue}>
+              {stats.totalSchools.toLocaleString()}
+            </span>
             <span className={styles.kpiLabel}>Colegios registrados</span>
           </div>
-          <div className={styles.kpiChip}>
-            {stats.totalTeachers} profesores
-          </div>
+          <div className={styles.kpiChip}>{stats.totalTeachers} profesores</div>
         </div>
       </section>
 
@@ -178,7 +201,11 @@ export default function AdminDashboardPage() {
 
         <div className={styles.planDistribution}>
           {/* Barra de distribución */}
-          <div className={styles.planBar} role="img" aria-label="Barra de distribución de planes">
+          <div
+            className={styles.planBar}
+            role="img"
+            aria-label="Barra de distribución de planes"
+          >
             {freeCount > 0 && (
               <div
                 className={`${styles.planBarSegment} ${styles.planBarFree}`}
@@ -207,10 +234,17 @@ export default function AdminDashboardPage() {
             {[
               { label: "FREE", count: freeCount, cls: styles.legendDotFree },
               { label: "PRO", count: proCount, cls: styles.legendDotPro },
-              { label: "ENTERPRISE", count: enterpriseCount, cls: styles.legendDotEnterprise },
+              {
+                label: "ENTERPRISE",
+                count: enterpriseCount,
+                cls: styles.legendDotEnterprise,
+              },
             ].map(({ label, count, cls }) => (
               <div key={label} className={styles.legendItem}>
-                <span className={`${styles.legendDot} ${cls}`} aria-hidden="true" />
+                <span
+                  className={`${styles.legendDot} ${cls}`}
+                  aria-hidden="true"
+                />
                 <span className={styles.legendLabel}>{label}</span>
                 <span className={styles.legendCount}>{count}</span>
                 <span className={styles.legendPct}>
@@ -225,19 +259,31 @@ export default function AdminDashboardPage() {
       {/* ── Accesos rápidos ─────────────────────────────────── */}
       <section className={styles.quickLinks} aria-label="Accesos rápidos">
         <Link href="/admin/users" className={styles.quickLink}>
-          <span className={styles.quickLinkIcon} aria-hidden="true">👥</span>
+          <span className={styles.quickLinkIcon} aria-hidden="true">
+            👥
+          </span>
           <span>Gestionar usuarios</span>
         </Link>
         <Link href="/admin/subscriptions" className={styles.quickLink}>
-          <span className={styles.quickLinkIcon} aria-hidden="true">💳</span>
+          <span className={styles.quickLinkIcon} aria-hidden="true">
+            💳
+          </span>
           <span>Gestionar suscripciones</span>
         </Link>
         <Link href="/admin/pricing" className={styles.quickLink}>
-          <span className={styles.quickLinkIcon} aria-hidden="true">💰</span>
+          <span className={styles.quickLinkIcon} aria-hidden="true">
+            💰
+          </span>
           <span>Ver planes y precios</span>
         </Link>
-        <Link href="/api/cron/expire-subscriptions" className={styles.quickLink} target="_blank">
-          <span className={styles.quickLinkIcon} aria-hidden="true">🔄</span>
+        <Link
+          href="/api/cron/expire-subscriptions"
+          className={styles.quickLink}
+          target="_blank"
+        >
+          <span className={styles.quickLinkIcon} aria-hidden="true">
+            🔄
+          </span>
           <span>Cron: expirar subs</span>
         </Link>
       </section>
@@ -256,9 +302,13 @@ export default function AdminDashboardPage() {
             <thead>
               <tr>
                 <th scope="col">Usuario</th>
-                <th scope="col" className={styles.hideOnMobile}>Rol</th>
+                <th scope="col" className={styles.hideOnMobile}>
+                  Rol
+                </th>
                 <th scope="col">Plan</th>
-                <th scope="col" className={styles.hideOnMobile}>Registro</th>
+                <th scope="col" className={styles.hideOnMobile}>
+                  Registro
+                </th>
                 <th scope="col">Acción</th>
               </tr>
             </thead>
@@ -268,29 +318,46 @@ export default function AdminDashboardPage() {
                   <td>
                     <div className={styles.userCell}>
                       <div className={styles.userInitials} aria-hidden="true">
-                        {(user.name ?? user.email).substring(0, 2).toUpperCase()}
+                        {(user.name ?? user.email)
+                          .substring(0, 2)
+                          .toUpperCase()}
                       </div>
                       <div>
-                        <div className={styles.userName}>{user.name ?? "—"}</div>
+                        <div className={styles.userName}>
+                          {user.name ?? "—"}
+                        </div>
                         <div className={styles.userEmail}>{user.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className={`${styles.roleCell} ${styles.hideOnMobile}`}>
-                    <span className={`${styles.roleBadge} ${user.role === "admin" || user.role === "super_admin" ? styles.roleBadgeAdmin : styles.roleBadgeUser}`}>
-                      {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Admin" : "User"}
+                    <span
+                      className={`${styles.roleBadge} ${user.role === "admin" || user.role === "super_admin" ? styles.roleBadgeAdmin : styles.roleBadgeUser}`}
+                    >
+                      {user.role === "super_admin"
+                        ? "Super Admin"
+                        : user.role === "admin"
+                          ? "Admin"
+                          : "User"}
                     </span>
                   </td>
                   <td>
-                    <span className={`${styles.planBadge} ${planColor(user.subscription?.plan ?? "FREE")}`}>
+                    <span
+                      className={`${styles.planBadge} ${planColor(user.subscription?.plan ?? "FREE")}`}
+                    >
                       {user.subscription?.plan ?? "FREE"}
                     </span>
                   </td>
                   <td className={styles.hideOnMobile}>
-                    <span className={styles.dateCell}>{formatDate(user.createdAt)}</span>
+                    <span className={styles.dateCell}>
+                      {formatDate(user.createdAt)}
+                    </span>
                   </td>
                   <td>
-                    <Link href={`/admin/users?highlight=${user.id}`} className={styles.actionLink}>
+                    <Link
+                      href={`/admin/users?highlight=${user.id}`}
+                      className={styles.actionLink}
+                    >
                       Ver
                     </Link>
                   </td>
@@ -307,12 +374,18 @@ export default function AdminDashboardPage() {
           <h2 className={styles.sectionTitle}>Estado de suscripciones</h2>
         </header>
         <div className={styles.statusGrid}>
-          {Object.entries(stats.subscriptions.byStatus).map(([status, count]) => (
-            <div key={status} className={styles.statusCard}>
-              <span className={`${styles.statusBadge} ${statusColor(status)}`}>{status}</span>
-              <span className={styles.statusCount}>{count}</span>
-            </div>
-          ))}
+          {Object.entries(stats.subscriptions.byStatus).map(
+            ([status, count]) => (
+              <div key={status} className={styles.statusCard}>
+                <span
+                  className={`${styles.statusBadge} ${statusColor(status)}`}
+                >
+                  {status}
+                </span>
+                <span className={styles.statusCount}>{count}</span>
+              </div>
+            ),
+          )}
         </div>
       </section>
     </div>

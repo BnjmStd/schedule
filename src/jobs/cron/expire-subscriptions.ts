@@ -98,7 +98,9 @@ export async function run(): Promise<ExpireSubscriptionsResult> {
 
   if (expired.length === 0) {
     result.durationMs = Date.now() - startedAt;
-    console.log(`[${JOB_NAME}] Nada que procesar. Duración: ${result.durationMs}ms`);
+    console.log(
+      `[${JOB_NAME}] Nada que procesar. Duración: ${result.durationMs}ms`,
+    );
     return result;
   }
 
@@ -111,9 +113,7 @@ export async function run(): Promise<ExpireSubscriptionsResult> {
 
       // Determinar la razón del vencimiento
       const reason =
-        sub.status === "TRIALING"
-          ? "trial_expired"
-          : "period_expired";
+        sub.status === "TRIALING" ? "trial_expired" : "period_expired";
 
       // Actualizar en BD — operación atómica
       await prisma.userSubscription.update({

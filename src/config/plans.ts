@@ -20,21 +20,21 @@ import type { SubscriptionPlan } from "@prisma/client";
 
 export interface PlanFeatures {
   // Límites cuantitativos
-  maxSchools: number;           // Número máximo de colegios que puede crear el usuario
+  maxSchools: number; // Número máximo de colegios que puede crear el usuario
   maxTeachersPerSchool: number; // Profesores por colegio
-  maxCoursesPerSchool: number;  // Cursos por colegio
+  maxCoursesPerSchool: number; // Cursos por colegio
   maxSubjectsPerSchool: number; // Asignaturas por colegio
 
   // Feature flags booleanos
-  autoScheduleGeneration: boolean;  // Generador automático de horarios
+  autoScheduleGeneration: boolean; // Generador automático de horarios
   advancedConflictDetection: boolean; // Detección de colisiones avanzada (cross-school)
-  exportPDF: boolean;               // Exportar horarios a PDF
-  exportExcel: boolean;             // Exportar horarios a Excel/CSV
-  scheduleHistory: boolean;         // Historial de cambios de jornada
+  exportPDF: boolean; // Exportar horarios a PDF
+  exportExcel: boolean; // Exportar horarios a Excel/CSV
+  scheduleHistory: boolean; // Historial de cambios de jornada
   teacherAvailabilityExceptions: boolean; // Excepciones de disponibilidad docente
-  courseSubjectRequirements: boolean;     // Requisitos por asignatura (para generador)
-  apiAccess: boolean;               // Acceso a API externa (futuro)
-  prioritySupport: boolean;         // Soporte prioritario
+  courseSubjectRequirements: boolean; // Requisitos por asignatura (para generador)
+  apiAccess: boolean; // Acceso a API externa (futuro)
+  prioritySupport: boolean; // Soporte prioritario
 }
 
 // ============================================

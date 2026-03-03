@@ -15,7 +15,12 @@ import type { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 
 const VALID_PLANS: SubscriptionPlan[] = ["FREE", "PRO", "ENTERPRISE"];
 const VALID_STATUSES: SubscriptionStatus[] = [
-  "ACTIVE", "TRIALING", "PAST_DUE", "CANCELED", "EXPIRED", "INCOMPLETE",
+  "ACTIVE",
+  "TRIALING",
+  "PAST_DUE",
+  "CANCELED",
+  "EXPIRED",
+  "INCOMPLETE",
 ];
 
 export async function GET(request: NextRequest) {
@@ -24,7 +29,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-    const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize") ?? 20)));
+    const pageSize = Math.min(
+      50,
+      Math.max(1, Number(searchParams.get("pageSize") ?? 20)),
+    );
     const plan = searchParams.get("plan") as SubscriptionPlan | null;
     const status = searchParams.get("status") as SubscriptionStatus | null;
     const search = searchParams.get("search")?.trim() ?? "";
@@ -88,7 +96,12 @@ export async function PATCH(request: NextRequest) {
     const adminSession = await requireAdminSession();
 
     const body = await request.json();
-    const { userId, plan, status: newStatus, reason } = body as {
+    const {
+      userId,
+      plan,
+      status: newStatus,
+      reason,
+    } = body as {
       userId: string;
       plan?: SubscriptionPlan;
       status?: SubscriptionStatus;
@@ -96,7 +109,10 @@ export async function PATCH(request: NextRequest) {
     };
 
     if (!userId) {
-      return NextResponse.json({ error: "userId es requerido" }, { status: 400 });
+      return NextResponse.json(
+        { error: "userId es requerido" },
+        { status: 400 },
+      );
     }
 
     if (plan && !VALID_PLANS.includes(plan)) {
@@ -112,10 +128,16 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Suscripción no encontrada" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Suscripción no encontrada" },
+        { status: 404 },
+      );
     }
 
-    const updateData: Partial<{ plan: SubscriptionPlan; status: SubscriptionStatus }> = {};
+    const updateData: Partial<{
+      plan: SubscriptionPlan;
+      status: SubscriptionStatus;
+    }> = {};
     if (plan) updateData.plan = plan;
     if (newStatus) updateData.status = newStatus;
 

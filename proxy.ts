@@ -62,7 +62,10 @@ export default async function proxy(request: NextRequest) {
       if (!isAdminRole(payload.role)) {
         if (isApiAdminRoute) {
           return NextResponse.json(
-            { error: "Acceso denegado. Se requiere rol de administrador.", code: "FORBIDDEN" },
+            {
+              error: "Acceso denegado. Se requiere rol de administrador.",
+              code: "FORBIDDEN",
+            },
             { status: 403 },
           );
         }

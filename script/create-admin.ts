@@ -67,7 +67,11 @@ async function main() {
           password: hashed,
         },
       });
-      console.log("Updated user:", { id: updated.id, email: updated.email, role: updated.role });
+      console.log("Updated user:", {
+        id: updated.id,
+        email: updated.email,
+        role: updated.role,
+      });
       console.log("Password (plain):", password);
       process.exit(0);
     }
@@ -81,7 +85,11 @@ async function main() {
       },
     });
 
-    console.log("Created user:", { id: user.id, email: user.email, role: user.role });
+    console.log("Created user:", {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
     console.log("Password (plain):", password);
     process.exit(0);
   } catch (err) {

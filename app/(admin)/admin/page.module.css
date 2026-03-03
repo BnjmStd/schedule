@@ -29,7 +29,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .errorState {
@@ -260,7 +262,10 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .quickLink:hover {
