@@ -10,7 +10,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useModal } from "@/contexts/ModalContext";
 import type { School } from "@/types";
-import "../../schools.css";
+import styles from "./schools.module.css";
 
 export default function SchoolsPage() {
   const [schools, setSchools] = useState<School[]>([]);
@@ -58,14 +58,16 @@ export default function SchoolsPage() {
 
   if (isLoading) {
     return (
-      <div className="schools-page">
-        <div className="schools-bg">
-          <div className="schools-gradient" />
+      <div className={styles["schools-page"]}>
+        <div className={styles["schools-bg"]}>
+          <div className={styles["schools-gradient"]} />
         </div>
-        <div className="schools-container">
-          <div className="schools-empty">
-            <div className="schools-empty-icon">⏳</div>
-            <p className="schools-empty-title">Cargando colegios...</p>
+        <div className={styles["schools-container"]}>
+          <div className={styles["schools-empty"]}>
+            <div className={styles["schools-empty-icon"]}>⏳</div>
+            <p className={styles["schools-empty-title"]}>
+              Cargando colegios...
+            </p>
           </div>
         </div>
       </div>
@@ -73,18 +75,18 @@ export default function SchoolsPage() {
   }
 
   return (
-    <div className="schools-page">
-      <div className="schools-bg">
-        <div className="schools-gradient" />
+    <div className={styles["schools-page"]}>
+      <div className={styles["schools-bg"]}>
+        <div className={styles["schools-gradient"]} />
       </div>
 
-      <div className="schools-container">
-        <header className="schools-header">
-          <div className="schools-header-top">
-            <h1 className="schools-title">🏫 Colegios</h1>
+      <div className={styles["schools-container"]}>
+        <header className={styles["schools-header"]}>
+          <div className={styles["schools-header-top"]}>
+            <h1 className={styles["schools-title"]}>🏫 Colegios</h1>
             <AddSchoolButton onSchoolCreated={loadSchools} />
           </div>
-          <p className="schools-description">
+          <p className={styles["schools-description"]}>
             Gestiona los colegios registrados en el sistema. Cada colegio puede
             tener múltiples profesores, cursos y horarios.
           </p>

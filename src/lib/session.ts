@@ -13,7 +13,8 @@ export interface SessionData {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: string; // UserRole enum value
+  schoolId: string | null; // null only for SUPER_ADMIN
 }
 
 // Crear token JWT
@@ -59,6 +60,8 @@ export async function getSession(): Promise<SessionData | null> {
         email: payload.email,
         name: payload.name,
         role: payload.role,
+        schoolId:
+          typeof payload.schoolId === "string" ? payload.schoolId : null,
       };
     }
 

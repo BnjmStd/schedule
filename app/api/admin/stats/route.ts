@@ -32,12 +32,12 @@ export async function GET() {
         where: { createdAt: { gte: thirtyDaysAgo } },
       }),
 
-      prisma.userSubscription.groupBy({
+      prisma.schoolSubscription.groupBy({
         by: ["plan"],
         _count: { plan: true },
       }),
 
-      prisma.userSubscription.groupBy({
+      prisma.schoolSubscription.groupBy({
         by: ["status"],
         _count: { status: true },
       }),
@@ -55,8 +55,12 @@ export async function GET() {
           email: true,
           role: true,
           createdAt: true,
-          subscription: {
-            select: { plan: true, status: true },
+          school: {
+            select: {
+              id: true,
+              name: true,
+              subscription: { select: { plan: true, status: true } },
+            },
           },
         },
       }),
@@ -90,7 +94,7 @@ export async function GET() {
         byPlan,
         byStatus,
         active: (byStatus.ACTIVE ?? 0) + (byStatus.TRIALING ?? 0),
-        total: totalUsers,
+        total: totalSchools, // 1 sub per school
       },
       recentUsers,
     });

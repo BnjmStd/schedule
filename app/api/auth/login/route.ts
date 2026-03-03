@@ -3,6 +3,9 @@ import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
 
+/** Roles that land on the admin panel after login */
+const ADMIN_ROLES = new Set(["OWNER", "ADMIN", "SUPER_ADMIN"]);
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
@@ -14,9 +17,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Buscar usuario
+    // Buscar usuario con su colegio
     const user = await prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        schoolId: true,
+        password: true,
+      },
     });
 
     if (!user) {
@@ -26,9 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar contraseña
     const isValid = await compare(password, user.password);
-
     if (!isValid) {
       return NextResponse.json(
         { error: "Credenciales inválidas" },
@@ -36,13 +45,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear sesión
+    // Crear sesión con schoolId incluido
     await createSession({
       id: user.id,
       email: user.email,
-      name: user.name || "",
+      name: user.name ?? "",
       role: user.role,
+      schoolId: user.schoolId,
     });
+
+    // Determinar ruta de redirección según rol
+    const redirectTo = user.role === "SUPER_ADMIN" ? "/admin" : "/dashboard";
+    // OWNER/ADMIN/STAFF/VIEWER → /dashboard (necesitan schoolId)
+    // SUPER_ADMIN             → /admin     (panel global, sin schoolId)
 
     return NextResponse.json({
       user: {
@@ -50,10 +65,12 @@ export async function POST(request: NextRequest) {
         email: user.email,
         name: user.name,
         role: user.role,
+        schoolId: user.schoolId,
       },
+      redirectTo,
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("[login] Error:", error);
     return NextResponse.json(
       { error: "Error en el servidor" },
       { status: 500 },

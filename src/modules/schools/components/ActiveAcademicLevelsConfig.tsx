@@ -11,7 +11,7 @@ import {
 } from "@/modules/schools/actions";
 import { parseActiveAcademicLevels } from "@/lib/utils/academic-levels";
 import type { AcademicLevel } from "@/types/schedule-config";
-import "@/app/schedule-editor.css";
+import "./schedule-editor.css";
 
 interface ActiveAcademicLevelsConfigProps {
   schoolId: string;

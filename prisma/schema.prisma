@@ -10,25 +10,37 @@ datasource db {
 }
 
 // ============================================
+// 👤 USER ROLES
+// ============================================
+enum UserRole {
+  OWNER       // Dueño del colegio — acceso total, gestiona suscripción
+  ADMIN       // Administrador delegado — acceso total excepto billing
+  STAFF       // Personal — acceso operativo limitado
+  VIEWER      // Solo lectura
+  SUPER_ADMIN // Panel global — no pertenece a un colegio específico
+}
+
+// ============================================
 // 👤 USER & AUTH MODELS
 // ============================================
 model User {
   id            String    @id @default(cuid())
+  // Nullable para SUPER_ADMIN (panel global sin colegio asignado)
+  schoolId      String?
   name          String?
   email         String    @unique
-  emailVerified DateTime?
+  emailVerified DateTime? // Requerido por NextAuth
   password      String
   image         String?
-  role          String    @default("user") // user, admin, super_admin
+  role          UserRole  @default(STAFF)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  schools      UserSchool[]
-  sessions     Session[]
-  subscription UserSubscription? // 1 usuario = 1 suscripción activa
-  billingEvents BillingEvent[]   // Webhooks recibidos para este usuario
+  school   School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  sessions Session[]
 
+  @@index([schoolId])
   @@map("users")
 }
 
@@ -42,25 +54,6 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
-}
-
-// ============================================
-// 🔗 USER-SCHOOL RELATIONSHIP (Multi-tenant)
-// ============================================
-model UserSchool {
-  id        String   @id @default(cuid())
-  userId    String
-  schoolId  String
-  role      String   @default("admin") // admin, teacher, viewer
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, schoolId])
-  @@map("user_schools")
 }
 
 // ============================================
@@ -92,14 +85,17 @@ model School {
   updatedAt DateTime @updatedAt
 
   // Relations
-  users             UserSchool[]
-  teachers          Teacher[]
-  subjects          Subject[]
-  courses           Course[]
-  schedules         Schedule[]
-  levelConfigs      ScheduleLevelConfig[]    // Configuración por nivel académico
-  teacherWorkloads  TeacherWorkloadLimit[]   // Límites de carga docente
-  subjectRequirements CourseSubjectRequirement[] // Requisitos de asignaturas por curso
+  users               User[]
+  teachers            Teacher[]
+  subjects            Subject[]
+  courses             Course[]
+  schedules           Schedule[]
+  levelConfigs        ScheduleLevelConfig[]       // Configuración por nivel académico
+  teacherWorkloads    TeacherWorkloadLimit[]      // Límites de carga docente
+  subjectRequirements CourseSubjectRequirement[]  // Requisitos de asignaturas por curso
+  subscription        SchoolSubscription?         // 1 colegio = 1 suscripción activa
+  billingEvents       BillingEvent[]              // Webhooks de Stripe para este colegio
+  auditLogs           AuditLog[]                  // Registro de auditoría del colegio
 
   @@map("schools")
 }
@@ -467,13 +463,14 @@ model ScheduleBlock {
 // 💳 BILLING & SUBSCRIPTIONS
 //
 // DECISIÓN ARQUITECTÓNICA:
-//   La suscripción es POR USUARIO, no por colegio.
-//   Un usuario puede tener múltiples colegios y la suscripción
-//   controla limits globales (maxSchools, maxTeachers, etc.).
+//   La suscripción es POR COLEGIO (School), no por usuario.
+//   El School es el cliente de la plataforma; sus usuarios son
+//   miembros internos sin capacidad de facturación propia.
 //
 //   PREPARADO PARA ESCALAR a Organization model:
-//     Si en el futuro existe Organization → Subscription,
-//     basta con agregar organizationId aquí y hacer userId opcional.
+//     Si en el futuro existe Organization → Schools → Subscription,
+//     basta con agregar organizationId en School y mover la
+//     SchoolSubscription al nivel de Organization.
 //     El servicio de billing (src/lib/billing/) abstrae esta lógica.
 // ============================================
 
@@ -481,28 +478,34 @@ model ScheduleBlock {
 // en el cliente generado y en los tipos TypeScript automáticamente.
 
 enum SubscriptionPlan {
-  FREE
-  PRO
-  ENTERPRISE
+  FREE        // Acceso gratuito con límites (ej. máx. 5 profesores, 3 cursos)
+  PRO         // Acceso completo, ilimitado
+  ENTERPRISE  // Features avanzadas + soporte dedicado
 }
 
 enum SubscriptionStatus {
   TRIALING   // Período de prueba activo
   ACTIVE     // Suscripción pagada y vigente
   PAST_DUE   // Pago fallido; acceso degradado pero no eliminado
-  CANCELED   // Cancelada por el usuario; datos preservados
+  CANCELED   // Cancelada; datos preservados hasta fin de período
   EXPIRED    // Período terminado sin renovación; degradado a FREE
   INCOMPLETE // Creada pero pago inicial no completado (flujo Stripe)
 }
 
 // ============================================
-// 📦 USER SUBSCRIPTION
-// 1 usuario = 1 fila (unique userId).
+// 📦 SCHOOL SUBSCRIPTION
+// 1 colegio = 1 fila (unique schoolId).
 // El historial de cambios de plan se registra en SubscriptionHistory.
+//
+// REGLAS DE NEGOCIO:
+//   FREE       → limitar profesores/cursos (ver src/config/plans.ts)
+//   PRO        → acceso ilimitado
+//   ENTERPRISE → features avanzadas (reportes, API, soporte)
+//   status != ACTIVE/TRIALING → bloquear creación de recursos
 // ============================================
-model UserSubscription {
-  id     String @id @default(cuid())
-  userId String @unique // Hard constraint: 1 suscripción por usuario
+model SchoolSubscription {
+  id       String @id @default(cuid())
+  schoolId String @unique // Hard constraint: 1 suscripción por colegio
 
   // Estado actual
   plan   SubscriptionPlan   @default(FREE)
@@ -518,25 +521,25 @@ model UserSubscription {
   // Cancelación
   canceledAt DateTime? // null = no cancelada
 
-  // Stripe IDs (opcionales hasta que el usuario ingrese tarjeta)
+  // Stripe IDs (opcionales hasta que el colegio ingrese tarjeta)
   stripeCustomerId     String? @unique
   stripeSubscriptionId String? @unique
 
   // Metadata extensible — para flags futuros sin migración
-  // JSON: { "grandfatheredPro": true, "betaTester": true }
+  // JSON: { "grandfatheredPro": true, "trialExtended": true }
   metadata String @default("{}")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  history SubscriptionHistory[]  // Historial de cambios de plan
+  school  School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  history SubscriptionHistory[] // Historial de cambios de plan
 
-  @@index([status])                  // Consultas de suscripciones activas/vencidas
-  @@index([stripeCustomerId])        // Lookup rápido desde webhooks Stripe
-  @@index([currentPeriodEnd])        // Job de expiración periódica
-  @@map("user_subscriptions")
+  @@index([status])            // Consultas de suscripciones activas/vencidas
+  @@index([stripeCustomerId])  // Lookup rápido desde webhooks Stripe
+  @@index([currentPeriodEnd])  // Job de expiración periódica
+  @@map("school_subscriptions")
 }
 
 // ============================================
@@ -554,13 +557,13 @@ model SubscriptionHistory {
   oldStatus SubscriptionStatus
   newStatus SubscriptionStatus
 
-  // Origen del cambio: "user_request", "stripe_webhook", "admin", "trial_expired", "cron_expiry"
+  // Origen del cambio: "school_request", "stripe_webhook", "admin", "trial_expired", "cron_expiry"
   reason    String?
 
   changedAt DateTime @default(now())
 
   // Relations
-  subscription UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscription SchoolSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId])
   @@index([changedAt])
@@ -576,24 +579,59 @@ model SubscriptionHistory {
 // que el mismo evento no se ejecute dos veces (at-least-once delivery).
 // ============================================
 model BillingEvent {
-  id             String @id @default(cuid())
-  userId         String? // Null si el evento no mapea aún a un usuario (ej. checkout.session sin userId)
+  id       String  @id @default(cuid())
+  schoolId String? // Null si el evento no mapea aún a un colegio (ej. checkout.session pendiente)
 
   // Stripe event ID — unique garantiza idempotencia
-  stripeEventId  String  @unique
-  type           String  // e.g., "invoice.payment_succeeded", "customer.subscription.updated"
-  payload        String  // JSON del evento completo (Stripe Event object)
+  stripeEventId String @unique
+  type          String // e.g., "invoice.payment_succeeded", "customer.subscription.updated"
+  payload       String // JSON del evento completo (Stripe Event object)
 
-  processed      Boolean   @default(false)
-  processedAt    DateTime? // null = pendiente
-  errorMessage   String?   // Si el procesamiento falló
+  processed    Boolean   @default(false)
+  processedAt  DateTime? // null = pendiente
+  errorMessage String?   // Si el procesamiento falló
 
   createdAt DateTime @default(now())
 
   // Relations
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  school School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
 
-  @@index([processed, createdAt])   // Worker: procesar pendientes ordenados por fecha
-  @@index([userId])
+  @@index([processed, createdAt]) // Worker: procesar pendientes ordenados por fecha
+  @@index([schoolId])
   @@map("billing_events")
+}
+
+// ============================================
+// 📋 AUDIT LOG
+//
+// Registro inmutable de acciones sensibles:
+// USER_CREATED, ROLE_CHANGED, OWNER_TRANSFERRED,
+// USER_DELETED, SUBSCRIPTION_CHANGED.
+// actorId: quien hizo la acción (userId)
+// schoolId: null para acciones globales de SUPER_ADMIN
+// ============================================
+model AuditLog {
+  id        String   @id @default(cuid())
+  schoolId  String?  // null para acciones globales de SUPER_ADMIN
+  actorId   String   // userId del que realizó la acción
+  actorRole String   // Rol del actor en el momento de la acción
+
+  action   String // USER_CREATED | ROLE_CHANGED | OWNER_TRANSFERRED | USER_DELETED | SUBSCRIPTION_CHANGED
+  entity   String // User | School | SchoolSubscription
+  entityId String
+
+  // Metadata JSON con detalles específicos de la acción
+  // Ej: { oldRole: "STAFF", newRole: "ADMIN", targetUserId: "..." }
+  metadata String @default("{}")
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  school School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId])
+  @@index([actorId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

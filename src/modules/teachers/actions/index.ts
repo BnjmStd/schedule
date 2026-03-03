@@ -5,63 +5,38 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getUserSchoolIds, getCurrentUser } from "@/lib/auth-helpers";
+import { getSessionSchoolId, userHasAccessToSchool } from "@/lib/auth-helpers";
 import { validateTeacherCreation } from "@/lib/billing";
 import { revalidatePath } from "next/cache";
 
 export async function getTeachers() {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const teachers = await prisma.teacher.findMany({
-    where: {
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { schoolId },
     include: {
-      school: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
+      school: { select: { id: true, name: true } },
       teacherSubjects: {
         include: {
-          subject: {
-            select: {
-              name: true,
-              code: true,
-            },
-          },
+          subject: { select: { name: true, code: true } },
         },
       },
       availability: true,
     },
-    orderBy: {
-      lastName: "asc",
-    },
+    orderBy: { lastName: "asc" },
   });
 
   return teachers;
 }
 
 export async function getTeacher(id: string) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const teacher = await prisma.teacher.findFirst({
-    where: {
-      id,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id, schoolId },
     include: {
       school: true,
-      teacherSubjects: {
-        include: {
-          subject: true,
-        },
-      },
+      teacherSubjects: { include: { subject: true } },
       availability: true,
     },
   });
@@ -77,21 +52,15 @@ export async function createTeacher(data: {
   phone?: string;
   specialization?: string;
 }) {
-  const user = await getCurrentUser();
-  const schoolIds = await getUserSchoolIds();
-
-  // Verificar que el usuario tiene acceso a esta escuela
-  if (!schoolIds.includes(data.schoolId)) {
+  const hasAccess = await userHasAccessToSchool(data.schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a esta escuela");
   }
 
-  // 💳 Validar límites de suscripción antes de crear
-  await validateTeacherCreation(user.id, data.schoolId);
+  // 💳 Validar límites de suscripción
+  await validateTeacherCreation(data.schoolId);
 
-  const teacher = await prisma.teacher.create({
-    data,
-  });
-
+  const teacher = await prisma.teacher.create({ data });
   revalidatePath("/teachers");
   return teacher;
 }
@@ -106,15 +75,10 @@ export async function updateTeacher(
     specialization?: string;
   },
 ) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const teacher = await prisma.teacher.update({
-    where: {
-      id,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id, schoolId },
     data,
   });
 
@@ -123,52 +87,28 @@ export async function updateTeacher(
 }
 
 export async function deleteTeacher(id: string) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
-  // 1. Verificar que el profesor pertenece a uno de los colegios del usuario ANTES
-  //    de eliminar cualquier dato relacionado (evita bypass de autorización)
   const teacher = await prisma.teacher.findFirst({
-    where: {
-      id,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id, schoolId },
   });
 
   if (!teacher) {
     throw new Error("No tienes acceso a este profesor");
   }
 
-  // 2. Eliminar registros relacionados para evitar violación de FK
-  await prisma.scheduleBlock.deleteMany({
-    where: { teacherId: id },
-  });
-
-  await prisma.teacherAvailability.deleteMany({
-    where: { teacherId: id },
-  });
-
-  // 3. Eliminar el profesor
-  await prisma.teacher.delete({
-    where: { id },
-  });
+  await prisma.scheduleBlock.deleteMany({ where: { teacherId: id } });
+  await prisma.teacherAvailability.deleteMany({ where: { teacherId: id } });
+  await prisma.teacher.delete({ where: { id } });
 
   revalidatePath("/teachers");
   revalidatePath("/schedules");
 }
 
 export async function countTeachers() {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
-  const count = await prisma.teacher.count({
-    where: {
-      schoolId: {
-        in: schoolIds,
-      },
-    },
-  });
-
+  const count = await prisma.teacher.count({ where: { schoolId } });
   return count;
 }
 
@@ -180,17 +120,11 @@ export async function getTeacherAvailability(
   teacherId: string,
   academicYear?: number,
 ) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
   const year = academicYear || new Date().getFullYear();
 
-  // Verificar que el profesor pertenece a una escuela del usuario
   const teacher = await prisma.teacher.findFirst({
-    where: {
-      id: teacherId,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id: teacherId, schoolId },
   });
 
   if (!teacher) {
@@ -221,17 +155,11 @@ export async function setTeacherAvailability(
   console.log("[Server] teacherId:", teacherId);
   console.log("[Server] availability count:", availability.length);
 
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
   const year = academicYear || new Date().getFullYear();
 
-  // Verificar que el profesor pertenece a una escuela del usuario
   const teacher = await prisma.teacher.findFirst({
-    where: {
-      id: teacherId,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id: teacherId, schoolId },
   });
 
   if (!teacher) {
@@ -285,16 +213,11 @@ export async function addTeacherAvailabilitySlot(
   },
   academicYear?: number,
 ) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
   const year = academicYear || new Date().getFullYear();
 
   const teacher = await prisma.teacher.findFirst({
-    where: {
-      id: teacherId,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id: teacherId, schoolId },
   });
 
   if (!teacher) {
@@ -314,17 +237,14 @@ export async function addTeacherAvailabilitySlot(
 }
 
 export async function deleteTeacherAvailabilitySlot(slotId: string) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
-  // Verificar que el slot pertenece a un profesor de una escuela del usuario
   const slot = await prisma.teacherAvailability.findUnique({
     where: { id: slotId },
-    include: {
-      teacher: true,
-    },
+    include: { teacher: true },
   });
 
-  if (!slot || !schoolIds.includes(slot.teacher.schoolId)) {
+  if (!slot || slot.teacher.schoolId !== schoolId) {
     throw new Error("No tienes acceso a este registro");
   }
 
@@ -546,26 +466,14 @@ export async function validateTeacherSchedule(
  * Obtiene todos los profesores con su disponibilidad para un día específico
  */
 export async function getTeachersWithAvailability(dayOfWeek?: string) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const teachers = await prisma.teacher.findMany({
-    where: {
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { schoolId },
     include: {
-      availability: dayOfWeek
-        ? {
-            where: {
-              dayOfWeek,
-            },
-          }
-        : true,
+      availability: dayOfWeek ? { where: { dayOfWeek } } : true,
     },
-    orderBy: {
-      lastName: "asc",
-    },
+    orderBy: { lastName: "asc" },
   });
 
   return teachers;

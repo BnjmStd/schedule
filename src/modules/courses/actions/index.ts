@@ -5,19 +5,15 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getUserSchoolIds, getCurrentUser } from "@/lib/auth-helpers";
+import { getSessionSchoolId, userHasAccessToSchool } from "@/lib/auth-helpers";
 import { validateCourseCreation } from "@/lib/billing";
 import { revalidatePath } from "next/cache";
 
 export async function getCourses() {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const courses = await prisma.course.findMany({
-    where: {
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { schoolId },
     include: {
       school: {
         select: {
@@ -42,14 +38,12 @@ export async function getCourses() {
 }
 
 export async function getCourse(id: string) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const course = await prisma.course.findFirst({
     where: {
       id,
-      schoolId: {
-        in: schoolIds,
-      },
+      schoolId,
     },
     include: {
       school: true,
@@ -69,16 +63,13 @@ export async function createCourse(data: {
   academicYear: number;
   studentCount?: number;
 }) {
-  const schoolIds = await getUserSchoolIds();
-
-  // Verificar que el usuario tiene acceso a esta escuela
-  if (!schoolIds.includes(data.schoolId)) {
+  const hasAccess = await userHasAccessToSchool(data.schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a esta escuela");
   }
 
   // Verificar límite del plan de suscripción
-  const user = await getCurrentUser();
-  await validateCourseCreation(user.id, data.schoolId);
+  await validateCourseCreation(data.schoolId);
 
   const course = await prisma.course.create({
     data,
@@ -99,15 +90,10 @@ export async function updateCourse(
     studentCount?: number;
   },
 ) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const course = await prisma.course.update({
-    where: {
-      id,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id, schoolId },
     data,
   });
 
@@ -116,29 +102,20 @@ export async function updateCourse(
 }
 
 export async function deleteCourse(id: string) {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   await prisma.course.delete({
-    where: {
-      id,
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { id, schoolId },
   });
 
   revalidatePath("/courses");
 }
 
 export async function countCourses() {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
   const count = await prisma.course.count({
-    where: {
-      schoolId: {
-        in: schoolIds,
-      },
-    },
+    where: { schoolId },
   });
 
   return count;

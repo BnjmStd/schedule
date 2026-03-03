@@ -12,7 +12,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { Input, Select } from "@/components/ui";
 import { ImportSubjectsModal } from "@/modules/subjects/components/ImportSubjectsModal";
 import type { School } from "@/types";
-import "../../subjects.css";
+import styles from "./subjects.module.css";
 
 // Tipo para subject con relaciones incluidas
 type SubjectWithRelations = {
@@ -485,18 +485,18 @@ export default function SubjectsPage() {
   };
 
   return (
-    <div className="schools-page">
-      <div className="schools-bg">
-        <div className="schools-gradient" />
+    <div className={styles["schools-page"]}>
+      <div className={styles["schools-bg"]}>
+        <div className={styles["schools-gradient"]} />
       </div>
 
-      <div className="schools-container">
-        <header className="schools-header">
-          <div className="schools-header-top">
-            <h1 className="schools-title">📚 Asignaturas</h1>
+      <div className={styles["schools-container"]}>
+        <header className={styles["schools-header"]}>
+          <div className={styles["schools-header-top"]}>
+            <h1 className={styles["schools-title"]}>📚 Asignaturas</h1>
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
               <button
-                className="schools-add-btn"
+                className={styles["schools-add-btn"]}
                 style={{
                   background: "linear-gradient(135deg, #10B981, #059669)",
                 }}
@@ -515,14 +515,14 @@ export default function SubjectsPage() {
                 📥 Importar
               </button>
               <button
-                className="schools-add-btn"
+                className={styles["schools-add-btn"]}
                 onClick={() => setShowCreateForm(!showCreateForm)}
               >
                 {showCreateForm ? "✕ Cancelar" : "+ Agregar Asignatura"}
               </button>
             </div>
           </div>
-          <p className="schools-description">
+          <p className={styles["schools-description"]}>
             {showCreateForm
               ? "Selecciona una plantilla o crea una asignatura personalizada"
               : "Gestiona las asignaturas disponibles y asígnalas a profesores calificados."}
@@ -565,15 +565,13 @@ export default function SubjectsPage() {
 
         {/* Formulario de creación */}
         {showCreateForm && (
-          <div className="subject-create-section">
-            <form onSubmit={handleSubmit} className="subject-form">
+          <div className={styles["subject-create-section"]}>
+            <form onSubmit={handleSubmit} className={styles["subject-form"]}>
               {/* Mode Toggle */}
-              <div className="subject-mode-toggle">
+              <div className={styles["subject-mode-toggle"]}>
                 <button
                   type="button"
-                  className={`subject-mode-btn ${
-                    creationMode === "template" ? "active" : ""
-                  }`}
+                  className={`${styles["subject-mode-btn"]} ${creationMode === "template" ? styles["active"] : ""}`}
                   onClick={() => {
                     setCreationMode("template");
                     if (selectedTemplate) {
@@ -592,9 +590,7 @@ export default function SubjectsPage() {
                 </button>
                 <button
                   type="button"
-                  className={`subject-mode-btn ${
-                    creationMode === "custom" ? "active" : ""
-                  }`}
+                  className={`${styles["subject-mode-btn"]} ${creationMode === "custom" ? styles["active"] : ""}`}
                   onClick={() => {
                     setCreationMode("custom");
                     setSelectedTemplate(null);
@@ -607,11 +603,14 @@ export default function SubjectsPage() {
 
               {/* Plantillas */}
               {creationMode === "template" && (
-                <div className="subject-templates">
+                <div className={styles["subject-templates"]}>
                   {SUBJECT_TEMPLATES.map((category) => (
-                    <div key={category.category} className="template-category">
-                      <div className="template-category-header">
-                        <h4 className="template-category-title">
+                    <div
+                      key={category.category}
+                      className={styles["template-category"]}
+                    >
+                      <div className={styles["template-category-header"]}>
+                        <h4 className={styles["template-category-title"]}>
                           {category.category}
                         </h4>
                         <div
@@ -652,7 +651,7 @@ export default function SubjectsPage() {
                           </button>
                           <button
                             type="button"
-                            className="template-category-toggle"
+                            className={styles["template-category-toggle"]}
                             onClick={() => toggleCategory(category.category)}
                             aria-label={
                               openCategories[category.category]
@@ -661,9 +660,7 @@ export default function SubjectsPage() {
                             }
                           >
                             <span
-                              className={`toggle-icon ${
-                                openCategories[category.category] ? "open" : ""
-                              }`}
+                              className={`${styles["toggle-icon"]} ${openCategories[category.category] ? styles["open"] : ""}`}
                             >
                               ▼
                             </span>
@@ -671,18 +668,14 @@ export default function SubjectsPage() {
                         </div>
                       </div>
                       {openCategories[category.category] && (
-                        <div className="template-grid">
+                        <div className={styles["template-grid"]}>
                           {category.subjects.map((template) => {
                             const isTaken = isCodeTaken(template.code);
                             return (
                               <button
                                 key={template.code}
                                 type="button"
-                                className={`template-card ${
-                                  selectedTemplate?.code === template.code
-                                    ? "selected"
-                                    : ""
-                                } ${isTaken ? "taken" : ""}`}
+                                className={`${styles["template-card"]} ${selectedTemplate?.code === template.code ? styles["selected"] : ""} ${isTaken ? styles["taken"] : ""}`}
                                 onClick={() => handleTemplateSelect(template)}
                                 style={
                                   {
@@ -691,32 +684,36 @@ export default function SubjectsPage() {
                                 }
                               >
                                 {isTaken && (
-                                  <div className="template-taken-badge">
+                                  <div
+                                    className={styles["template-taken-badge"]}
+                                  >
                                     <span>⚠️</span> Código ya usado
                                   </div>
                                 )}
-                                <div className="template-selected-badge">
+                                <div
+                                  className={styles["template-selected-badge"]}
+                                >
                                   ✓ Seleccionada
                                 </div>
-                                <div className="template-header">
-                                  <div className="template-info">
-                                    <h5 className="template-name">
+                                <div className={styles["template-header"]}>
+                                  <div className={styles["template-info"]}>
+                                    <h5 className={styles["template-name"]}>
                                       {template.name}
                                     </h5>
-                                    <span className="template-code">
+                                    <span className={styles["template-code"]}>
                                       {template.code}
                                     </span>
                                   </div>
                                   <div
-                                    className="template-color"
+                                    className={styles["template-color"]}
                                     style={{ backgroundColor: template.color }}
                                   />
                                 </div>
-                                <p className="template-description">
+                                <p className={styles["template-description"]}>
                                   {template.description}
                                 </p>
                                 {isTaken && (
-                                  <p className="template-hint">
+                                  <p className={styles["template-hint"]}>
                                     Puedes modificar el código abajo
                                   </p>
                                 )}
@@ -731,9 +728,9 @@ export default function SubjectsPage() {
               )}
 
               {/* School selector */}
-              <div className="form-group">
-                <label htmlFor="schoolId" className="form-label">
-                  Colegio <span className="required">*</span>
+              <div className={styles["form-group"]}>
+                <label htmlFor="schoolId" className={styles["form-label"]}>
+                  Colegio <span className={styles["required"]}>*</span>
                 </label>
                 <Select
                   id="schoolId"
@@ -757,10 +754,10 @@ export default function SubjectsPage() {
               </div>
 
               {/* Campos del formulario */}
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="name" className="form-label">
-                    Nombre <span className="required">*</span>
+              <div className={styles["form-row"]}>
+                <div className={styles["form-group"]}>
+                  <label htmlFor="name" className={styles["form-label"]}>
+                    Nombre <span className={styles["required"]}>*</span>
                   </label>
                   <Input
                     id="name"
@@ -776,9 +773,9 @@ export default function SubjectsPage() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="code" className="form-label">
-                    Código <span className="required">*</span>
+                <div className={styles["form-group"]}>
+                  <label htmlFor="code" className={styles["form-label"]}>
+                    Código <span className={styles["required"]}>*</span>
                   </label>
                   <Input
                     id="code"
@@ -795,8 +792,8 @@ export default function SubjectsPage() {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="description" className="form-label">
+              <div className={styles["form-group"]}>
+                <label htmlFor="description" className={styles["form-label"]}>
                   Descripción
                 </label>
                 <Input
@@ -815,11 +812,11 @@ export default function SubjectsPage() {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="color" className="form-label">
+              <div className={styles["form-group"]}>
+                <label htmlFor="color" className={styles["form-label"]}>
                   Color
                 </label>
-                <div className="color-input-wrapper">
+                <div className={styles["color-input-wrapper"]}>
                   <input
                     id="color"
                     name="color"
@@ -833,7 +830,7 @@ export default function SubjectsPage() {
                       }))
                     }
                   />
-                  <span className="color-hint">
+                  <span className={styles["color-hint"]}>
                     Color para identificar la asignatura
                   </span>
                 </div>
@@ -841,7 +838,7 @@ export default function SubjectsPage() {
 
               {success && (
                 <div
-                  className="form-success"
+                  className={styles["form-success"]}
                   style={{
                     padding: "1rem",
                     display: "flex",
@@ -861,7 +858,7 @@ export default function SubjectsPage() {
 
               {error && (
                 <div
-                  className="form-error"
+                  className={styles["form-error"]}
                   style={{
                     padding: "1rem",
                     display: "flex",
@@ -880,7 +877,7 @@ export default function SubjectsPage() {
               )}
 
               <div
-                className="form-actions"
+                className={styles["form-actions"]}
                 style={{
                   display: "flex",
                   gap: "1rem",
@@ -920,25 +917,27 @@ export default function SubjectsPage() {
         {!showCreateForm && (
           <>
             {subjects.length === 0 ? (
-              <div className="schools-empty">
-                <div className="schools-empty-icon">📚</div>
-                <p className="schools-empty-title">
+              <div className={styles["schools-empty"]}>
+                <div className={styles["schools-empty-icon"]}>📚</div>
+                <p className={styles["schools-empty-title"]}>
                   No hay asignaturas registradas
                 </p>
-                <p className="schools-empty-subtitle">
+                <p className={styles["schools-empty-subtitle"]}>
                   Comienza agregando tu primera asignatura
                 </p>
               </div>
             ) : (
-              <div className="schools-grid">
+              <div className={styles["schools-grid"]}>
                 {subjects.map((subject) => (
-                  <div key={subject.id} className="schools-card">
-                    <div className="schools-card-header">
+                  <div key={subject.id} className={styles["schools-card"]}>
+                    <div className={styles["schools-card-header"]}>
                       <div>
-                        <h3 className="schools-card-title">{subject.name}</h3>
+                        <h3 className={styles["schools-card-title"]}>
+                          {subject.name}
+                        </h3>
                       </div>
                       <span
-                        className="schools-card-badge"
+                        className={styles["schools-card-badge"]}
                         style={{
                           background: subject.color
                             ? `${subject.color}33`
@@ -952,14 +951,18 @@ export default function SubjectsPage() {
                       </span>
                     </div>
 
-                    <div className="schools-card-info">
-                      <div className="schools-card-info-item">
-                        <span className="schools-card-info-icon">🏫</span>
+                    <div className={styles["schools-card-info"]}>
+                      <div className={styles["schools-card-info-item"]}>
+                        <span className={styles["schools-card-info-icon"]}>
+                          🏫
+                        </span>
                         <span>{subject.school.name}</span>
                       </div>
                       {subject.teacherSubjects.length > 0 && (
-                        <div className="schools-card-info-item">
-                          <span className="schools-card-info-icon">👨‍🏫</span>
+                        <div className={styles["schools-card-info-item"]}>
+                          <span className={styles["schools-card-info-icon"]}>
+                            👨‍🏫
+                          </span>
                           <span>
                             {subject.teacherSubjects.length} profesor
                             {subject.teacherSubjects.length !== 1 ? "es" : ""}
@@ -967,22 +970,28 @@ export default function SubjectsPage() {
                         </div>
                       )}
                       {subject.description && (
-                        <div className="schools-card-info-item">
-                          <span className="schools-card-info-icon">📝</span>
+                        <div className={styles["schools-card-info-item"]}>
+                          <span className={styles["schools-card-info-icon"]}>
+                            📝
+                          </span>
                           <span>{subject.description}</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="schools-card-footer">
-                      <button className="schools-card-btn schools-card-btn-primary">
+                    <div className={styles["schools-card-footer"]}>
+                      <button
+                        className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-primary"]}`}
+                      >
                         Ver Detalles
                       </button>
-                      <button className="schools-card-btn schools-card-btn-ghost">
+                      <button
+                        className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-ghost"]}`}
+                      >
                         Editar
                       </button>
                       <button
-                        className="schools-card-btn schools-card-btn-danger"
+                        className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-danger"]}`}
                         onClick={() => handleDeleteSubject(subject)}
                       >
                         Eliminar

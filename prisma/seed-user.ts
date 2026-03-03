@@ -18,7 +18,7 @@ async function main() {
       name: "Usuario Demo",
       email: "demo@bbschedule.com",
       password: password,
-      role: "admin",
+      role: "ADMIN",
     },
   });
 
@@ -27,27 +27,9 @@ async function main() {
   console.log("   Password: demo1234");
   console.log("   Role:", user.role);
 
-  // Relacionar usuario con los colegios existentes
-  const schools = await prisma.school.findMany();
-
-  for (const school of schools) {
-    await prisma.userSchool.upsert({
-      where: {
-        userId_schoolId: {
-          userId: user.id,
-          schoolId: school.id,
-        },
-      },
-      update: {},
-      create: {
-        userId: user.id,
-        schoolId: school.id,
-        role: "admin",
-      },
-    });
-  }
-
-  console.log(`✅ Usuario vinculado a ${schools.length} colegios`);
+  console.log(
+    "✅ Usuario creado (sin escuela asociada - asignar schoolId manualmente si es necesario)",
+  );
   console.log("\n🎉 Seed de usuario completado!");
 }
 

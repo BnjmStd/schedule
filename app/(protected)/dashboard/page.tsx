@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { getSession } from "@/lib/session";
-import { getSchools } from "@/modules/schools/actions";
+import { prisma } from "@/lib/prisma";
 import { countTeachers } from "@/modules/teachers/actions";
 import { countCourses } from "@/modules/courses/actions";
 import { countSchedules } from "@/modules/schedules/actions";
-import "../../dashboard.css";
+import { getSubjects } from "@/modules/subjects/actions";
+import styles from "./dashboard.module.css";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -15,17 +16,76 @@ export default async function DashboardPage() {
     redirect("/auth/login");
   }
 
-  // Obtener colegios del usuario
-  let schools = [];
+  // SUPER_ADMIN no pertenece a ningún colegio → panel global
+  if (session.role === "SUPER_ADMIN") {
+    redirect("/admin");
+  }
+
+  // Cualquier otro rol sin colegio asignado → aviso de configuración
+  if (!session.schoolId) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+          gap: "1rem",
+          textAlign: "center",
+          padding: "2rem",
+        }}
+      >
+        <span style={{ fontSize: "3rem" }}>🏫</span>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 700 }}>
+          Sin colegio asignado
+        </h1>
+        <p style={{ color: "rgba(255,255,255,0.6)", maxWidth: 420 }}>
+          Tu cuenta ({session.email}) tiene rol <strong>{session.role}</strong>{" "}
+          pero aún no está asociada a ningún colegio. Pide a tu administrador
+          que te asigne un colegio, o registra uno nuevo.
+        </p>
+        <a
+          href="/auth/register"
+          style={{
+            marginTop: "0.5rem",
+            padding: "0.6rem 1.5rem",
+            background: "var(--accent,#6366f1)",
+            color: "#fff",
+            borderRadius: "8px",
+            textDecoration: "none",
+            fontWeight: 600,
+          }}
+        >
+          Registrar colegio
+        </a>
+      </div>
+    );
+  }
+
+  // Cargar nombre del colegio y estadísticas en paralelo
+  let schoolName = "Mi Colegio";
   let teachersCount = 0;
   let coursesCount = 0;
   let schedulesCount = 0;
+  let subjectsCount = 0;
 
   try {
-    schools = await getSchools();
-    teachersCount = await countTeachers();
-    coursesCount = await countCourses();
-    schedulesCount = await countSchedules();
+    const [school, subjects, teachers, courses, schedules] = await Promise.all([
+      prisma.school.findUnique({
+        where: { id: session.schoolId },
+        select: { name: true },
+      }),
+      getSubjects(),
+      countTeachers(),
+      countCourses(),
+      countSchedules(),
+    ]);
+    schoolName = school?.name ?? "Mi Colegio";
+    subjectsCount = subjects.length;
+    teachersCount = teachers;
+    coursesCount = courses;
+    schedulesCount = schedules;
   } catch (error) {
     console.error("Error al obtener datos:", error);
   }
@@ -33,8 +93,8 @@ export default async function DashboardPage() {
   const quickActions = [
     {
       icon: "🏫",
-      title: "Colegios",
-      description: "Gestiona instituciones",
+      title: "Mi Colegio",
+      description: "Configuración institucional",
       href: "/schools",
     },
     {
@@ -70,114 +130,93 @@ export default async function DashboardPage() {
   ];
 
   const stats = [
-    { label: "Colegios", value: schools.length.toString(), icon: "🏫" },
     { label: "Profesores", value: teachersCount.toString(), icon: "👨‍🏫" },
+    { label: "Asignaturas", value: subjectsCount.toString(), icon: "📚" },
     { label: "Cursos", value: coursesCount.toString(), icon: "🎓" },
     { label: "Horarios", value: schedulesCount.toString(), icon: "🗓️" },
   ];
 
   return (
-    <div className="dashboard-page">
+    <div className={styles["dashboard-page"]}>
       {/* Background */}
-      <div className="dashboard-bg">
-        <div className="dashboard-gradient"></div>
-        <div className="dashboard-orb dashboard-orb-1"></div>
-        <div className="dashboard-orb dashboard-orb-2"></div>
+      <div className={styles["dashboard-bg"]}>
+        <div className={styles["dashboard-gradient"]}></div>
+        <div
+          className={`${styles["dashboard-orb"]} ${styles["dashboard-orb-1"]}`}
+        ></div>
+        <div
+          className={`${styles["dashboard-orb"]} ${styles["dashboard-orb-2"]}`}
+        ></div>
       </div>
 
       {/* Main Content */}
-      <main className="dashboard-main">
-        {schools.length === 0 ? (
-          /* Primera vez - No hay colegios */
-          <div className="dashboard-welcome">
-            <h1 className="dashboard-title">
-              ¡Bienvenido a {siteConfig.name}!
-            </h1>
-            <p className="dashboard-subtitle">
-              Comienza creando tu primer colegio
-            </p>
-            <div style={{ marginTop: "2rem" }}>
+      <main className={styles["dashboard-main"]}>
+        {/* Welcome Section */}
+        <div className={styles["dashboard-welcome"]}>
+          <h1 className={styles["dashboard-title"]}>
+            Bienvenido a {siteConfig.name}
+          </h1>
+          <p className={styles["dashboard-subtitle"]}>
+            {schoolName} · {session.name ?? session.email}
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className={styles["dashboard-stats-grid"]}>
+          {stats.map((stat, index) => (
+            <div key={index} className={styles["dashboard-stat-card"]}>
+              <div className={styles["dashboard-stat-content"]}>
+                <div className={styles["dashboard-stat-info"]}>
+                  <p className={styles["dashboard-stat-label"]}>{stat.label}</p>
+                  <p className={styles["dashboard-stat-value"]}>{stat.value}</p>
+                </div>
+                <div className={styles["dashboard-stat-icon"]}>{stat.icon}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <h2 className={styles["dashboard-section-title"]}>Acceso Rápido</h2>
+          <div className={styles["dashboard-actions-grid"]}>
+            {quickActions.map((action, index) => (
               <Link
-                href="/schools"
-                className="dashboard-action-card"
-                style={{ display: "inline-block", maxWidth: "400px" }}
+                key={index}
+                href={action.href}
+                className={styles["dashboard-action-card"]}
               >
-                <div className="dashboard-action-icon">🏫</div>
-                <h3 className="dashboard-action-title">
-                  Crear Mi Primer Colegio
+                <div className={styles["dashboard-action-icon"]}>
+                  {action.icon}
+                </div>
+                <h3 className={styles["dashboard-action-title"]}>
+                  {action.title}
                 </h3>
-                <p className="dashboard-action-description">
-                  Configura tu institución educativa y comienza a gestionar
-                  horarios
+                <p className={styles["dashboard-action-description"]}>
+                  {action.description}
                 </p>
               </Link>
-            </div>
+            ))}
           </div>
-        ) : (
-          /* Usuario con colegios */
-          <>
-            {/* Welcome Section */}
-            <div className="dashboard-welcome">
-              <h1 className="dashboard-title">
-                Bienvenido a tu panel de control
-              </h1>
-              <p className="dashboard-subtitle">
-                Gestiona todo tu sistema educativo desde aquí
+        </div>
+
+        {/* Recent Activity */}
+        <div>
+          <h2 className={styles["dashboard-section-title"]}>
+            Actividad Reciente
+          </h2>
+          <div className={styles["dashboard-activity-card"]}>
+            <div className={styles["dashboard-empty-state"]}>
+              <div className={styles["dashboard-empty-icon"]}>📊</div>
+              <p className={styles["dashboard-empty-title"]}>
+                No hay actividad reciente
+              </p>
+              <p className={styles["dashboard-empty-subtitle"]}>
+                Comienza agregando profesores, asignaturas o cursos
               </p>
             </div>
-
-            {/* Stats Cards */}
-            <div className="dashboard-stats-grid">
-              {stats.map((stat, index) => (
-                <div key={index} className="dashboard-stat-card">
-                  <div className="dashboard-stat-content">
-                    <div className="dashboard-stat-info">
-                      <p className="dashboard-stat-label">{stat.label}</p>
-                      <p className="dashboard-stat-value">{stat.value}</p>
-                    </div>
-                    <div className="dashboard-stat-icon">{stat.icon}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Quick Actions */}
-            <div>
-              <h2 className="dashboard-section-title">Acceso Rápido</h2>
-              <div className="dashboard-actions-grid">
-                {quickActions.map((action, index) => (
-                  <Link
-                    key={index}
-                    href={action.href}
-                    className="dashboard-action-card"
-                  >
-                    <div className="dashboard-action-icon">{action.icon}</div>
-                    <h3 className="dashboard-action-title">{action.title}</h3>
-                    <p className="dashboard-action-description">
-                      {action.description}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div>
-              <h2 className="dashboard-section-title">Actividad Reciente</h2>
-              <div className="dashboard-activity-card">
-                <div className="dashboard-empty-state">
-                  <div className="dashboard-empty-icon">📊</div>
-                  <p className="dashboard-empty-title">
-                    No hay actividad reciente
-                  </p>
-                  <p className="dashboard-empty-subtitle">
-                    Comienza creando un colegio o agregando profesores
-                  </p>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+          </div>
+        </div>
       </main>
     </div>
   );

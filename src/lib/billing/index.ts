@@ -2,14 +2,13 @@
  * 💳 Billing module — public API
  *
  * Importar desde aquí en server actions y API routes:
- *   import { getUserActiveSubscription, validateSchoolCreation } from "@/lib/billing";
+ *   import { getSchoolActiveSubscription, validateTeacherCreation } from "@/lib/billing";
  */
 
 export {
-  getUserActiveSubscription,
+  getSchoolActiveSubscription,
   isFeatureEnabled,
   requireFeature,
-  validateSchoolCreation,
   validateTeacherCreation,
   validateCourseCreation,
   recordSubscriptionChange,

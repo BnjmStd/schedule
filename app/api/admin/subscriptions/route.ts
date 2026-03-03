@@ -40,16 +40,11 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: Record<string, any> = {};
 
-    if (plan && VALID_PLANS.includes(plan)) {
-      where.plan = plan;
-    }
-
-    if (status && VALID_STATUSES.includes(status)) {
-      where.status = status;
-    }
+    if (plan && VALID_PLANS.includes(plan)) where.plan = plan;
+    if (status && VALID_STATUSES.includes(status)) where.status = status;
 
     if (search) {
-      where.user = {
+      where.school = {
         OR: [
           { name: { contains: search, mode: "insensitive" } },
           { email: { contains: search, mode: "insensitive" } },
@@ -58,24 +53,25 @@ export async function GET(request: NextRequest) {
     }
 
     const [subscriptions, total] = await Promise.all([
-      prisma.userSubscription.findMany({
+      prisma.schoolSubscription.findMany({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
         orderBy: { updatedAt: "desc" },
         include: {
-          user: {
+          school: {
             select: {
               id: true,
               name: true,
               email: true,
-              role: true,
-              _count: { select: { schools: true } },
+              _count: {
+                select: { teachers: true, courses: true, users: true },
+              },
             },
           },
         },
       }),
-      prisma.userSubscription.count({ where }),
+      prisma.schoolSubscription.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -97,20 +93,20 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
     const {
-      userId,
+      schoolId,
       plan,
       status: newStatus,
       reason,
     } = body as {
-      userId: string;
+      schoolId: string;
       plan?: SubscriptionPlan;
       status?: SubscriptionStatus;
       reason?: string;
     };
 
-    if (!userId) {
+    if (!schoolId) {
       return NextResponse.json(
-        { error: "userId es requerido" },
+        { error: "schoolId es requerido" },
         { status: 400 },
       );
     }
@@ -123,8 +119,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
     }
 
-    const existing = await prisma.userSubscription.findUnique({
-      where: { userId },
+    const existing = await prisma.schoolSubscription.findUnique({
+      where: { schoolId },
     });
 
     if (!existing) {
@@ -141,18 +137,17 @@ export async function PATCH(request: NextRequest) {
     if (plan) updateData.plan = plan;
     if (newStatus) updateData.status = newStatus;
 
-    const updated = await prisma.userSubscription.update({
-      where: { userId },
+    const updated = await prisma.schoolSubscription.update({
+      where: { schoolId },
       data: {
         ...updateData,
         updatedAt: new Date(),
       },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        school: { select: { id: true, name: true, email: true } },
       },
     });
 
-    // Registrar cambio en historial (subscriptionId, oldPlan, newPlan, oldStatus, newStatus, reason)
     await recordSubscriptionChange(
       existing.id,
       existing.plan,

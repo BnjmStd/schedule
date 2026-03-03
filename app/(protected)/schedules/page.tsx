@@ -14,10 +14,10 @@ import {
 } from "@/modules/schools/actions/schedule-config";
 import { ScheduleGrid } from "@/modules/schedules/components/ScheduleGridSimple";
 import { DownloadScheduleModal } from "@/components/ui";
-import "../../schools.css";
-import "../../schedules.css";
-import "../../schedule-grid.css";
-import "../../schedule-accordion.css";
+import schoolsStyles from "./schools.module.css";
+import schedulesStyles from "./schedules.module.css";
+import scheduleGridStyles from "./schedule-grid.module.css";
+import accordionStyles from "./schedule-accordion.module.css";
 
 type ScheduleView = "course" | "teacher";
 
@@ -352,52 +352,54 @@ export default function SchedulesPage() {
   };
 
   return (
-    <div className="schools-page">
-      <div className="schools-bg">
-        <div className="schools-gradient" />
+    <div className={schoolsStyles["schools-page"]}>
+      <div className={schoolsStyles["schools-bg"]}>
+        <div className={schoolsStyles["schools-gradient"]} />
       </div>
 
-      <div className="schools-container">
-        <header className="schools-header">
-          <div className="schools-header-top">
-            <h1 className="schools-title">🗓️ Horarios</h1>
+      <div className={schoolsStyles["schools-container"]}>
+        <header className={schoolsStyles["schools-header"]}>
+          <div className={schoolsStyles["schools-header-top"]}>
+            <h1 className={schoolsStyles["schools-title"]}>🗓️ Horarios</h1>
           </div>
-          <p className="schools-description">
+          <p className={schoolsStyles["schools-description"]}>
             Visualiza y gestiona los horarios semanales de cursos y profesores.
           </p>
         </header>
 
         {/* Pestañas de visualización */}
-        <div className="schedule-tabs">
+        <div className={schedulesStyles["schedule-tabs"]}>
           <button
-            className={`schedule-tab ${
-              activeView === "course" ? "active" : ""
-            }`}
+            className={`${schedulesStyles["schedule-tab"]} ${activeView === "course" ? schedulesStyles["active"] : ""}`}
             onClick={() => setActiveView("course")}
           >
-            <span className="schedule-tab-icon">🎓</span>
-            <span className="schedule-tab-text">Por Curso</span>
+            <span className={schedulesStyles["schedule-tab-icon"]}>🎓</span>
+            <span className={schedulesStyles["schedule-tab-text"]}>
+              Por Curso
+            </span>
           </button>
           <button
-            className={`schedule-tab ${
-              activeView === "teacher" ? "active" : ""
-            }`}
+            className={`${schedulesStyles["schedule-tab"]} ${activeView === "teacher" ? schedulesStyles["active"] : ""}`}
             onClick={() => setActiveView("teacher")}
           >
-            <span className="schedule-tab-icon">👨‍🏫</span>
-            <span className="schedule-tab-text">Por Profesor</span>
+            <span className={schedulesStyles["schedule-tab-icon"]}>👨‍🏫</span>
+            <span className={schedulesStyles["schedule-tab-text"]}>
+              Por Profesor
+            </span>
           </button>
         </div>
 
         {/* Selector de colegio */}
         {!loading && schools.length > 0 && (
-          <div className="school-selector-container">
-            <label className="school-selector-label">
-              <span className="school-selector-icon">🏫</span>
+          <div className={schedulesStyles["school-selector-container"]}>
+            <label className={schedulesStyles["school-selector-label"]}>
+              <span className={schedulesStyles["school-selector-icon"]}>
+                🏫
+              </span>
               <span>Colegio:</span>
             </label>
             <select
-              className="school-selector"
+              className={schedulesStyles["school-selector"]}
               value={selectedSchoolId || ""}
               onChange={(e) => {
                 setSelectedSchoolId(e.target.value);
@@ -415,13 +417,13 @@ export default function SchedulesPage() {
 
         {/* Info del colegio seleccionado */}
         {!loading && selectedSchool && (
-          <div className="selected-school-info">
-            <div className="selected-school-icon">🏫</div>
-            <div className="selected-school-details">
-              <h2 className="selected-school-name">
+          <div className={schedulesStyles["selected-school-info"]}>
+            <div className={schedulesStyles["selected-school-icon"]}>🏫</div>
+            <div className={schedulesStyles["selected-school-details"]}>
+              <h2 className={schedulesStyles["selected-school-name"]}>
                 {(selectedSchool as any).name}
               </h2>
-              <p className="selected-school-meta">
+              <p className={schedulesStyles["selected-school-meta"]}>
                 {activeView === "course"
                   ? `${filteredCourses.length} ${
                       filteredCourses.length === 1 ? "curso" : "cursos"
@@ -436,25 +438,27 @@ export default function SchedulesPage() {
 
         {/* Loading state */}
         {loading ? (
-          <div className="schools-empty">
-            <div className="schools-empty-icon">⏳</div>
-            <p className="schools-empty-title">Cargando horarios...</p>
+          <div className={schoolsStyles["schools-empty"]}>
+            <div className={schoolsStyles["schools-empty-icon"]}>⏳</div>
+            <p className={schoolsStyles["schools-empty-title"]}>
+              Cargando horarios...
+            </p>
           </div>
         ) : (
           <>
             {/* Empty state */}
             {((activeView === "course" && filteredCourses.length === 0) ||
               (activeView === "teacher" && filteredTeachers.length === 0)) && (
-              <div className="schools-empty">
-                <div className="schools-empty-icon">
+              <div className={schoolsStyles["schools-empty"]}>
+                <div className={schoolsStyles["schools-empty-icon"]}>
                   {activeView === "course" ? "🎓" : "👨‍🏫"}
                 </div>
-                <p className="schools-empty-title">
+                <p className={schoolsStyles["schools-empty-title"]}>
                   {activeView === "course"
                     ? "No hay cursos registrados en este colegio"
                     : "No hay profesores registrados en este colegio"}
                 </p>
-                <p className="schools-empty-subtitle">
+                <p className={schoolsStyles["schools-empty-subtitle"]}>
                   {activeView === "course"
                     ? "Selecciona otro colegio o crea cursos para este"
                     : "Selecciona otro colegio o crea profesores para este"}
@@ -465,18 +469,37 @@ export default function SchedulesPage() {
             {/* Accordion list */}
             {((activeView === "course" && filteredCourses.length > 0) ||
               (activeView === "teacher" && filteredTeachers.length > 0)) && (
-              <div className="schedule-accordion-container">
+              <div className={accordionStyles["schedule-accordion-container"]}>
                 {activeView === "course"
                   ? filteredCourses.map((course) => (
-                      <div key={course.id} className="schedule-accordion-item">
+                      <div
+                        key={course.id}
+                        className={accordionStyles["schedule-accordion-item"]}
+                      >
                         <div
-                          className="schedule-accordion-header"
+                          className={
+                            accordionStyles["schedule-accordion-header"]
+                          }
                           onClick={() => toggleExpand(course.id, "course")}
                         >
-                          <div className="schedule-accordion-info">
-                            <div className="schedule-accordion-icon">🎓</div>
+                          <div
+                            className={
+                              accordionStyles["schedule-accordion-info"]
+                            }
+                          >
+                            <div
+                              className={
+                                accordionStyles["schedule-accordion-icon"]
+                              }
+                            >
+                              🎓
+                            </div>
                             <div>
-                              <h3 className="schedule-accordion-title">
+                              <h3
+                                className={
+                                  accordionStyles["schedule-accordion-title"]
+                                }
+                              >
                                 {course.name}
                                 {scheduleData[course.id]?.isDeprecated && (
                                   <span
@@ -496,16 +519,24 @@ export default function SchedulesPage() {
                                   </span>
                                 )}
                               </h3>
-                              <p className="schedule-accordion-subtitle">
+                              <p
+                                className={
+                                  accordionStyles["schedule-accordion-subtitle"]
+                                }
+                              >
                                 {course.grade}° {course.section} •{" "}
                                 {formatAcademicLevel(course.academicLevel)} •{" "}
                                 {course.studentCount || 0} estudiantes
                               </p>
                             </div>
                           </div>
-                          <div className="schedule-accordion-actions">
+                          <div
+                            className={
+                              accordionStyles["schedule-accordion-actions"]
+                            }
+                          >
                             <button
-                              className="schedule-action-btn"
+                              className={accordionStyles["schedule-action-btn"]}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDownload(
@@ -530,7 +561,7 @@ export default function SchedulesPage() {
                               </svg>
                             </button>
                             <button
-                              className="schedule-action-btn"
+                              className={accordionStyles["schedule-action-btn"]}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEdit(course.id, "course");
@@ -549,7 +580,11 @@ export default function SchedulesPage() {
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                               </svg>
                             </button>
-                            <button className="schedule-accordion-toggle">
+                            <button
+                              className={
+                                accordionStyles["schedule-accordion-toggle"]
+                              }
+                            >
                               <svg
                                 width="20"
                                 height="20"
@@ -571,7 +606,11 @@ export default function SchedulesPage() {
                           </div>
                         </div>
                         {expandedId === course.id && (
-                          <div className="schedule-accordion-content">
+                          <div
+                            className={
+                              accordionStyles["schedule-accordion-content"]
+                            }
+                          >
                             {loadingSchedules[course.id] ? (
                               <div
                                 style={{
@@ -656,27 +695,54 @@ export default function SchedulesPage() {
                       </div>
                     ))
                   : filteredTeachers.map((teacher) => (
-                      <div key={teacher.id} className="schedule-accordion-item">
+                      <div
+                        key={teacher.id}
+                        className={accordionStyles["schedule-accordion-item"]}
+                      >
                         <div
-                          className="schedule-accordion-header"
+                          className={
+                            accordionStyles["schedule-accordion-header"]
+                          }
                           onClick={() => toggleExpand(teacher.id, "teacher")}
                         >
-                          <div className="schedule-accordion-info">
-                            <div className="schedule-accordion-icon">👨‍🏫</div>
+                          <div
+                            className={
+                              accordionStyles["schedule-accordion-info"]
+                            }
+                          >
+                            <div
+                              className={
+                                accordionStyles["schedule-accordion-icon"]
+                              }
+                            >
+                              👨‍🏫
+                            </div>
                             <div>
-                              <h3 className="schedule-accordion-title">
+                              <h3
+                                className={
+                                  accordionStyles["schedule-accordion-title"]
+                                }
+                              >
                                 {teacher.firstName} {teacher.lastName}
                               </h3>
-                              <p className="schedule-accordion-subtitle">
+                              <p
+                                className={
+                                  accordionStyles["schedule-accordion-subtitle"]
+                                }
+                              >
                                 {teacher.specialization ||
                                   "Sin especialización"}{" "}
                                 • {teacher.email}
                               </p>
                             </div>
                           </div>
-                          <div className="schedule-accordion-actions">
+                          <div
+                            className={
+                              accordionStyles["schedule-accordion-actions"]
+                            }
+                          >
                             <button
-                              className="schedule-action-btn"
+                              className={accordionStyles["schedule-action-btn"]}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDownload(
@@ -701,7 +767,7 @@ export default function SchedulesPage() {
                               </svg>
                             </button>
                             <button
-                              className="schedule-action-btn"
+                              className={accordionStyles["schedule-action-btn"]}
                               disabled
                               title="Edición de horarios de profesores próximamente"
                               style={{
@@ -721,7 +787,11 @@ export default function SchedulesPage() {
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                               </svg>
                             </button>
-                            <button className="schedule-accordion-toggle">
+                            <button
+                              className={
+                                accordionStyles["schedule-accordion-toggle"]
+                              }
+                            >
                               <svg
                                 width="20"
                                 height="20"
@@ -743,7 +813,11 @@ export default function SchedulesPage() {
                           </div>
                         </div>
                         {expandedId === teacher.id && (
-                          <div className="schedule-accordion-content">
+                          <div
+                            className={
+                              accordionStyles["schedule-accordion-content"]
+                            }
+                          >
                             {loadingSchedules[teacher.id] ? (
                               <div
                                 style={{

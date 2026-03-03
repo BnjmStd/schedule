@@ -6,7 +6,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getUserSchoolIds } from "@/lib/auth-helpers";
+import { userHasAccessToSchool } from "@/lib/auth-helpers";
 import type {
   ScheduleLevelConfig,
   AcademicLevel,
@@ -25,9 +25,8 @@ export async function getScheduleConfigForLevel(
   schoolId: string,
   academicLevel: AcademicLevel,
 ): Promise<ScheduleLevelConfig> {
-  const schoolIds = await getUserSchoolIds();
-
-  if (!schoolIds.includes(schoolId)) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este colegio");
   }
 
@@ -69,9 +68,8 @@ export async function saveScheduleConfigForLevel(
   config: ScheduleLevelConfig,
   changeReason?: string,
 ): Promise<ScheduleLevelConfig> {
-  const schoolIds = await getUserSchoolIds();
-
-  if (!schoolIds.includes(config.schoolId)) {
+  const hasAccess = await userHasAccessToSchool(config.schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este colegio");
   }
 
@@ -265,9 +263,8 @@ export async function getScheduleConfigForTeacher(
 export async function getAllScheduleConfigsForSchool(
   schoolId: string,
 ): Promise<ScheduleLevelConfig[]> {
-  const schoolIds = await getUserSchoolIds();
-
-  if (!schoolIds.includes(schoolId)) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este colegio");
   }
 
@@ -293,9 +290,8 @@ export async function getScheduleConfigHistory(
   academicLevel: AcademicLevel,
   limit: number = 10,
 ) {
-  const schoolIds = await getUserSchoolIds();
-
-  if (!schoolIds.includes(schoolId)) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este colegio");
   }
 
@@ -335,9 +331,8 @@ export async function getScheduleConfigHistory(
  * Verifica que los profesores tengan cursos con jornadas compatibles
  */
 export async function validateScheduleCongruency(schoolId: string) {
-  const schoolIds = await getUserSchoolIds();
-
-  if (!schoolIds.includes(schoolId)) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este colegio");
   }
 

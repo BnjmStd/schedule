@@ -11,29 +11,29 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
   getCurrentUser,
-  getUserSchoolIds,
+  getSessionSchoolId,
   userHasAccessToSchool,
 } from "@/lib/auth-helpers";
-import { validateSchoolCreation } from "@/lib/billing";
 import { CreateSchoolInput, UpdateSchoolInput, School } from "@/types";
 
 export async function getSchools(): Promise<School[]> {
-  const schoolIds = await getUserSchoolIds();
+  const schoolId = await getSessionSchoolId();
 
-  const schools = await prisma.school.findMany({
-    where: {
-      id: { in: schoolIds },
-    },
-    orderBy: { name: "asc" },
+  const school = await prisma.school.findUnique({
+    where: { id: schoolId },
   });
 
-  return schools.map((school) => ({
-    ...school,
-    phone: school.phone || undefined,
-    email: school.email || undefined,
-    createdAt: school.createdAt,
-    updatedAt: school.updatedAt,
-  }));
+  if (!school) return [];
+
+  return [
+    {
+      ...school,
+      phone: school.phone || undefined,
+      email: school.email || undefined,
+      createdAt: school.createdAt,
+      updatedAt: school.updatedAt,
+    },
+  ];
 }
 
 export async function getSchoolById(id: string): Promise<School | null> {
@@ -58,11 +58,14 @@ export async function getSchoolById(id: string): Promise<School | null> {
   };
 }
 
+// NOTE: School creation now happens exclusively during registration (/api/auth/register).
+// This action is kept only for SUPER_ADMIN use cases.
 export async function createSchool(data: CreateSchoolInput): Promise<School> {
   const user = await getCurrentUser();
 
-  // 💳 Validar límites de suscripción antes de crear
-  await validateSchoolCreation(user.id);
+  if (user.role !== "SUPER_ADMIN") {
+    throw new Error("Solo un SUPER_ADMIN puede crear escuelas adicionales.");
+  }
 
   const school = await prisma.school.create({
     data: {
@@ -70,13 +73,6 @@ export async function createSchool(data: CreateSchoolInput): Promise<School> {
       address: data.address,
       phone: data.phone,
       email: data.email,
-      // Crear la relación UserSchool automáticamente
-      users: {
-        create: {
-          userId: user.id,
-          role: "admin",
-        },
-      },
     },
   });
 

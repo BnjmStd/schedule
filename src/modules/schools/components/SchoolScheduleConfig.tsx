@@ -9,7 +9,7 @@ import {
   getSchoolScheduleConfig,
   updateSchoolScheduleConfig,
 } from "@/modules/schools/actions";
-import "@/app/schedule-editor.css";
+import "./schedule-editor.css";
 
 interface SchoolScheduleConfigProps {
   schoolId: string;

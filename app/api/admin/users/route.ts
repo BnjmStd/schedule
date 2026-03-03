@@ -52,18 +52,20 @@ export async function GET(request: NextRequest) {
           name: true,
           email: true,
           role: true,
+          schoolId: true,
           createdAt: true,
           updatedAt: true,
-          subscription: {
+          school: {
             select: {
-              plan: true,
-              status: true,
-              currentPeriodEnd: true,
-              trialEndsAt: true,
+              id: true,
+              name: true,
+              subscription: {
+                select: { plan: true, status: true, currentPeriodEnd: true },
+              },
             },
           },
           _count: {
-            select: { schools: true },
+            select: { sessions: true },
           },
         },
       }),

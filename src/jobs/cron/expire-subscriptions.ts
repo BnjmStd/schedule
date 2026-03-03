@@ -4,16 +4,15 @@
  * Frecuencia recomendada: diaria — ej. "0 3 * * *" (3 AM UTC)
  *
  * Qué hace:
- *   1. Busca suscripciones ACTIVE o TRIALING cuyo currentPeriodEnd ya pasó
- *   2. Las marca como EXPIRED (o ACTIVE→FREE si el plan era FREE)
+ *   1. Busca SchoolSubscriptions ACTIVE o TRIALING cuyo currentPeriodEnd ya pasó
+ *   2. Las marca como EXPIRED
  *   3. Registra cada cambio en SubscriptionHistory
  *   4. Emite un resumen estructurado de la ejecución
  *
- * Idempotente: re-ejecutar produce el mismo resultado (ya-expiradas se ignoran).
+ * Idempotente: re-ejecutar produce el mismo resultado.
  *
  * PREPARADO PARA ESCALAR:
- *   Cuando exista Organization, este job también expirará
- *   OrganizationSubscription. Agregar un segundo bloque análogo aquí.
+ *   Cuando exista Organization, agregar un segundo bloque análogo aquí.
  */
 
 import { prisma } from "@/lib/prisma";
@@ -25,17 +24,11 @@ import type { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 // ============================================
 
 export interface ExpireSubscriptionsResult {
-  /** Cuántas suscripciones se procesaron en total */
   processed: number;
-  /** Cuántas se marcaron como EXPIRED */
   expired: number;
-  /** Cuántas ya estaban expiradas (skip) */
   skipped: number;
-  /** IDs de suscripciones que fallaron y el error */
   errors: Array<{ subscriptionId: string; error: string }>;
-  /** Milliseconds que tomó el job */
   durationMs: number;
-  /** Timestamp de ejecución */
   ranAt: string;
 }
 
@@ -60,21 +53,13 @@ export async function run(): Promise<ExpireSubscriptionsResult> {
 
   console.log(`[${JOB_NAME}] Iniciando — ${now.toISOString()}`);
 
-  // 1. Obtener suscripciones vencidas que aún no están marcadas como EXPIRED
-  //    Incluimos TRIALING cuyo trialEndsAt ya venció también.
-  const expired = await prisma.userSubscription.findMany({
+  const expired = await prisma.schoolSubscription.findMany({
     where: {
       AND: [
-        {
-          status: {
-            in: ["ACTIVE", "TRIALING"] as SubscriptionStatus[],
-          },
-        },
+        { status: { in: ["ACTIVE", "TRIALING"] as SubscriptionStatus[] } },
         {
           OR: [
-            // Período de facturación vencido
             { currentPeriodEnd: { lt: now } },
-            // Trial terminado (si está TRIALING y trialEndsAt ya pasó)
             {
               status: "TRIALING" as SubscriptionStatus,
               trialEndsAt: { lt: now },
@@ -85,7 +70,7 @@ export async function run(): Promise<ExpireSubscriptionsResult> {
     },
     select: {
       id: true,
-      userId: true,
+      schoolId: true,
       plan: true,
       status: true,
       currentPeriodEnd: true,
@@ -104,52 +89,36 @@ export async function run(): Promise<ExpireSubscriptionsResult> {
     return result;
   }
 
-  // 2. Procesar cada suscripción individualmente para aislar fallos
   for (const sub of expired) {
     try {
       const oldStatus = sub.status;
       const oldPlan = sub.plan;
       const newStatus: SubscriptionStatus = "EXPIRED";
-
-      // Determinar la razón del vencimiento
       const reason =
         sub.status === "TRIALING" ? "trial_expired" : "period_expired";
 
-      // Actualizar en BD — operación atómica
-      await prisma.userSubscription.update({
+      await prisma.schoolSubscription.update({
         where: { id: sub.id },
-        data: {
-          status: newStatus,
-          // Al expirar, el plan efectivo es FREE para el servicio,
-          // pero conservamos el plan original aquí para el historial.
-          // resolveEffectivePlan() en el servicio maneja FREE automáticamente.
-        },
+        data: { status: newStatus },
       });
 
-      // Registrar en historial (reutilizar el helper del servicio de billing)
       await recordSubscriptionChange(
         sub.id,
         oldPlan,
-        oldPlan, // el plan no cambia, solo el status
+        oldPlan as SubscriptionPlan,
         oldStatus,
         newStatus,
         reason,
       );
 
       result.expired++;
-
       console.log(
-        `[${JOB_NAME}] ✅ userId=${sub.userId} plan=${oldPlan} ${oldStatus}→${newStatus} (${reason})`,
+        `[${JOB_NAME}] ✅ schoolId=${sub.schoolId} plan=${oldPlan} ${oldStatus}→${newStatus} (${reason})`,
       );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Error desconocido";
-
-      result.errors.push({
-        subscriptionId: sub.id,
-        error: errorMessage,
-      });
-
+      result.errors.push({ subscriptionId: sub.id, error: errorMessage });
       console.error(
         `[${JOB_NAME}] ❌ Error procesando subscriptionId=${sub.id}: ${errorMessage}`,
       );

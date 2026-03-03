@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { getSessionSchoolId } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { requireFeature } from "@/lib/billing";
 import {
@@ -10,6 +11,15 @@ import {
 } from "@/modules/teachers/actions";
 import { generateScheduleForCourse } from "./generation";
 import type { ScheduleGenerationConfig } from "../types";
+
+// Helper: verify user has access to a school via session
+async function userHasAccessToSchool(
+  schoolId: string,
+  session: { id: string; role: string; schoolId?: string | null },
+): Promise<boolean> {
+  if (session.role === "SUPER_ADMIN") return true;
+  return session.schoolId === schoolId;
+}
 
 // Funciones auxiliares
 async function findOrCreateSubject(
@@ -228,18 +238,15 @@ export async function saveSchedule(data: {
     if (entityType === "course") {
       const course = await prisma.course.findFirst({
         where: { id: entityId },
-        include: {
-          school: {
-            include: {
-              users: {
-                where: { userId: session.id },
-              },
-            },
-          },
-        },
       });
 
-      if (!course || course.school.users.length === 0) {
+      if (!course) {
+        throw new Error("No tienes acceso a este curso");
+      }
+
+      // Verify user belongs to same school
+      const hasAccess = await userHasAccessToSchool(course.schoolId, session);
+      if (!hasAccess) {
         throw new Error("No tienes acceso a este curso");
       }
 
@@ -249,18 +256,14 @@ export async function saveSchedule(data: {
       // entityType === 'teacher'
       const teacher = await prisma.teacher.findFirst({
         where: { id: entityId },
-        include: {
-          school: {
-            include: {
-              users: {
-                where: { userId: session.id },
-              },
-            },
-          },
-        },
       });
 
-      if (!teacher || teacher.school.users.length === 0) {
+      if (!teacher) {
+        throw new Error("No tienes acceso a este profesor");
+      }
+
+      const hasAccess = await userHasAccessToSchool(teacher.schoolId, session);
+      if (!hasAccess) {
         throw new Error("No tienes acceso a este profesor");
       }
 
@@ -487,17 +490,16 @@ export async function deleteSchedule(scheduleId: string) {
 
     // Verificar acceso
     const schedule = await prisma.schedule.findFirst({
-      where: {
-        id: scheduleId,
-        school: {
-          users: {
-            some: { userId: session.id },
-          },
-        },
-      },
+      where: { id: scheduleId },
+      include: { school: { select: { id: true } } },
     });
 
     if (!schedule) {
+      throw new Error("No tienes acceso a este horario");
+    }
+
+    const hasAccess = await userHasAccessToSchool(schedule.schoolId, session);
+    if (!hasAccess) {
       throw new Error("No tienes acceso a este horario");
     }
 
@@ -524,15 +526,10 @@ export async function countSchedules() {
       throw new Error("No autorizado");
     }
 
+    const schoolId = await getSessionSchoolId();
+
     const count = await prisma.schedule.count({
-      where: {
-        school: {
-          users: {
-            some: { userId: session.id },
-          },
-        },
-        isActive: true,
-      },
+      where: { schoolId, isActive: true },
     });
 
     return count;
@@ -556,8 +553,12 @@ export async function generateAndSaveSchedule(
   }
 
   // Verificar que el usuario tiene acceso a la generación automática (plan PRO+)
+  const sessionSchoolId = session.schoolId;
+  if (!sessionSchoolId) {
+    throw new Error("No perteneces a ningún colegio");
+  }
   await requireFeature(
-    session.id,
+    sessionSchoolId,
     "autoScheduleGeneration",
     "Generación automática de horarios",
   );
@@ -566,17 +567,15 @@ export async function generateAndSaveSchedule(
 
   // Verificar acceso al curso
   const course = await prisma.course.findFirst({
-    where: {
-      id: config.courseId,
-      school: {
-        users: {
-          some: { userId: session.id },
-        },
-      },
-    },
+    where: { id: config.courseId },
   });
 
   if (!course) {
+    throw new Error("No tienes acceso a este curso");
+  }
+
+  const hasAccess = await userHasAccessToSchool(course.schoolId, session);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este curso");
   }
 

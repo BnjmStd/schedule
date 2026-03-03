@@ -30,16 +30,19 @@ export async function GET(
         role: true,
         createdAt: true,
         updatedAt: true,
-        subscription: true,
-        schools: {
-          include: {
-            school: {
-              select: { id: true, name: true, createdAt: true },
+        schoolId: true,
+        school: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+            subscription: {
+              select: { plan: true, status: true, currentPeriodEnd: true },
             },
           },
         },
         _count: {
-          select: { schools: true, sessions: true },
+          select: { sessions: true },
         },
       },
     });

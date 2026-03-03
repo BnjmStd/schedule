@@ -8,7 +8,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { GenerateScheduleModal } from "@/modules/schedules/components/GenerateScheduleModal";
 import { useModal } from "@/contexts/ModalContext";
 import type { School } from "@/types";
-import "../../courses.css";
+import styles from "./courses.module.css";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui";
@@ -97,15 +97,15 @@ export default function CoursesPage() {
   };
 
   return (
-    <div className="schools-page">
-      <div className="schools-bg">
-        <div className="schools-gradient" />
+    <div className={styles["schools-page"]}>
+      <div className={styles["schools-bg"]}>
+        <div className={styles["schools-gradient"]} />
       </div>
 
-      <div className="schools-container">
-        <header className="schools-header">
-          <div className="schools-header-top">
-            <h1 className="schools-title">
+      <div className={styles["schools-container"]}>
+        <header className={styles["schools-header"]}>
+          <div className={styles["schools-header-top"]}>
+            <h1 className={styles["schools-title"]}>
               🎓 Cursos
               {selectedSchool !== "all" && (
                 <span
@@ -124,7 +124,7 @@ export default function CoursesPage() {
               style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}
             >
               <button
-                className="schools-filter-btn"
+                className={styles["schools-filter-btn"]}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 🔍 {showFilters ? "Ocultar" : "Filtros"}
@@ -132,7 +132,7 @@ export default function CoursesPage() {
               <AddCourseButton onCourseCreated={reloadCourses} />
             </div>
           </div>
-          <p className="schools-description">
+          <p className={styles["schools-description"]}>
             Administra los cursos, secciones y niveles académicos de la
             institución.
             {selectedSchool !== "all" &&
@@ -143,11 +143,13 @@ export default function CoursesPage() {
 
           {/* Filtros */}
           {showFilters && (
-            <div className="schools-filters">
-              <div className="schools-filter-group">
-                <label className="schools-filter-label">Colegio</label>
+            <div className={styles["schools-filters"]}>
+              <div className={styles["schools-filter-group"]}>
+                <label className={styles["schools-filter-label"]}>
+                  Colegio
+                </label>
                 <select
-                  className="schools-filter-select"
+                  className={styles["schools-filter-select"]}
                   value={selectedSchool}
                   onChange={(e) => setSelectedSchool(e.target.value)}
                 >
@@ -164,61 +166,67 @@ export default function CoursesPage() {
         </header>
 
         {filteredCourses.length === 0 ? (
-          <div className="schools-empty">
-            <div className="schools-empty-icon">🎓</div>
-            <p className="schools-empty-title">
+          <div className={styles["schools-empty"]}>
+            <div className={styles["schools-empty-icon"]}>🎓</div>
+            <p className={styles["schools-empty-title"]}>
               {selectedSchool === "all"
                 ? "No hay cursos registrados"
                 : "No hay cursos en este colegio"}
             </p>
-            <p className="schools-empty-subtitle">
+            <p className={styles["schools-empty-subtitle"]}>
               {selectedSchool === "all"
                 ? "Comienza agregando tu primer curso"
                 : "Selecciona otro colegio o agrega un curso nuevo"}
             </p>
           </div>
         ) : (
-          <div className="schools-grid">
+          <div className={styles["schools-grid"]}>
             {filteredCourses.map((course) => (
-              <div key={course.id} className="schools-card">
-                <div className="schools-card-header">
+              <div key={course.id} className={styles["schools-card"]}>
+                <div className={styles["schools-card-header"]}>
                   <div>
-                    <h3 className="schools-card-title">{course.name}</h3>
+                    <h3 className={styles["schools-card-title"]}>
+                      {course.name}
+                    </h3>
                     {selectedSchool === "all" && (
-                      <span className="schools-card-school-badge">
+                      <span className={styles["schools-card-school-badge"]}>
                         {course.school.name}
                       </span>
                     )}
                   </div>
-                  <span className="schools-card-badge">
+                  <span className={styles["schools-card-badge"]}>
                     {course.academicLevel}
                   </span>
                 </div>
 
-                <div className="schools-card-info">
-                  <div className="schools-card-info-item">
-                    <span className="schools-card-info-icon">🏫</span>
+                <div className={styles["schools-card-info"]}>
+                  <div className={styles["schools-card-info-item"]}>
+                    <span className={styles["schools-card-info-icon"]}>🏫</span>
                     <span>{course.school.name}</span>
                   </div>
                   <button
-                    className="schools-card-btn schools-card-btn-danger"
+                    className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-danger"]}`}
                     onClick={() => handleDeleteCourse(course)}
                   >
                     Eliminar
                   </button>
                   {course.studentCount && (
-                    <div className="schools-card-info-item">
-                      <span className="schools-card-info-icon">👥</span>
+                    <div className={styles["schools-card-info-item"]}>
+                      <span className={styles["schools-card-info-icon"]}>
+                        👥
+                      </span>
                       <span>{course.studentCount} estudiantes</span>
                     </div>
                   )}
-                  <div className="schools-card-info-item">
-                    <span className="schools-card-info-icon">📅</span>
+                  <div className={styles["schools-card-info-item"]}>
+                    <span className={styles["schools-card-info-icon"]}>📅</span>
                     <span>Año {course.academicYear}</span>
                   </div>
                   {course.schedules.length > 0 && (
-                    <div className="schools-card-info-item">
-                      <span className="schools-card-info-icon">🗓️</span>
+                    <div className={styles["schools-card-info-item"]}>
+                      <span className={styles["schools-card-info-icon"]}>
+                        🗓️
+                      </span>
                       <span>
                         {course.schedules.length} horario
                         {course.schedules.length !== 1 ? "s" : ""}
@@ -227,9 +235,9 @@ export default function CoursesPage() {
                   )}
                 </div>
 
-                <div className="schools-card-footer">
+                <div className={styles["schools-card-footer"]}>
                   {/* <button
-                    className="schools-card-btn schools-card-btn-secondary"
+                    className={`${styles['schools-card-btn']} ${styles['schools-card-btn-secondary']}`}
                     onClick={() => handleGenerateSchedule(course)}
                     title="Generar horario automáticamente"
                   >
@@ -237,13 +245,13 @@ export default function CoursesPage() {
                   </button> */}
                   <Link
                     href={`/schedules/`}
-                    className="schools-card-btn schools-card-btn-primary"
+                    className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-primary"]}`}
                   >
                     {course.schedules.length > 0
                       ? "Ver Horario"
                       : "Crear Horario"}
                   </Link>
-                  {/* <button className="schools-card-btn schools-card-btn-ghost">
+                  {/* <button className={`${styles['schools-card-btn']} ${styles['schools-card-btn-ghost']}`}>
                     Editar
                   </button> */}
                 </div>

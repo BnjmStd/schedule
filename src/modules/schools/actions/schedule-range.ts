@@ -6,12 +6,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getUserSchoolIds } from "@/lib/auth-helpers";
+import { userHasAccessToSchool } from "@/lib/auth-helpers";
 
 export async function getSchoolScheduleRange(schoolId: string) {
-  const schoolIds = await getUserSchoolIds();
-
-  if (!schoolIds.includes(schoolId)) {
+  const hasAccess = await userHasAccessToSchool(schoolId);
+  if (!hasAccess) {
     throw new Error("No tienes acceso a este colegio");
   }
 

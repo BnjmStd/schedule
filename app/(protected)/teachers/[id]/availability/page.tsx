@@ -10,7 +10,7 @@ import {
 import { getSchoolScheduleConfig } from "@/modules/schools/actions";
 import { getSchoolScheduleRange } from "@/modules/schools/actions/schedule-range";
 import { ImportAvailabilityModal } from "@/modules/teachers/components/ImportAvailabilityModal";
-import "./TeacherAvailability.css";
+import styles from "./TeacherAvailability.module.css";
 
 type Teacher = Awaited<ReturnType<typeof getTeacher>>;
 type Availability = Awaited<ReturnType<typeof getTeacherAvailability>>;
@@ -368,9 +368,9 @@ export default function TeacherAvailabilityPage({
 
   if (isLoading) {
     return (
-      <div className="availability-page">
-        <div className="availability-loading">
-          <div className="spinner">⏳</div>
+      <div className={styles["availability-page"]}>
+        <div className={styles["availability-loading"]}>
+          <div className={styles["spinner"]}>⏳</div>
           <p>Cargando disponibilidad...</p>
         </div>
       </div>
@@ -379,8 +379,8 @@ export default function TeacherAvailabilityPage({
 
   if (!teacher) {
     return (
-      <div className="availability-page">
-        <div className="availability-error">
+      <div className={styles["availability-page"]}>
+        <div className={styles["availability-error"]}>
           <p>❌ Profesor no encontrado</p>
         </div>
       </div>
@@ -388,30 +388,30 @@ export default function TeacherAvailabilityPage({
   }
 
   return (
-    <div className="availability-page" onMouseUp={handleMouseUp}>
-      <div className="availability-bg">
-        <div className="availability-gradient" />
+    <div className={styles["availability-page"]} onMouseUp={handleMouseUp}>
+      <div className={styles["availability-bg"]}>
+        <div className={styles["availability-gradient"]} />
       </div>
 
-      <div className="availability-container">
+      <div className={styles["availability-container"]}>
         {/* Header */}
-        <header className="availability-header">
-          <div className="availability-header-top">
+        <header className={styles["availability-header"]}>
+          <div className={styles["availability-header-top"]}>
             <button
-              className="availability-back-btn"
+              className={styles["availability-back-btn"]}
               onClick={() => router.push("/teachers")}
             >
               ← Volver
             </button>
-            <div className="availability-actions">
+            <div className={styles["availability-actions"]}>
               <button
-                className="availability-btn availability-btn-ghost"
+                className={`${styles["availability-btn"]} ${styles["availability-btn-ghost"]}`}
                 onClick={handleClearAll}
               >
                 🗑️ Limpiar Todo
               </button>
               <button
-                className="availability-btn"
+                className={styles["availability-btn"]}
                 style={{
                   background: "linear-gradient(135deg, #10B981, #059669)",
                   color: "#fff",
@@ -421,13 +421,13 @@ export default function TeacherAvailabilityPage({
                 📥 Importar Excel
               </button>
               <button
-                className="availability-btn availability-btn-secondary"
+                className={`${styles["availability-btn"]} ${styles["availability-btn-secondary"]}`}
                 onClick={handleSelectAll}
               >
                 ✓ Seleccionar Todo
               </button>
               <button
-                className="availability-btn availability-btn-primary"
+                className={`${styles["availability-btn"]} ${styles["availability-btn-primary"]}`}
                 onClick={handleSave}
                 disabled={isSaving}
               >
@@ -436,21 +436,23 @@ export default function TeacherAvailabilityPage({
             </div>
           </div>
 
-          <div className="availability-teacher-info">
-            <div className="teacher-avatar">
+          <div className={styles["availability-teacher-info"]}>
+            <div className={styles["teacher-avatar"]}>
               {teacher.firstName[0]}
               {teacher.lastName[0]}
             </div>
             <div>
-              <h1 className="availability-title">📅 Disponibilidad Horaria</h1>
-              <p className="availability-subtitle">
+              <h1 className={styles["availability-title"]}>
+                📅 Disponibilidad Horaria
+              </h1>
+              <p className={styles["availability-subtitle"]}>
                 {teacher.firstName} {teacher.lastName}
                 {teacher.specialization && ` · ${teacher.specialization}`}
               </p>
             </div>
           </div>
 
-          <div className="availability-instructions">
+          <div className={styles["availability-instructions"]}>
             <p>
               💡 <strong>Instrucciones:</strong> Haz clic o arrastra sobre los
               bloques para marcar los horarios en que el profesor está
@@ -476,28 +478,32 @@ export default function TeacherAvailabilityPage({
         </header>
 
         {/* Grilla de disponibilidad */}
-        <div className="availability-grid-wrapper">
-          <div className="availability-grid">
+        <div className={styles["availability-grid-wrapper"]}>
+          <div className={styles["availability-grid"]}>
             {/* Header con días */}
-            <div className="availability-grid-header">
-              <div className="availability-grid-cell availability-grid-corner">
+            <div className={styles["availability-grid-header"]}>
+              <div
+                className={`${styles["availability-grid-cell"]} ${styles["availability-grid-corner"]}`}
+              >
                 Hora
               </div>
               {DAYS.map((day) => (
                 <div
                   key={day.key}
-                  className="availability-grid-cell availability-grid-day"
+                  className={`${styles["availability-grid-cell"]} ${styles["availability-grid-day"]}`}
                 >
-                  <span className="day-full">{day.label}</span>
-                  <span className="day-short">{day.short}</span>
+                  <span className={styles["day-full"]}>{day.label}</span>
+                  <span className={styles["day-short"]}>{day.short}</span>
                 </div>
               ))}
             </div>
 
             {/* Filas de tiempo */}
             {timeSlots.slice(0, -1).map((time, timeIdx) => (
-              <div key={time} className="availability-grid-row">
-                <div className="availability-grid-cell availability-grid-time">
+              <div key={time} className={styles["availability-grid-row"]}>
+                <div
+                  className={`${styles["availability-grid-cell"]} ${styles["availability-grid-time"]}`}
+                >
                   {time}
                 </div>
                 {DAYS.map((day) => {
@@ -507,9 +513,7 @@ export default function TeacherAvailabilityPage({
                   return (
                     <div
                       key={slotKey}
-                      className={`availability-grid-cell availability-grid-slot ${
-                        isSelected ? "selected" : ""
-                      }`}
+                      className={`${styles["availability-grid-cell"]} ${styles["availability-grid-slot"]} ${isSelected ? styles["selected"] : ""}`}
                       onMouseDown={() => handleMouseDown(day.key, time)}
                       onMouseEnter={() => handleMouseEnter(day.key, time)}
                     >
@@ -523,9 +527,9 @@ export default function TeacherAvailabilityPage({
         </div>
 
         {/* Resumen */}
-        <div className="availability-summary">
+        <div className={styles["availability-summary"]}>
           <h3>📊 Resumen de Disponibilidad</h3>
-          <div className="availability-summary-grid">
+          <div className={styles["availability-summary-grid"]}>
             {DAYS.map((day) => {
               const daySlots = Array.from(selectedSlots).filter((slot) =>
                 slot.startsWith(`${day.key}-`),
@@ -533,7 +537,10 @@ export default function TeacherAvailabilityPage({
 
               if (daySlots.length === 0) {
                 return (
-                  <div key={day.key} className="availability-summary-day">
+                  <div
+                    key={day.key}
+                    className={styles["availability-summary-day"]}
+                  >
                     <strong>{day.label}:</strong>
                     <span style={{ color: "rgba(255,255,255,0.5)" }}>
                       Sin disponibilidad
@@ -543,7 +550,10 @@ export default function TeacherAvailabilityPage({
               }
 
               return (
-                <div key={day.key} className="availability-summary-day">
+                <div
+                  key={day.key}
+                  className={styles["availability-summary-day"]}
+                >
                   <strong>{day.label}:</strong>
                   <span>
                     {daySlots.length} bloques de 30min (

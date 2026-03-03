@@ -15,7 +15,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Card, Badge, Button } from "@/components/ui";
 import { useModal } from "@/contexts/ModalContext";
 import type { School } from "@/types";
-import "../../teachers.css";
+import styles from "./teachers.module.css";
 
 type Teacher = Awaited<ReturnType<typeof getTeachers>>[0];
 
@@ -263,14 +263,16 @@ export default function TeachersPage() {
 
   if (isLoading) {
     return (
-      <div className="schools-page">
-        <div className="schools-bg">
-          <div className="schools-gradient" />
+      <div className={styles["schools-page"]}>
+        <div className={styles["schools-bg"]}>
+          <div className={styles["schools-gradient"]} />
         </div>
-        <div className="schools-container">
-          <div className="schools-empty">
-            <div className="schools-empty-icon">⏳</div>
-            <p className="schools-empty-title">Cargando profesores...</p>
+        <div className={styles["schools-container"]}>
+          <div className={styles["schools-empty"]}>
+            <div className={styles["schools-empty-icon"]}>⏳</div>
+            <p className={styles["schools-empty-title"]}>
+              Cargando profesores...
+            </p>
           </div>
         </div>
       </div>
@@ -278,18 +280,18 @@ export default function TeachersPage() {
   }
 
   return (
-    <div className="schools-page">
-      <div className="schools-bg">
-        <div className="schools-gradient" />
+    <div className={styles["schools-page"]}>
+      <div className={styles["schools-bg"]}>
+        <div className={styles["schools-gradient"]} />
       </div>
 
-      <div className="schools-container">
-        <header className="schools-header">
-          <div className="schools-header-top">
-            <h1 className="schools-title">👨‍🏫 Profesores</h1>
-            <div className="schools-header-actions">
+      <div className={styles["schools-container"]}>
+        <header className={styles["schools-header"]}>
+          <div className={styles["schools-header-top"]}>
+            <h1 className={styles["schools-title"]}>👨‍🏫 Profesores</h1>
+            <div className={styles["schools-header-actions"]}>
               <button
-                className="schools-filter-btn"
+                className={styles["schools-filter-btn"]}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <svg
@@ -313,7 +315,7 @@ export default function TeachersPage() {
                 Filtros
               </button>
               <button
-                className="schools-add-btn"
+                className={styles["schools-add-btn"]}
                 style={{
                   background: "linear-gradient(135deg, #10B981, #059669)",
                 }}
@@ -325,7 +327,7 @@ export default function TeachersPage() {
               <AddTeacherButton onTeacherCreated={loadData} />
             </div>
           </div>
-          <p className="schools-description">
+          <p className={styles["schools-description"]}>
             Administra los profesores, su disponibilidad horaria y las
             asignaturas que pueden dictar.
           </p>
@@ -367,13 +369,13 @@ export default function TeachersPage() {
 
         {/* Panel de filtros */}
         {showFilters && (
-          <div className="schools-filters">
-            <div className="schools-filter-group">
-              <label className="schools-filter-label">
+          <div className={styles["schools-filters"]}>
+            <div className={styles["schools-filter-group"]}>
+              <label className={styles["schools-filter-label"]}>
                 Filtrar por Colegio
               </label>
               <select
-                className="schools-filter-select"
+                className={styles["schools-filter-select"]}
                 value={selectedSchool}
                 onChange={(e) => setSelectedSchool(e.target.value)}
               >
@@ -394,7 +396,7 @@ export default function TeachersPage() {
             </div>
             {selectedSchool !== "all" && (
               <button
-                className="schools-filter-clear"
+                className={styles["schools-filter-clear"]}
                 onClick={() => setSelectedSchool("all")}
               >
                 Limpiar filtros
@@ -404,51 +406,55 @@ export default function TeachersPage() {
         )}
 
         {filteredTeachers.length === 0 ? (
-          <div className="schools-empty">
-            <div className="schools-empty-icon">👨‍🏫</div>
-            <p className="schools-empty-title">
+          <div className={styles["schools-empty"]}>
+            <div className={styles["schools-empty-icon"]}>👨‍🏫</div>
+            <p className={styles["schools-empty-title"]}>
               {selectedSchool === "all"
                 ? "No hay profesores registrados"
                 : "No hay profesores en este colegio"}
             </p>
-            <p className="schools-empty-subtitle">
+            <p className={styles["schools-empty-subtitle"]}>
               {selectedSchool === "all"
                 ? "Comienza agregando tu primer profesor"
                 : "Intenta con otro colegio o limpia los filtros"}
             </p>
           </div>
         ) : (
-          <div className="schools-grid">
+          <div className={styles["schools-grid"]}>
             {filteredTeachers.map((teacher) => (
-              <div key={teacher.id} className="schools-card">
-                <div className="schools-card-header">
+              <div key={teacher.id} className={styles["schools-card"]}>
+                <div className={styles["schools-card-header"]}>
                   <div>
-                    <h3 className="schools-card-title">
+                    <h3 className={styles["schools-card-title"]}>
                       {teacher.firstName} {teacher.lastName}
                     </h3>
-                    <span className="schools-card-school-badge">
+                    <span className={styles["schools-card-school-badge"]}>
                       🏫 {teacher.school.name}
                     </span>
                   </div>
-                  <span className="schools-card-badge">
+                  <span className={styles["schools-card-badge"]}>
                     {teacher.specialization || "Profesor"}
                   </span>
                 </div>
 
-                <div className="schools-card-info">
-                  <div className="schools-card-info-item">
-                    <span className="schools-card-info-icon">✉️</span>
+                <div className={styles["schools-card-info"]}>
+                  <div className={styles["schools-card-info-item"]}>
+                    <span className={styles["schools-card-info-icon"]}>✉️</span>
                     <span>{teacher.email}</span>
                   </div>
                   {teacher.phone && (
-                    <div className="schools-card-info-item">
-                      <span className="schools-card-info-icon">📞</span>
+                    <div className={styles["schools-card-info-item"]}>
+                      <span className={styles["schools-card-info-icon"]}>
+                        📞
+                      </span>
                       <span>{teacher.phone}</span>
                     </div>
                   )}
                   {teacher.teacherSubjects.length > 0 && (
-                    <div className="schools-card-info-item">
-                      <span className="schools-card-info-icon">📚</span>
+                    <div className={styles["schools-card-info-item"]}>
+                      <span className={styles["schools-card-info-icon"]}>
+                        📚
+                      </span>
                       <span>
                         {teacher.teacherSubjects.length} asignatura
                         {teacher.teacherSubjects.length !== 1 ? "s" : ""}
@@ -457,9 +463,9 @@ export default function TeachersPage() {
                   )}
                 </div>
 
-                <div className="schools-card-footer">
+                <div className={styles["schools-card-footer"]}>
                   <button
-                    className="schools-card-btn schools-card-btn-primary"
+                    className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-primary"]}`}
                     onClick={() =>
                       router.push(`/teachers/${teacher.id}/availability`)
                     }
@@ -468,13 +474,13 @@ export default function TeachersPage() {
                     📅 Disponibilidad
                   </button>
                   <button
-                    className="schools-card-btn schools-card-btn-ghost"
+                    className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-ghost"]}`}
                     onClick={() => handleDownloadAvailability(teacher)}
                   >
                     Descargar 👇 disponibilidad
                   </button>
                   <button
-                    className="schools-card-btn schools-card-btn-danger"
+                    className={`${styles["schools-card-btn"]} ${styles["schools-card-btn-danger"]}`}
                     onClick={() => handleDeleteTeacher(teacher)}
                   >
                     Eliminar

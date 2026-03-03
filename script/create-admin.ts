@@ -3,7 +3,11 @@
 /**
  * Script para crear/actualizar un usuario con rol admin / super_admin
  * Uso:
- *  npx tsx script/create-admin.ts --email=admin@example.com --name="Admin" --role=admin --password=secret
+ *  npx tsx script/create-admin.ts --email=admin@example.com --name="Admin" --role=ADMIN --password=secret [--schoolId=xxx]
+ *
+ * Roles válidos (case-insensitive): OWNER, ADMIN, SUPER_ADMIN, STAFF, VIEWER
+ * SUPER_ADMIN no necesita --schoolId. Los demás roles sí lo necesitan para
+ * poder acceder al dashboard tras el login.
  *
  * Si el usuario existe: actualiza el rol (y la contraseña si se pasa).
  * Si no existe: lo crea con la contraseña indicada o una aleatoria.
@@ -40,17 +44,27 @@ async function main() {
   const args = parseArgs();
   const email = String(args.email || args.e || args.user || "").trim();
   const name = (args.name as string) || (args.n as string) || "Admin";
-  const role = String(args.role || args.r || "admin").toLowerCase();
+  const role = String(args.role || args.r || "ADMIN").toUpperCase();
   const passArg = args.password || args.p;
+  const schoolId = (args.schoolId || args.school) as string | undefined;
 
   if (!email) {
     console.error("Error: --email is required");
     process.exit(2);
   }
 
-  if (!["admin", "super_admin"].includes(role)) {
-    console.error("Error: --role must be 'admin' or 'super_admin'");
+  const VALID_ROLES = ["OWNER", "ADMIN", "SUPER_ADMIN", "STAFF", "VIEWER"];
+  if (!VALID_ROLES.includes(role)) {
+    console.error(
+      `Error: --role must be one of: ${VALID_ROLES.join(", ")} (case-insensitive)`,
+    );
     process.exit(2);
+  }
+
+  if (role !== "SUPER_ADMIN" && !schoolId) {
+    console.warn(
+      `⚠️  Warning: --schoolId not provided. The user will log in but won't be able to access the dashboard. Pass --schoolId=<id> to associate them with a school.`,
+    );
   }
 
   const password = passArg ? String(passArg) : generatePassword();
@@ -62,9 +76,10 @@ async function main() {
       const updated = await prisma.user.update({
         where: { email },
         data: {
-          role,
+          role: role as import("@prisma/client").$Enums.UserRole,
           name,
           password: hashed,
+          ...(schoolId ? { schoolId } : {}),
         },
       });
       console.log("Updated user:", {
@@ -80,8 +95,9 @@ async function main() {
       data: {
         email,
         name,
-        role,
+        role: role as import("@prisma/client").$Enums.UserRole,
         password: hashed,
+        ...(schoolId ? { schoolId } : {}),
       },
     });
 

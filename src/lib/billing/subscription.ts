@@ -1,9 +1,9 @@
 /**
  * 💳 Subscription Service
  *
- * Única fuente de verdad para el estado de suscripción de un usuario.
+ * Única fuente de verdad para el estado de suscripción de un COLEGIO.
  * Toda la lógica de acceso debe pasar por aquí — nunca leer
- * UserSubscription directamente desde las acciones de dominio.
+ * SchoolSubscription directamente desde las acciones de dominio.
  *
  * PREPARADO PARA ESCALAR:
  *   Cuando exista Organization, las funciones recibirán un
@@ -13,7 +13,7 @@
 
 import { prisma } from "@/lib/prisma";
 import type {
-  UserSubscription,
+  SchoolSubscription,
   SubscriptionPlan,
   SubscriptionStatus,
 } from "@prisma/client";
@@ -31,7 +31,7 @@ export interface ActiveSubscription {
   canCreate: boolean;
   /** El plan real efectivo (TRIALING → PRO features, PAST_DUE → FREE features) */
   effectivePlan: SubscriptionPlan;
-  raw: UserSubscription;
+  raw: SchoolSubscription;
 }
 
 export interface SubscriptionLimitError {
@@ -57,12 +57,11 @@ export interface SubscriptionLimitError {
 // EXPIRED    → FREE
 // INCOMPLETE → FREE (pago inicial no completado)
 // ============================================
-function resolveEffectivePlan(sub: UserSubscription): SubscriptionPlan {
+function resolveEffectivePlan(sub: SchoolSubscription): SubscriptionPlan {
   switch (sub.status) {
     case "ACTIVE":
       return sub.plan;
     case "TRIALING": {
-      // Si el trial no expiró, usar el plan asociado
       const now = new Date();
       if (sub.trialEndsAt && sub.trialEndsAt > now) return sub.plan;
       return "FREE";
@@ -85,27 +84,26 @@ function canCreateResources(status: SubscriptionStatus): boolean {
 // ============================================
 
 /**
- * Obtiene la suscripción activa de un usuario.
+ * Obtiene la suscripción activa de un colegio.
  * Si no existe, crea una FREE automáticamente (bootstrapping).
  *
- * Este es el ÚNICO lugar donde se lee UserSubscription.
+ * Este es el Único lugar donde se lee SchoolSubscription.
  */
-export async function getUserActiveSubscription(
-  userId: string,
+export async function getSchoolActiveSubscription(
+  schoolId: string,
 ): Promise<ActiveSubscription> {
-  let sub = await prisma.userSubscription.findUnique({
-    where: { userId },
+  let sub = await prisma.schoolSubscription.findUnique({
+    where: { schoolId },
   });
 
   // Bootstrap: crear suscripción FREE si no existe
   if (!sub) {
-    sub = await prisma.userSubscription.create({
+    sub = await prisma.schoolSubscription.create({
       data: {
-        userId,
+        schoolId,
         plan: "FREE",
         status: "ACTIVE",
         currentPeriodStart: new Date(),
-        // FREE no tiene período real — se pone un año lejano
         currentPeriodEnd: new Date("2099-12-31"),
       },
     });
@@ -129,21 +127,14 @@ export async function getUserActiveSubscription(
 // ============================================
 
 /**
- * Verifica si una feature está habilitada para un usuario.
- * Usar en server actions y API routes, nunca en client components directamente.
- *
- * @example
- *   if (!await isFeatureEnabled(userId, "autoScheduleGeneration")) {
- *     throw new Error("Esta feature requiere plan Pro");
- *   }
+ * Verifica si una feature está habilitada para un colegio.
  */
 export async function isFeatureEnabled(
-  userId: string,
+  schoolId: string,
   feature: keyof PlanFeatures,
 ): Promise<boolean> {
-  const subscription = await getUserActiveSubscription(userId);
+  const subscription = await getSchoolActiveSubscription(schoolId);
   const value = subscription.features[feature];
-  // Soporta tanto boolean como number (limit > 0)
   return typeof value === "boolean" ? value : value > 0;
 }
 
@@ -152,68 +143,21 @@ export async function isFeatureEnabled(
 // ============================================
 
 /**
- * Valida si el usuario puede crear un nuevo colegio.
+ * Valida si el colegio puede crear un nuevo profesor.
  * Lanza SubscriptionLimitError si supera el límite.
  */
-export async function validateSchoolCreation(userId: string): Promise<void> {
-  const subscription = await getUserActiveSubscription(userId);
+export async function validateTeacherCreation(schoolId: string): Promise<void> {
+  const subscription = await getSchoolActiveSubscription(schoolId);
 
   if (!subscription.canCreate) {
     throw createLimitError({
       code: "SUBSCRIPTION_INACTIVE",
       message:
-        "Tu suscripción no está activa. Por favor, revisa tu método de pago.",
-    });
-  }
-
-  const { maxSchools } = subscription.features;
-
-  if (maxSchools === Infinity) return; // ENTERPRISE: sin límite
-
-  const currentSchoolCount = await prisma.userSchool.count({
-    where: { userId },
-  });
-
-  if (currentSchoolCount >= maxSchools) {
-    throw createLimitError({
-      code: "LIMIT_SCHOOLS",
-      message: `Tu plan ${subscription.effectivePlan} permite un máximo de ${maxSchools} colegio${maxSchools === 1 ? "" : "s"}. Actualmente tienes ${currentSchoolCount}.`,
-      limit: maxSchools,
-      current: currentSchoolCount,
-    });
-  }
-}
-
-/**
- * Valida si el usuario puede crear un nuevo profesor en un colegio.
- */
-export async function validateTeacherCreation(
-  userId: string,
-  schoolId: string,
-): Promise<void> {
-  // Verificar que el usuario tiene acceso a este colegio
-  const userSchool = await prisma.userSchool.findUnique({
-    where: { userId_schoolId: { userId, schoolId } },
-  });
-  if (!userSchool) {
-    throw createLimitError({
-      code: "SUBSCRIPTION_INACTIVE",
-      message: "No tienes acceso a este colegio.",
-    });
-  }
-
-  const subscription = await getUserActiveSubscription(userId);
-
-  if (!subscription.canCreate) {
-    throw createLimitError({
-      code: "SUBSCRIPTION_INACTIVE",
-      message:
-        "Tu suscripción no está activa. Por favor, revisa tu método de pago.",
+        "La suscripción del colegio no está activa. Por favor, revisa el método de pago.",
     });
   }
 
   const { maxTeachersPerSchool } = subscription.features;
-
   if (maxTeachersPerSchool === Infinity) return;
 
   const currentCount = await prisma.teacher.count({ where: { schoolId } });
@@ -229,23 +173,19 @@ export async function validateTeacherCreation(
 }
 
 /**
- * Valida si el usuario puede crear un nuevo curso en un colegio.
+ * Valida si el colegio puede crear un nuevo curso.
  */
-export async function validateCourseCreation(
-  userId: string,
-  schoolId: string,
-): Promise<void> {
-  const subscription = await getUserActiveSubscription(userId);
+export async function validateCourseCreation(schoolId: string): Promise<void> {
+  const subscription = await getSchoolActiveSubscription(schoolId);
 
   if (!subscription.canCreate) {
     throw createLimitError({
       code: "SUBSCRIPTION_INACTIVE",
-      message: "Tu suscripción no está activa.",
+      message: "La suscripción del colegio no está activa.",
     });
   }
 
   const { maxCoursesPerSchool } = subscription.features;
-
   if (maxCoursesPerSchool === Infinity) return;
 
   const currentCount = await prisma.course.count({ where: { schoolId } });
@@ -261,15 +201,14 @@ export async function validateCourseCreation(
 }
 
 /**
- * Valida si un feature específico está disponible para el usuario.
- * Útil para features booleanos (exportPDF, autoScheduleGeneration, etc.)
+ * Valida si un feature específico está disponible para el colegio.
  */
 export async function requireFeature(
-  userId: string,
+  schoolId: string,
   feature: keyof PlanFeatures,
   featureLabel: string,
 ): Promise<void> {
-  const enabled = await isFeatureEnabled(userId, feature);
+  const enabled = await isFeatureEnabled(schoolId, feature);
   if (!enabled) {
     throw createLimitError({
       code: "FEATURE_DISABLED",
@@ -284,7 +223,7 @@ export async function requireFeature(
 
 /**
  * Registra un cambio de plan en el historial.
- * Llamar SIEMPRE que cambie plan o status, incluyendo desde webhooks Stripe.
+ * Llamar SIEMPRE que cambie plan o status.
  */
 export async function recordSubscriptionChange(
   subscriptionId: string,
@@ -312,7 +251,7 @@ export async function recordSubscriptionChange(
  */
 export async function registerBillingEvent(params: {
   stripeEventId: string;
-  userId?: string;
+  schoolId?: string;
   type: string;
   payload: string;
 }): Promise<{ created: boolean; eventId: string }> {
@@ -327,7 +266,7 @@ export async function registerBillingEvent(params: {
   const event = await prisma.billingEvent.create({
     data: {
       stripeEventId: params.stripeEventId,
-      userId: params.userId ?? null,
+      schoolId: params.schoolId ?? null,
       type: params.type,
       payload: params.payload,
       processed: false,

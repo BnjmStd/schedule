@@ -7,10 +7,10 @@ import { getTeachers } from "@/modules/teachers/actions";
 import { ScheduleEditor } from "@/modules/schedules/components/ScheduleEditor";
 
 /* styles */
-import "../../../schools.css";
-import "../../../schedules.css";
-import "../../../schedule-grid.css";
-import "../../../schedule-editor.css";
+import schoolsStyles from "./schools.module.css";
+import schedulesStyles from "./schedules.module.css";
+import scheduleGridStyles from "./schedule-grid.module.css";
+import editorStyles from "./schedule-editor.module.css";
 
 function EditorContent() {
   const router = useRouter();
@@ -54,11 +54,11 @@ function EditorContent() {
 
   if (loading) {
     return (
-      <div className="schools-page">
-        <div className="schools-bg">
-          <div className="schools-gradient" />
+      <div className={schoolsStyles["schools-page"]}>
+        <div className={schoolsStyles["schools-bg"]}>
+          <div className={schoolsStyles["schools-gradient"]} />
         </div>
-        <div className="schools-container">
+        <div className={schoolsStyles["schools-container"]}>
           <div
             style={{
               display: "flex",
@@ -70,7 +70,9 @@ function EditorContent() {
               color: "rgba(255, 255, 255, 0.7)",
             }}
           >
-            <div className="schedule-editor-loading-spinner"></div>
+            <div
+              className={editorStyles["schedule-editor-loading-spinner"]}
+            ></div>
             <p>Cargando editor...</p>
           </div>
         </div>
@@ -80,21 +82,21 @@ function EditorContent() {
 
   if (!entity) {
     return (
-      <div className="schools-page">
-        <div className="schools-bg">
-          <div className="schools-gradient" />
+      <div className={schoolsStyles["schools-page"]}>
+        <div className={schoolsStyles["schools-bg"]}>
+          <div className={schoolsStyles["schools-gradient"]} />
         </div>
-        <div className="schools-container">
-          <div className="schools-empty">
-            <div className="schools-empty-icon">❌</div>
-            <p className="schools-empty-title">
+        <div className={schoolsStyles["schools-container"]}>
+          <div className={schoolsStyles["schools-empty"]}>
+            <div className={schoolsStyles["schools-empty-icon"]}>❌</div>
+            <p className={schoolsStyles["schools-empty-title"]}>
               {type === "course"
                 ? "Curso no encontrado"
                 : "Profesor no encontrado"}
             </p>
             <button
               onClick={handleBack}
-              className="schools-add-btn"
+              className={schoolsStyles["schools-add-btn"]}
               style={{ marginTop: "1rem" }}
             >
               ← Volver a Horarios
@@ -109,14 +111,17 @@ function EditorContent() {
     type === "course" ? entity.name : `${entity.firstName} ${entity.lastName}`;
 
   return (
-    <div className="schools-page">
-      <div className="schools-bg">
-        <div className="schools-gradient" />
+    <div className={schoolsStyles["schools-page"]}>
+      <div className={schoolsStyles["schools-bg"]}>
+        <div className={schoolsStyles["schools-gradient"]} />
       </div>
 
-      <div className="schools-container">
-        <div className="schedule-editor-header">
-          <button onClick={handleBack} className="schedule-editor-back-btn">
+      <div className={schoolsStyles["schools-container"]}>
+        <div className={editorStyles["schedule-editor-header"]}>
+          <button
+            onClick={handleBack}
+            className={editorStyles["schedule-editor-back-btn"]}
+          >
             <svg
               width="20"
               height="20"
@@ -129,9 +134,9 @@ function EditorContent() {
             </svg>
             Volver
           </button>
-          <div className="schedule-editor-title">
+          <div className={editorStyles["schedule-editor-title"]}>
             <h1>{type === "course" ? "🎓" : "👨‍🏫"} Editar Horario</h1>
-            <p className="schedule-editor-subtitle">
+            <p className={editorStyles["schedule-editor-subtitle"]}>
               {entityName}
               {type === "course" && entity.studentCount && (
                 <span> • {entity.studentCount} estudiantes</span>
@@ -158,11 +163,11 @@ export default function ScheduleEditorPage() {
   return (
     <Suspense
       fallback={
-        <div className="schools-page">
-          <div className="schools-bg">
-            <div className="schools-gradient" />
+        <div className={schoolsStyles["schools-page"]}>
+          <div className={schoolsStyles["schools-bg"]}>
+            <div className={schoolsStyles["schools-gradient"]} />
           </div>
-          <div className="schools-container">
+          <div className={schoolsStyles["schools-container"]}>
             <div
               style={{
                 display: "flex",

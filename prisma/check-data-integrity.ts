@@ -23,13 +23,11 @@ async function main() {
   const schoolsWithUsers = await prisma.school.findMany({
     include: {
       users: {
-        include: {
-          user: {
-            select: {
-              email: true,
-              name: true,
-            },
-          },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
         },
       },
       _count: {
@@ -48,8 +46,8 @@ async function main() {
     console.log(`🏫 ${school.name}`);
     console.log(`   ID: ${school.id}`);
     console.log(`   Usuarios asociados: ${school.users.length}`);
-    school.users.forEach((us: { user: { email: string }; role: string }) => {
-      console.log(`      - ${us.user.email} (${us.role})`);
+    school.users.forEach((u: { email: string; role: string }) => {
+      console.log(`      - ${u.email} (${u.role})`);
     });
     console.log(`   👨‍🏫 Profesores: ${school._count.teachers}`);
     console.log(`   📚 Asignaturas: ${school._count.subjects}`);
