@@ -172,8 +172,8 @@ export default function LoginPage() {
 
         <p className="auth-footer">
           Al continuar, aceptas nuestros{" "}
-          <a href="#terms">Términos de Servicio</a> y{" "}
-          <a href="#privacy">Política de Privacidad</a>
+          <Link href="/legal/terms">Términos de Servicio</Link> y{" "}
+          <Link href="/legal/privacy">Política de Privacidad</Link>
         </p>
       </div>
     </div>

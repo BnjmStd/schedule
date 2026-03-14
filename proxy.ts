@@ -66,6 +66,7 @@ export default async function proxy(request: NextRequest) {
     pathname === "/" ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/legal") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico");
 
