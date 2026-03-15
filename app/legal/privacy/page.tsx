@@ -40,19 +40,45 @@ export default function PrivacyPage() {
           <nav aria-label="Tabla de contenidos">
             <p className={styles.tocTitle}>Contenido</p>
             <ul className={styles.tocList}>
-              <li><a href="#responsable">Responsable</a></li>
-              <li><a href="#datos-recopilados">Datos que recopilamos</a></li>
-              <li><a href="#finalidad">Finalidad del tratamiento</a></li>
-              <li><a href="#base-legal">Base legal</a></li>
-              <li><a href="#cookies">Cookies</a></li>
-              <li><a href="#compartir">Compartir datos</a></li>
-              <li><a href="#transferencias">Transferencias internacionales</a></li>
-              <li><a href="#retencion">Retención</a></li>
-              <li><a href="#seguridad">Seguridad</a></li>
-              <li><a href="#derechos">Tus derechos</a></li>
-              <li><a href="#menores">Menores de edad</a></li>
-              <li><a href="#cambios">Cambios</a></li>
-              <li><a href="#contacto">Contacto</a></li>
+              <li>
+                <a href="#responsable">Responsable</a>
+              </li>
+              <li>
+                <a href="#datos-recopilados">Datos que recopilamos</a>
+              </li>
+              <li>
+                <a href="#finalidad">Finalidad del tratamiento</a>
+              </li>
+              <li>
+                <a href="#base-legal">Base legal</a>
+              </li>
+              <li>
+                <a href="#cookies">Cookies</a>
+              </li>
+              <li>
+                <a href="#compartir">Compartir datos</a>
+              </li>
+              <li>
+                <a href="#transferencias">Transferencias internacionales</a>
+              </li>
+              <li>
+                <a href="#retencion">Retención</a>
+              </li>
+              <li>
+                <a href="#seguridad">Seguridad</a>
+              </li>
+              <li>
+                <a href="#derechos">Tus derechos</a>
+              </li>
+              <li>
+                <a href="#menores">Menores de edad</a>
+              </li>
+              <li>
+                <a href="#cambios">Cambios</a>
+              </li>
+              <li>
+                <a href="#contacto">Contacto</a>
+              </li>
             </ul>
           </nav>
 
@@ -94,7 +120,9 @@ export default function PrivacyPage() {
                 <strong>Datos que tú nos proporcionas</strong>
               </p>
               <ul>
-                <li>Nombre y apellido, correo electrónico, contraseña (cifrada).</li>
+                <li>
+                  Nombre y apellido, correo electrónico, contraseña (cifrada).
+                </li>
                 <li>Nombre e información de tu institución educativa.</li>
                 <li>
                   Datos operativos: docentes, materias, cursos, aulas y horarios
@@ -127,10 +155,13 @@ export default function PrivacyPage() {
                 <li>Crear y gestionar tu cuenta.</li>
                 <li>Prestar y mejorar las funcionalidades de la Plataforma.</li>
                 <li>Procesar pagos y emitir facturas.</li>
-                <li>Enviarte comunicaciones relacionadas con el servicio (incidencias, actualizaciones, avisos de seguridad).</li>
                 <li>
-                  Enviarte comunicaciones de marketing, únicamente si has dado tu
-                  consentimiento expreso.
+                  Enviarte comunicaciones relacionadas con el servicio
+                  (incidencias, actualizaciones, avisos de seguridad).
+                </li>
+                <li>
+                  Enviarte comunicaciones de marketing, únicamente si has dado
+                  tu consentimiento expreso.
                 </li>
                 <li>Cumplir obligaciones legales y prevenir fraudes.</li>
               </ul>
@@ -190,9 +221,9 @@ export default function PrivacyPage() {
                 </li>
               </ul>
               <p>
-                Puedes gestionar las cookies no esenciales desde la configuración
-                de tu navegador. Desactivarlas puede afectar algunas
-                funcionalidades.
+                Puedes gestionar las cookies no esenciales desde la
+                configuración de tu navegador. Desactivarlas puede afectar
+                algunas funcionalidades.
               </p>
             </div>
           </section>
@@ -233,8 +264,8 @@ export default function PrivacyPage() {
             </h2>
             <div className={styles.sectionContent}>
               <p>
-                Algunos de nuestros proveedores pueden estar ubicados fuera de tu
-                país. En esos casos garantizamos que existan salvaguardas
+                Algunos de nuestros proveedores pueden estar ubicados fuera de
+                tu país. En esos casos garantizamos que existan salvaguardas
                 adecuadas (cláusulas contractuales estándar u otro mecanismo de
                 transferencia válido) para proteger tus datos.
               </p>
@@ -250,9 +281,9 @@ export default function PrivacyPage() {
               <p>
                 Conservamos tus datos mientras tu cuenta esté activa y por el
                 tiempo necesario para cumplir los fines descritos en esta
-                política. Tras la cancelación de tu cuenta eliminaremos tus datos
-                operativos en un plazo máximo de 30 días, salvo que la ley exija
-                conservarlos más tiempo (p. ej., registros fiscales).
+                política. Tras la cancelación de tu cuenta eliminaremos tus
+                datos operativos en un plazo máximo de 30 días, salvo que la ley
+                exija conservarlos más tiempo (p. ej., registros fiscales).
               </p>
             </div>
           </section>
@@ -275,8 +306,8 @@ export default function PrivacyPage() {
               </ul>
               <p>
                 Ningún sistema es 100&nbsp;% seguro. En caso de una brecha de
-                seguridad que afecte tus datos, te notificaremos en los plazos que
-                establezca la normativa aplicable.
+                seguridad que afecte tus datos, te notificaremos en los plazos
+                que establezca la normativa aplicable.
               </p>
             </div>
           </section>
@@ -292,13 +323,34 @@ export default function PrivacyPage() {
                 derechos respecto de tus datos:
               </p>
               <ul>
-                <li><strong>Acceso:</strong> obtener una copia de los datos que tenemos sobre ti.</li>
-                <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos.</li>
-                <li><strong>Supresión:</strong> solicitar la eliminación de tus datos (&quot;derecho al olvido&quot;).</li>
-                <li><strong>Portabilidad:</strong> recibir tus datos en formato estructurado y legible por máquina.</li>
-                <li><strong>Oposición:</strong> oponerte al tratamiento basado en interés legítimo.</li>
-                <li><strong>Limitación:</strong> solicitar la restricción temporal del tratamiento.</li>
-                <li><strong>Retirar consentimiento</strong> en cualquier momento para los tratamientos basados en él.</li>
+                <li>
+                  <strong>Acceso:</strong> obtener una copia de los datos que
+                  tenemos sobre ti.
+                </li>
+                <li>
+                  <strong>Rectificación:</strong> corregir datos inexactos o
+                  incompletos.
+                </li>
+                <li>
+                  <strong>Supresión:</strong> solicitar la eliminación de tus
+                  datos (&quot;derecho al olvido&quot;).
+                </li>
+                <li>
+                  <strong>Portabilidad:</strong> recibir tus datos en formato
+                  estructurado y legible por máquina.
+                </li>
+                <li>
+                  <strong>Oposición:</strong> oponerte al tratamiento basado en
+                  interés legítimo.
+                </li>
+                <li>
+                  <strong>Limitación:</strong> solicitar la restricción temporal
+                  del tratamiento.
+                </li>
+                <li>
+                  <strong>Retirar consentimiento</strong> en cualquier momento
+                  para los tratamientos basados en él.
+                </li>
               </ul>
               <p>
                 Para ejercer cualquiera de estos derechos escríbenos a{" "}
@@ -318,10 +370,10 @@ export default function PrivacyPage() {
             <div className={styles.sectionContent}>
               <p>
                 La Plataforma está dirigida a administradores institucionales y
-                docentes adultos. No recopilamos intencionalmente datos personales
-                de menores de 18 años directamente. Si detectamos que hemos
-                recibido datos de un menor sin consentimiento, los eliminaremos de
-                inmediato.
+                docentes adultos. No recopilamos intencionalmente datos
+                personales de menores de 18 años directamente. Si detectamos que
+                hemos recibido datos de un menor sin consentimiento, los
+                eliminaremos de inmediato.
               </p>
             </div>
           </section>
@@ -333,10 +385,10 @@ export default function PrivacyPage() {
             </h2>
             <div className={styles.sectionContent}>
               <p>
-                Podemos actualizar esta política periódicamente. Cuando realicemos
-                cambios materiales te notificaremos por correo electrónico o
-                mediante un aviso prominente en la Plataforma. La fecha de la
-                última actualización siempre aparece en la cabecera.
+                Podemos actualizar esta política periódicamente. Cuando
+                realicemos cambios materiales te notificaremos por correo
+                electrónico o mediante un aviso prominente en la Plataforma. La
+                fecha de la última actualización siempre aparece en la cabecera.
               </p>
             </div>
           </section>

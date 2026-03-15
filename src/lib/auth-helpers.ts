@@ -14,6 +14,7 @@
 
 import { getSession } from "./session";
 import { prisma } from "./prisma";
+import type { AuditAction, Prisma } from "@prisma/client";
 
 /** Roles con capacidad de escritura sobre recursos del colegio */
 const WRITE_ROLES = new Set(["OWNER", "ADMIN", "STAFF"]);
@@ -226,10 +227,10 @@ export async function appendAuditLog(entry: AuditLogEntry): Promise<void> {
         schoolId: entry.schoolId ?? null,
         actorId: entry.actorId,
         actorRole: entry.actorRole,
-        action: entry.action,
+        action: entry.action as AuditAction,
         entity: entry.entity,
         entityId: entry.entityId,
-        metadata: JSON.stringify(entry.metadata ?? {}),
+        metadata: (entry.metadata ?? {}) as Prisma.InputJsonValue,
       },
     });
   } catch (err) {

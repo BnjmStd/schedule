@@ -10,6 +10,7 @@ import {
 import { getSchoolScheduleConfig } from "@/modules/schools/actions";
 import { getSchoolScheduleRange } from "@/modules/schools/actions/schedule-range";
 import { ImportAvailabilityModal } from "@/modules/teachers/components/ImportAvailabilityModal";
+import { dateToTimeString } from "@/lib/utils/time";
 import styles from "./TeacherAvailability.module.css";
 
 type Teacher = Awaited<ReturnType<typeof getTeacher>>;
@@ -138,10 +139,12 @@ export default function TeacherAvailabilityPage({
 
       // Convertir disponibilidad a slots seleccionados
       const selectedSet = new Set<string>();
-      availabilityData.forEach((slot: AvailabilitySlot) => {
+      availabilityData.forEach((slot) => {
         console.log("[Availability] Procesando slot:", slot);
-        const startIdx = slots.indexOf(slot.startTime);
-        const endIdx = slots.indexOf(slot.endTime);
+        const startTime = dateToTimeString(slot.startTime);
+        const endTime = dateToTimeString(slot.endTime);
+        const startIdx = slots.indexOf(startTime);
+        const endIdx = slots.indexOf(endTime);
 
         // endTime marca hasta dónde NO llega (exclusivo), así que pintamos hasta endIdx-1
         // PERO si endIdx = -1 (ej: endTime es 18:00 que no está en slots), pintamos hasta el final
@@ -151,8 +154,8 @@ export default function TeacherAvailabilityPage({
           startIdx,
           endIdx,
           lastSlotIdx,
-          start: slot.startTime,
-          end: slot.endTime,
+          start: startTime,
+          end: endTime,
           slots: slots.slice(startIdx, lastSlotIdx),
         });
 

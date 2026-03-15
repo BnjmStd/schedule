@@ -7,6 +7,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { userHasAccessToSchool } from "@/lib/auth-helpers";
+import { dateToTimeString } from "@/lib/utils/time";
 
 export async function getSchoolScheduleRange(schoolId: string) {
   const hasAccess = await userHasAccessToSchool(schoolId);
@@ -48,8 +49,8 @@ export async function getSchoolScheduleRange(schoolId: string) {
   }
 
   // Encontrar el rango más amplio
-  const startTimes = levelConfigs.map((c) => c.startTime);
-  const endTimes = levelConfigs.map((c) => c.endTime);
+  const startTimes = levelConfigs.map((c) => dateToTimeString(c.startTime));
+  const endTimes = levelConfigs.map((c) => dateToTimeString(c.endTime));
 
   // La hora más temprana de inicio
   const earliestStart = startTimes.reduce((min, time) =>
@@ -70,8 +71,8 @@ export async function getSchoolScheduleRange(schoolId: string) {
     blockDuration: minBlockDuration,
     source: "levelConfigs" as const,
     details: levelConfigs.map((c) => ({
-      start: c.startTime,
-      end: c.endTime,
+      start: dateToTimeString(c.startTime),
+      end: dateToTimeString(c.endTime),
       duration: c.blockDuration,
     })),
   };

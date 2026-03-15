@@ -40,19 +40,45 @@ export default function TermsPage() {
           <nav aria-label="Tabla de contenidos">
             <p className={styles.tocTitle}>Contenido</p>
             <ul className={styles.tocList}>
-              <li><a href="#aceptacion">Aceptación</a></li>
-              <li><a href="#descripcion">Descripción del servicio</a></li>
-              <li><a href="#cuentas">Cuentas de usuario</a></li>
-              <li><a href="#uso-aceptable">Uso aceptable</a></li>
-              <li><a href="#datos">Datos y privacidad</a></li>
-              <li><a href="#propiedad">Propiedad intelectual</a></li>
-              <li><a href="#pagos">Planes y pagos</a></li>
-              <li><a href="#suspension">Suspensión</a></li>
-              <li><a href="#garantias">Garantías</a></li>
-              <li><a href="#limitacion">Limitación de responsabilidad</a></li>
-              <li><a href="#ley">Ley aplicable</a></li>
-              <li><a href="#cambios">Cambios a los términos</a></li>
-              <li><a href="#contacto">Contacto</a></li>
+              <li>
+                <a href="#aceptacion">Aceptación</a>
+              </li>
+              <li>
+                <a href="#descripcion">Descripción del servicio</a>
+              </li>
+              <li>
+                <a href="#cuentas">Cuentas de usuario</a>
+              </li>
+              <li>
+                <a href="#uso-aceptable">Uso aceptable</a>
+              </li>
+              <li>
+                <a href="#datos">Datos y privacidad</a>
+              </li>
+              <li>
+                <a href="#propiedad">Propiedad intelectual</a>
+              </li>
+              <li>
+                <a href="#pagos">Planes y pagos</a>
+              </li>
+              <li>
+                <a href="#suspension">Suspensión</a>
+              </li>
+              <li>
+                <a href="#garantias">Garantías</a>
+              </li>
+              <li>
+                <a href="#limitacion">Limitación de responsabilidad</a>
+              </li>
+              <li>
+                <a href="#ley">Ley aplicable</a>
+              </li>
+              <li>
+                <a href="#cambios">Cambios a los términos</a>
+              </li>
+              <li>
+                <a href="#contacto">Contacto</a>
+              </li>
             </ul>
           </nav>
 
@@ -76,9 +102,15 @@ export default function TermsPage() {
                 que:
               </p>
               <ul>
-                <li>Tienes al menos 18 años o actúas con autorización de tu institución educativa.</li>
+                <li>
+                  Tienes al menos 18 años o actúas con autorización de tu
+                  institución educativa.
+                </li>
                 <li>Has leído y comprendido estos Términos.</li>
-                <li>Tienes la autoridad para aceptar estos Términos en nombre de tu organización, si aplica.</li>
+                <li>
+                  Tienes la autoridad para aceptar estos Términos en nombre de
+                  tu organización, si aplica.
+                </li>
               </ul>
             </div>
           </section>
@@ -91,9 +123,12 @@ export default function TermsPage() {
             <div className={styles.sectionContent}>
               <p>
                 {siteConfig.name} es una plataforma SaaS diseñada para la{" "}
-                <strong>gestión y generación automática de horarios escolares</strong>.
-                Ofrece herramientas para administrar docentes, materias, cursos,
-                aulas y jornadas, detectar conflictos y exportar horarios.
+                <strong>
+                  gestión y generación automática de horarios escolares
+                </strong>
+                . Ofrece herramientas para administrar docentes, materias,
+                cursos, aulas y jornadas, detectar conflictos y exportar
+                horarios.
               </p>
               <p>
                 Nos reservamos el derecho de modificar, suspender o descontinuar
@@ -110,17 +145,19 @@ export default function TermsPage() {
             </h2>
             <div className={styles.sectionContent}>
               <p>
-                Para acceder al servicio debes crear una cuenta. Eres responsable
-                de:
+                Para acceder al servicio debes crear una cuenta. Eres
+                responsable de:
               </p>
               <ul>
                 <li>Mantener la confidencialidad de tus credenciales.</li>
                 <li>Toda actividad que ocurra bajo tu cuenta.</li>
-                <li>Notificarnos de inmediato ante cualquier uso no autorizado.</li>
+                <li>
+                  Notificarnos de inmediato ante cualquier uso no autorizado.
+                </li>
               </ul>
               <p>
-                No está permitido compartir credenciales entre distintas personas
-                físicas ni crear cuentas de forma automatizada.
+                No está permitido compartir credenciales entre distintas
+                personas físicas ni crear cuentas de forma automatizada.
               </p>
             </div>
           </section>
@@ -133,7 +170,9 @@ export default function TermsPage() {
             <div className={styles.sectionContent}>
               <p>Queda expresamente prohibido:</p>
               <ul>
-                <li>Usar la Plataforma para fines ilegales o no autorizados.</li>
+                <li>
+                  Usar la Plataforma para fines ilegales o no autorizados.
+                </li>
                 <li>
                   Intentar acceder sin autorización a sistemas, cuentas o redes
                   relacionadas con la Plataforma.
@@ -143,8 +182,8 @@ export default function TermsPage() {
                   que infrinja derechos de terceros.
                 </li>
                 <li>
-                  Realizar ingeniería inversa, descompilar o desensamblar cualquier
-                  parte del software.
+                  Realizar ingeniería inversa, descompilar o desensamblar
+                  cualquier parte del software.
                 </li>
                 <li>
                   Revender, sublicenciar o transferir el acceso a la Plataforma
@@ -184,8 +223,8 @@ export default function TermsPage() {
               <p>
                 La Plataforma, incluyendo su código fuente, diseño, algoritmos,
                 logotipos y marca, es propiedad exclusiva de{" "}
-                <strong>{siteConfig.name}</strong> y está protegida por las leyes
-                de propiedad intelectual aplicables.
+                <strong>{siteConfig.name}</strong> y está protegida por las
+                leyes de propiedad intelectual aplicables.
               </p>
               <p>
                 Se te otorga una licencia limitada, revocable, no exclusiva e
@@ -211,12 +250,12 @@ export default function TermsPage() {
                   seleccionado (mensual o anual).
                 </li>
                 <li>
-                  Que el cobro se realiza de forma anticipada y es no reembolsable,
-                  salvo lo dispuesto por la ley aplicable.
+                  Que el cobro se realiza de forma anticipada y es no
+                  reembolsable, salvo lo dispuesto por la ley aplicable.
                 </li>
                 <li>
-                  Que podemos modificar precios notificándote con al menos 30 días
-                  de antelación.
+                  Que podemos modificar precios notificándote con al menos 30
+                  días de antelación.
                 </li>
               </ul>
               <p>
@@ -253,10 +292,11 @@ export default function TermsPage() {
             </h2>
             <div className={styles.sectionContent}>
               <p>
-                La Plataforma se proporciona <strong>&quot;tal cual&quot;</strong> y{" "}
-                <strong>&quot;según disponibilidad&quot;</strong>. No garantizamos
-                que el servicio sea ininterrumpido, libre de errores o que cumpla
-                todos tus requisitos específicos.
+                La Plataforma se proporciona{" "}
+                <strong>&quot;tal cual&quot;</strong> y{" "}
+                <strong>&quot;según disponibilidad&quot;</strong>. No
+                garantizamos que el servicio sea ininterrumpido, libre de
+                errores o que cumpla todos tus requisitos específicos.
               </p>
             </div>
           </section>
@@ -274,8 +314,8 @@ export default function TermsPage() {
                 derivados del uso o imposibilidad de uso del servicio.
               </p>
               <p>
-                Nuestra responsabilidad total no excederá el importe pagado por ti
-                en los doce (12) meses anteriores al evento que originó el
+                Nuestra responsabilidad total no excederá el importe pagado por
+                ti en los doce (12) meses anteriores al evento que originó el
                 reclamo.
               </p>
             </div>
@@ -303,11 +343,11 @@ export default function TermsPage() {
             </h2>
             <div className={styles.sectionContent}>
               <p>
-                Podemos actualizar estos Términos periódicamente. Te notificaremos
-                por correo electrónico o mediante un aviso visible en la Plataforma
-                con al menos 15 días de anticipación para cambios materiales. El
-                uso continuado del servicio tras la fecha de vigencia implica la
-                aceptación de los nuevos Términos.
+                Podemos actualizar estos Términos periódicamente. Te
+                notificaremos por correo electrónico o mediante un aviso visible
+                en la Plataforma con al menos 15 días de anticipación para
+                cambios materiales. El uso continuado del servicio tras la fecha
+                de vigencia implica la aceptación de los nuevos Términos.
               </p>
             </div>
           </section>

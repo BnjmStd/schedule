@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { getSessionSchoolId, userHasAccessToSchool } from "@/lib/auth-helpers";
 import { validateTeacherCreation } from "@/lib/billing";
 import { revalidatePath } from "next/cache";
+import { DayOfWeek } from "@prisma/client";
+import { timeStringToDate, dateToTimeString } from "@/lib/utils/time";
 
 export async function getTeachers() {
   const schoolId = await getSessionSchoolId();
@@ -189,10 +191,11 @@ export async function setTeacherAvailability(
       const createResult = await prisma.teacherAvailability.createMany({
         data: validSlots.map((slot) => ({
           teacherId,
+          schoolId,
           academicYear: year,
-          dayOfWeek: slot.dayOfWeek,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
+          dayOfWeek: slot.dayOfWeek as DayOfWeek,
+          startTime: timeStringToDate(slot.startTime),
+          endTime: timeStringToDate(slot.endTime),
         })),
       });
       console.log("[Server] Registros creados:", createResult.count);
@@ -227,8 +230,11 @@ export async function addTeacherAvailabilitySlot(
   const availability = await prisma.teacherAvailability.create({
     data: {
       teacherId,
+      schoolId,
       academicYear: year,
-      ...slot,
+      dayOfWeek: slot.dayOfWeek as DayOfWeek,
+      startTime: timeStringToDate(slot.startTime),
+      endTime: timeStringToDate(slot.endTime),
     },
   });
 
@@ -308,7 +314,7 @@ export async function isTeacherAvailable(
     where: {
       teacherId,
       academicYear: year,
-      dayOfWeek,
+      dayOfWeek: dayOfWeek as DayOfWeek,
     },
   });
 
@@ -319,7 +325,9 @@ export async function isTeacherAvailable(
 
   // Verificar si el rango solicitado está cubierto por algún slot de disponibilidad
   const hasAvailability = availability.some((slot) => {
-    const isWithinSlot = startTime >= slot.startTime && endTime <= slot.endTime;
+    const slotStart = dateToTimeString(slot.startTime);
+    const slotEnd = dateToTimeString(slot.endTime);
+    const isWithinSlot = startTime >= slotStart && endTime <= slotEnd;
     return isWithinSlot;
   });
 
@@ -355,7 +363,7 @@ export async function hasTeacherScheduleConflict(
   const conflictingBlocks = await prisma.scheduleBlock.findMany({
     where: {
       teacherId,
-      dayOfWeek,
+      dayOfWeek: dayOfWeek as DayOfWeek,
       schedule: {
         academicYear: year,
         isActive: true,
@@ -380,7 +388,12 @@ export async function hasTeacherScheduleConflict(
 
   // Filtrar bloques que se solapan en tiempo
   const overlapping = conflictingBlocks.filter((block) => {
-    return timesOverlap(block.startTime, block.endTime, startTime, endTime);
+    return timesOverlap(
+      dateToTimeString(block.startTime),
+      dateToTimeString(block.endTime),
+      startTime,
+      endTime,
+    );
   });
 
   if (overlapping.length === 0) {
@@ -390,11 +403,11 @@ export async function hasTeacherScheduleConflict(
   return {
     hasConflict: true,
     conflictingBlocks: overlapping.map((block) => ({
-      courseId: block.schedule.courseId,
+      courseId: block.schedule.course.id,
       courseName: block.schedule.course.name,
       schoolName: block.schedule.course.school.name,
-      startTime: block.startTime,
-      endTime: block.endTime,
+      startTime: dateToTimeString(block.startTime),
+      endTime: dateToTimeString(block.endTime),
     })),
   };
 }
@@ -471,7 +484,9 @@ export async function getTeachersWithAvailability(dayOfWeek?: string) {
   const teachers = await prisma.teacher.findMany({
     where: { schoolId },
     include: {
-      availability: dayOfWeek ? { where: { dayOfWeek } } : true,
+      availability: dayOfWeek
+        ? { where: { dayOfWeek: dayOfWeek as DayOfWeek } }
+        : true,
     },
     orderBy: { lastName: "asc" },
   });

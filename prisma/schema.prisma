@@ -1,5 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// ================================================================
+// 🏗️  PRISMA SCHEMA — School Timetable SaaS
+// Production-grade | Multi-tenant | PostgreSQL
+// Refactored: 2026-03-15
+// ================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -9,38 +12,104 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================
-// 👤 USER ROLES
-// ============================================
+// ================================================================
+// 🔤 ENUMS
+// ================================================================
+
 enum UserRole {
-  OWNER       // Dueño del colegio — acceso total, gestiona suscripción
-  ADMIN       // Administrador delegado — acceso total excepto billing
-  STAFF       // Personal — acceso operativo limitado
-  VIEWER      // Solo lectura
-  SUPER_ADMIN // Panel global — no pertenece a un colegio específico
+  OWNER       // School owner — full access, manages subscription
+  ADMIN       // Delegated admin — full access except billing
+  STAFF       // Operational access (limited)
+  VIEWER      // Read-only
+  SUPER_ADMIN // Global panel — not tied to a specific school
 }
 
-// ============================================
-// 👤 USER & AUTH MODELS
-// ============================================
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum AcademicLevel {
+  BASIC  // 1°–8° Básico
+  MIDDLE // 1°–4° Medio
+}
+
+enum AuditAction {
+  USER_CREATED
+  USER_DELETED
+  ROLE_CHANGED
+  OWNER_TRANSFERRED
+  SUBSCRIPTION_CHANGED
+  SCHEDULE_GENERATED
+  SCHEDULE_PUBLISHED
+}
+
+enum GenerationStatus {
+  PENDING
+  RUNNING
+  FAILED
+  COMPLETED
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+  INCOMPLETE
+}
+
+// ================================================================
+// 🏢 ORGANIZATION — Multi-school tenant grouping
+// Allows a single entity to own multiple schools.
+// Schools can exist independently (organizationId is optional).
+// ================================================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  schools School[]
+
+  @@map("organizations")
+}
+
+// ================================================================
+// 👤 USER & AUTH
+// ================================================================
+
 model User {
   id            String    @id @default(cuid())
-  // Nullable para SUPER_ADMIN (panel global sin colegio asignado)
-  schoolId      String?
+  schoolId      String?   // Null for SUPER_ADMIN (global panel user)
   name          String?
   email         String    @unique
-  emailVerified DateTime? // Requerido por NextAuth
+  emailVerified DateTime?
   password      String
   image         String?
   role          UserRole  @default(STAFF)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Soft delete — user data preserved for audit trail
 
-  // Relations
-  school   School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  sessions Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school         School?                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  sessions       Session[]
+  generationJobs ScheduleGenerationJob[]
 
   @@index([schoolId])
+  @@index([deletedAt]) // Fast filter for active users
   @@map("users")
 }
 
@@ -56,28 +125,33 @@ model Session {
   @@map("sessions")
 }
 
-// ============================================
-// 🏫 SCHOOL MODEL
-// ============================================
+// ================================================================
+// 🏫 SCHOOL — The primary billing and multi-tenant unit
+// Each school has exactly one subscription.
+// All resources are scoped by schoolId.
+// ================================================================
+
 model School {
-  id      String  @id @default(cuid())
+  id             String  @id @default(cuid())
+  organizationId String? // Optional: organization-owned schools
+
   name    String
   address String
   phone   String?
   email   String?
 
-  // Niveles académicos activos en este colegio
-  // Valores: "BASIC", "MIDDLE", o "BASIC,MIDDLE"
+  // Comma-separated active academic levels: "BASIC", "MIDDLE", or "BASIC,MIDDLE"
+  // Parsed by src/lib/utils/academic-levels.ts
   activeAcademicLevels String @default("BASIC,MIDDLE")
 
-  // ⚠️ CAMPOS DEPRECADOS - Mantener solo por compatibilidad con datos existentes
-  // Usar ScheduleLevelConfig para nueva funcionalidad
+  // ⚠️  DEPRECATED — Kept only for backwards-compatibility with existing data.
+  //     Use ScheduleLevelConfig for all new schedule configuration.
   scheduleStartTime String  @default("08:00")
   scheduleEndTime   String  @default("17:00")
   blockDuration     Int     @default(45)
   breakDuration     Int     @default(15)
   lunchBreakEnabled Boolean @default(true)
-  lunchBreakConfig  String  @default("{\"MONDAY\":{\"enabled\":true,\"start\":\"13:00\",\"end\":\"14:00\"},\"TUESDAY\":{\"enabled\":true,\"start\":\"13:00\",\"end\":\"14:00\"},\"WEDNESDAY\":{\"enabled\":true,\"start\":\"13:00\",\"end\":\"14:00\"},\"THURSDAY\":{\"enabled\":true,\"start\":\"13:00\",\"end\":\"14:00\"},\"FRIDAY\":{\"enabled\":true,\"start\":\"13:00\",\"end\":\"14:00\"}}")
+  lunchBreakConfig  Json    @default("{}")
   lunchBreakStart   String  @default("13:00")
   lunchBreakEnd     String  @default("14:00")
 
@@ -85,257 +159,280 @@ model School {
   updatedAt DateTime @updatedAt
 
   // Relations
+  organization        Organization?              @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   users               User[]
   teachers            Teacher[]
   subjects            Subject[]
   courses             Course[]
   schedules           Schedule[]
-  levelConfigs        ScheduleLevelConfig[]       // Configuración por nivel académico
-  teacherWorkloads    TeacherWorkloadLimit[]      // Límites de carga docente
-  subjectRequirements CourseSubjectRequirement[]  // Requisitos de asignaturas por curso
-  subscription        SchoolSubscription?         // 1 colegio = 1 suscripción activa
-  billingEvents       BillingEvent[]              // Webhooks de Stripe para este colegio
-  auditLogs           AuditLog[]                  // Registro de auditoría del colegio
+  levelConfigs        ScheduleLevelConfig[]
+  teacherWorkloads    TeacherWorkloadLimit[]
+  subjectRequirements CourseSubjectRequirement[]
+  subscription        SchoolSubscription?
+  billingEvents       BillingEvent[]
+  auditLogs           AuditLog[]
+  generationJobs      ScheduleGenerationJob[]
 
+  @@index([organizationId])
   @@map("schools")
 }
 
-// ============================================
-// ⚙️ SCHEDULE LEVEL CONFIG (Básica/Media)
-// ============================================
+// ================================================================
+// ⚙️  SCHEDULE LEVEL CONFIG — Per academic-level timetable settings
+// Replaces the deprecated per-school flat fields.
+// Each school can have one config per academic level (BASIC / MIDDLE).
+// ================================================================
+
 model ScheduleLevelConfig {
-  id            String @id @default(cuid())
+  id            String        @id @default(cuid())
   schoolId      String
-  academicLevel String // BASIC (1°-8° Básico), MIDDLE (1°-4° Medio)
+  academicLevel AcademicLevel
 
-  // Horario general
-  startTime     String @default("08:00") // Hora inicio jornada
-  endTime       String @default("17:00") // Hora fin jornada
-  blockDuration Int    @default(45) // Duración bloques en minutos (múltiplo de 15)
+  // Stored as native PostgreSQL TIME (no timezone).
+  // Application code: use timeToDate() / dateToTime() helpers.
+  startTime     DateTime @db.Time @default(dbgenerated("'08:00:00'::time"))
+  endTime       DateTime @db.Time @default(dbgenerated("'17:00:00'::time"))
+  blockDuration Int      @default(45) // Minutes — must be a multiple of 15
 
-  // Recreos explícitos (JSON array)
-  // Formato: [{"afterBlock": 2, "duration": 15, "name": "Recreo"}, {"afterBlock": 4, "duration": 45, "name": "Almuerzo"}]
-  breaks String @default("[]")
+  // JSON array: [{ "afterBlock": 2, "duration": 15, "name": "Recreo" }, ...]
+  breaks Json @default("[]")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  school  School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  history ScheduleLevelConfigHistory[] // Historial de cambios
+  school  School                       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  history ScheduleLevelConfigHistory[]
 
   @@unique([schoolId, academicLevel])
   @@index([schoolId])
   @@map("schedule_level_configs")
 }
 
-// ============================================
-// 📜 SCHEDULE LEVEL CONFIG HISTORY
-// ============================================
+// ================================================================
+// 📜 SCHEDULE LEVEL CONFIG HISTORY — Immutable change log
+// ================================================================
+
 model ScheduleLevelConfigHistory {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   configId      String
   schoolId      String
-  academicLevel String
+  academicLevel AcademicLevel
 
-  // Configuración histórica
-  startTime     String
-  endTime       String
+  startTime     DateTime @db.Time
+  endTime       DateTime @db.Time
   blockDuration Int
-  breaks        String // JSON array
+  breaks        Json
 
-  // Metadata del cambio
-  changedBy    String? // userId del que hizo el cambio
-  changeReason String? // Razón del cambio
+  changedBy    String? // userId
+  changeReason String?
   createdAt    DateTime @default(now())
 
-  // Relations
   config ScheduleLevelConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
 
   @@index([configId])
   @@index([schoolId])
   @@index([createdAt])
-  // Índice compuesto para consultar el historial más reciente por nivel
   @@index([schoolId, academicLevel, createdAt])
   @@map("schedule_level_config_history")
 }
 
-// ============================================
-// 👨‍🏫 TEACHER MODEL
-// ============================================
+// ================================================================
+// 👨‍🏫 TEACHER
+// ================================================================
+
 model Teacher {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   schoolId       String
   firstName      String
   lastName       String
   email          String
   phone          String?
   specialization String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime? // Soft delete
 
-  // Relations
-  school                 School                       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  availability           TeacherAvailability[]
-  availabilityExceptions TeacherAvailabilityException[] // Excepciones específicas por fecha
-  workloadLimits         TeacherWorkloadLimit[]         // Límites de carga por año
-  teacherSubjects        TeacherSubject[]
-  scheduleBlocks         ScheduleBlock[]
-  preferredInRequirements CourseSubjectRequirement[]   @relation("PreferredTeacher")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school                  School                         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  availability            TeacherAvailability[]
+  availabilityExceptions  TeacherAvailabilityException[]
+  workloadLimits          TeacherWorkloadLimit[]
+  teacherSubjects         TeacherSubject[]
+  scheduleBlocks          ScheduleBlock[]
+  preferredInRequirements CourseSubjectRequirement[]     @relation("PreferredTeacher")
 
   @@index([schoolId])
+  @@index([schoolId, deletedAt]) // Efficient soft-delete filtering
   @@map("teachers")
 }
 
-// ============================================
-// 📅 TEACHER AVAILABILITY (Disponibilidad estructural semanal)
-// ============================================
-model TeacherAvailability {
-  id           String   @id @default(cuid())
-  teacherId    String
-  academicYear Int    // Año académico (2024, 2025, etc.)
-  dayOfWeek    String // MONDAY, TUESDAY, etc.
-  startTime    String // HH:mm format
-  endTime      String // HH:mm format
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+// ================================================================
+// 📅 TEACHER AVAILABILITY — Structural weekly availability
+// schoolId is denormalized here for direct multi-tenant queries
+// without requiring a join through Teacher.
+// ================================================================
 
-  // Relations
+model TeacherAvailability {
+  id           String    @id @default(cuid())
+  teacherId    String
+  schoolId     String    // Denormalized for multi-tenant isolation
+  academicYear Int
+  dayOfWeek    DayOfWeek
+  startTime    DateTime  @db.Time
+  endTime      DateTime  @db.Time
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, academicYear, dayOfWeek, startTime, endTime])
   @@index([teacherId])
   @@index([teacherId, academicYear])
+  @@index([schoolId, academicYear])
   @@map("teacher_availability")
 }
 
-// ============================================
-// 🚫 TEACHER AVAILABILITY EXCEPTION (Excepciones por fecha específica)
-// Modela: licencias médicas, feriados, reuniones, bloqueos puntuales
-// ============================================
-model TeacherAvailabilityException {
-  id          String   @id @default(cuid())
-  teacherId   String
-  date        DateTime // Fecha específica del bloqueo o disponibilidad extra
-  startTime   String?  // HH:mm — null significa que aplica a todo el día
-  endTime     String?  // HH:mm — null significa que aplica a todo el día
-  isAvailable Boolean  @default(false) // false = bloqueado, true = disponible fuera del horario habitual
-  reason      String?  // Descripción: "Licencia médica", "Feriado regional", "Reunión dirección"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// ================================================================
+// 🚫 TEACHER AVAILABILITY EXCEPTIONS — Specific date overrides
+// Models: sick leave, holidays, single-day blocks, ad-hoc availability.
+// ================================================================
 
-  // Relations
+model TeacherAvailabilityException {
+  id          String    @id @default(cuid())
+  teacherId   String
+  date        DateTime
+  startTime   DateTime? @db.Time // null = entire day
+  endTime     DateTime? @db.Time // null = entire day
+  isAvailable Boolean   @default(false) // false = blocked, true = extra availability
+  reason      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([teacherId])
   @@index([teacherId, date])
-  @@index([date]) // Para consultas globales de feriados o bloqueos de un día
+  @@index([date])
   @@map("teacher_availability_exceptions")
 }
 
-// ============================================
-// 📊 TEACHER WORKLOAD LIMIT (Límite de carga docente por año)
-// Permite al generador respetar cargas máximas y preferencias horarias
-// ============================================
+// ================================================================
+// 📊 TEACHER WORKLOAD LIMIT — Per-year teaching load cap
+// ================================================================
+
 model TeacherWorkloadLimit {
-  id               String  @id @default(cuid())
+  id               String    @id @default(cuid())
   teacherId        String
   schoolId         String
   academicYear     Int
-  maxBlocksPerDay  Int     @default(6)  // Máximo bloques que puede tener en un día
-  maxBlocksPerWeek Int     @default(30) // Máximo bloques que puede tener en la semana
-  // Ventana horaria preferida (el solver los respeta como soft constraint)
-  preferredStartTime String? // HH:mm — hora más temprana preferida
-  preferredEndTime   String? // HH:mm — hora más tardía preferida
-  notes              String? // Observaciones adicionales
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  maxBlocksPerDay  Int       @default(6)
+  maxBlocksPerWeek Int       @default(30)
 
-  // Relations
+  // Soft constraints: preferred working window for the solver
+  preferredStartTime DateTime? @db.Time
+  preferredEndTime   DateTime? @db.Time
+  notes              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, academicYear])
-  @@index([schoolId, academicYear]) // Para cargar límites del colegio por año
+  @@index([schoolId, academicYear])
   @@map("teacher_workload_limits")
 }
 
-// ============================================
-// 📚 SUBJECT MODEL
-// ============================================
+// ================================================================
+// 📚 SUBJECT
+// ================================================================
+
 model Subject {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   schoolId    String
   name        String
-  code        String  // e.g., "MAT101"
+  code        String
   description String?
-  color       String? // Color hex para visualización
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  color       String?
+  deletedAt   DateTime? // Soft delete
 
-  // Relations
-  school              School                    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school              School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   teacherSubjects     TeacherSubject[]
   scheduleBlocks      ScheduleBlock[]
-  subjectRequirements CourseSubjectRequirement[] // Requisitos de esta asignatura por curso
+  subjectRequirements CourseSubjectRequirement[]
 
   @@unique([schoolId, code])
   @@index([schoolId])
+  @@index([schoolId, deletedAt])
   @@map("subjects")
 }
 
-// ============================================
-// 📚 TEACHER-SUBJECT (Many-to-Many)
-// ============================================
+// ================================================================
+// 🔗 TEACHER-SUBJECT (Many-to-Many)
+// schoolId denormalized to enforce cross-school isolation at query level.
+// ================================================================
+
 model TeacherSubject {
   id        String   @id @default(cuid())
   teacherId String
   subjectId String
+  schoolId  String   // Denormalized for multi-tenant isolation
+
   createdAt DateTime @default(now())
 
-  // Relations
   teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, subjectId])
   @@index([teacherId])
   @@index([subjectId])
+  @@index([schoolId])
   @@map("teacher_subjects")
 }
 
-// ============================================
-// 🎓 COURSE MODEL
-// ============================================
+// ================================================================
+// 🎓 COURSE
+// ================================================================
+
 model Course {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   schoolId      String
-  name          String // e.g., "1° Básico A"
-  grade         String // e.g., "1", "2", "3"
-  section       String // e.g., "A", "B", "C"
-  academicLevel String // BASIC (1°-8° Básico), MIDDLE (1°-4° Medio)
+  name          String        // e.g., "1° Básico A"
+  grade         String        // e.g., "1", "2"
+  section       String        // e.g., "A", "B"
+  academicLevel AcademicLevel
   academicYear  Int
   studentCount  Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?     // Soft delete
 
-  // Relations
-  school              School                    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school              School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   schedules           Schedule[]
-  subjectRequirements CourseSubjectRequirement[] // Requisitos de asignaturas para el generador
+  subjectRequirements CourseSubjectRequirement[]
 
   @@index([schoolId])
   @@index([academicYear])
   @@index([academicLevel])
-  @@index([schoolId, academicYear, academicLevel]) // Consulta frecuente del generador
+  @@index([schoolId, academicYear])
+  @@index([schoolId, academicYear, academicLevel]) // Hot query path for the generator
+  @@index([schoolId, deletedAt])
   @@map("courses")
 }
 
-// ============================================
+// ================================================================
 // 📋 COURSE SUBJECT REQUIREMENT
-// Declara cuántos bloques semanales necesita cada asignatura en cada curso.
-// Es la fuente de verdad para el generador automático y el solver.
-// Diseñado para ser extensible con restricciones blandas (soft constraints).
-// ============================================
+// Source of truth for the constraint solver:
+// how many weekly blocks each subject requires per course.
+// ================================================================
+
 model CourseSubjectRequirement {
   id           String @id @default(cuid())
   schoolId     String
@@ -343,22 +440,15 @@ model CourseSubjectRequirement {
   subjectId    String
   academicYear Int
 
-  // Requisito principal
-  blocksPerWeek Int // Bloques semanales requeridos (antes "hoursPerWeek" en el config)
-
-  // Profesor preferido (soft constraint para el solver)
-  preferredTeacherId String?
-
-  // Restricciones para el generador / solver (soft constraints)
-  // Si en el futuro se necesitan más, se agregan aquí sin rediseñar la tabla
-  maxConsecutiveBlocks Int     @default(2)    // No más de N bloques seguidos de esta asignatura
-  preferredDays        String  @default("[]") // JSON: ["MONDAY","WEDNESDAY"] — días preferidos
-  avoidAfterLunch      Boolean @default(false) // No asignar en el primer bloque post-almuerzo
+  blocksPerWeek          Int
+  preferredTeacherId     String?
+  maxConsecutiveBlocks   Int     @default(2)
+  preferredDays          Json    @default("[]") // Array of DayOfWeek string values
+  avoidAfterLunch        Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
   school           School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   subject          Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -366,272 +456,265 @@ model CourseSubjectRequirement {
 
   @@unique([courseId, subjectId, academicYear])
   @@index([schoolId])
-  @@index([courseId, academicYear]) // Cargar todos los requisitos de un curso en un año
+  @@index([courseId, academicYear])
   @@index([subjectId, academicYear])
   @@map("course_subject_requirements")
 }
 
-// ============================================
-// 🗓️ SCHEDULE MODEL
-// ============================================
+// ================================================================
+// 🗓️ SCHEDULE
+// Supports versioning and draft/published lifecycle.
+// version + courseId (via @@index) allows multiple draft versions.
+// ================================================================
+
 model Schedule {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   schoolId     String
   courseId     String
-  name         String // e.g., "Horario 1° Básico A - Semestre 1"
+  name         String
   academicYear Int
-  semester     Int      // 1 or 2
+  semester     Int
   startDate    DateTime
   endDate      DateTime
-  isActive     Boolean  @default(true)
 
-  // Snapshot de configuración con la que fue creado
-  // JSON: {"startTime": "08:00", "endTime": "17:00", "blockDuration": 45, "academicLevel": "BASIC"}
-  configSnapshot String?
-  isDeprecated   Boolean @default(false) // Marca si quedó obsoleto por cambio de jornada
+  isActive     Boolean   @default(true)
+  isLocked     Boolean   @default(false) // True = no further edits allowed
+  publishedAt  DateTime?                 // Null = draft
+  version      Int       @default(1)     // Incremented on each publish
+
+  configSnapshot Json?    // Snapshot of ScheduleLevelConfig at creation time
+  isDeprecated   Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  school School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  course Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  blocks ScheduleBlock[]
+  school            School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  course            Course                     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  blocks            ScheduleBlock[]
+  generationResults ScheduleGenerationResult[]
 
   @@index([schoolId])
   @@index([courseId])
   @@index([academicYear])
   @@index([isActive])
   @@index([isDeprecated])
-  @@index([schoolId, academicYear, isActive]) // Consulta frecuente: horarios activos del colegio por año
+  @@index([schoolId, academicYear, isActive])
   @@map("schedules")
 }
 
-// ============================================
-// 🧱 SCHEDULE BLOCK MODEL
+// ================================================================
+// 🧱 SCHEDULE BLOCK
 //
-// DECISIÓN ARQUITECTÓNICA:
-//   courseId ha sido ELIMINADO de este modelo.
-//   La relación correcta es ScheduleBlock → Schedule → Course.
-//   Mantener courseId aquí era redundante y peligroso (inconsistencias
-//   si se reasignaba un Schedule a otro curso).
+// HARD CONSTRAINTS (enforced at DB level):
+//   1. A course cannot have two blocks in the same slot:
+//      @@unique([scheduleId, dayOfWeek, blockNumber])
+//   2. A teacher cannot be double-booked in the same year:
+//      @@unique([teacherId, dayOfWeek, startTime, academicYear])
 //
-//   academicYear se denormaliza aquí (copiado de Schedule) para habilitar
-//   el constraint único de anti-colisión docente a nivel de base de datos,
-//   sin necesidad de JOINs en el CHECK constraint.
-// ============================================
+// schoolId is denormalized for fast multi-tenant queries without JOIN.
+// academicYear is denormalized to enable the teacher uniqueness constraint.
+// ================================================================
+
 model ScheduleBlock {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   scheduleId  String
+  schoolId    String    // Denormalized for multi-tenant isolation
   subjectId   String
   teacherId   String
-  dayOfWeek   String // MONDAY, TUESDAY, etc.
-  blockNumber Int    // 1, 2, 3, etc. (posición ordinal en el día según la jornada)
-  startTime   String // HH:mm format
-  endTime     String // HH:mm format
-  duration    Int    // Duration in minutes
-  // Denormalizado de schedule.academicYear para el constraint de anti-colisión docente
-  // @default(2026) es un valor de migración — backfill manual desde schedule.academicYear recomendado
-  academicYear Int @default(2026)
+  dayOfWeek   DayOfWeek
+  blockNumber Int
+  startTime   DateTime  @db.Time
+  endTime     DateTime  @db.Time
+  duration    Int       // Minutes
+  academicYear Int      @default(2026) // Denormalized — backfill from schedule.academicYear
   classroom   String?
   notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  subject  Subject  @relation(fields: [subjectId], references: [id])
-  teacher  Teacher  @relation(fields: [teacherId], references: [id])
-
-  // CONSTRAINT: Un curso no puede tener dos bloques en el mismo slot del mismo horario
-  @@unique([scheduleId, dayOfWeek, blockNumber])
-
-  // CONSTRAINT: Un profesor no puede estar en dos lugares al mismo tiempo en el mismo año
-  // Previene doble-asignación a nivel de base de datos (hard constraint)
-  @@unique([teacherId, dayOfWeek, startTime, academicYear])
-
-  // Índices para queries frecuentes
-  @@index([scheduleId])
-  @@index([teacherId])
-  @@index([teacherId, academicYear])          // Bloques del profesor en un año
-  @@index([dayOfWeek, startTime])             // Búsqueda por día y hora (generador)
-  @@index([academicYear])                     // Filtrado global por año
-  @@map("schedule_blocks")
-}
-
-// ============================================
-// 💳 BILLING & SUBSCRIPTIONS
-//
-// DECISIÓN ARQUITECTÓNICA:
-//   La suscripción es POR COLEGIO (School), no por usuario.
-//   El School es el cliente de la plataforma; sus usuarios son
-//   miembros internos sin capacidad de facturación propia.
-//
-//   PREPARADO PARA ESCALAR a Organization model:
-//     Si en el futuro existe Organization → Schools → Subscription,
-//     basta con agregar organizationId en School y mover la
-//     SchoolSubscription al nivel de Organization.
-//     El servicio de billing (src/lib/billing/) abstrae esta lógica.
-// ============================================
-
-// Enums de suscripción definidos aquí para que Prisma los exponga
-// en el cliente generado y en los tipos TypeScript automáticamente.
-
-enum SubscriptionPlan {
-  FREE        // Acceso gratuito con límites (ej. máx. 5 profesores, 3 cursos)
-  PRO         // Acceso completo, ilimitado
-  ENTERPRISE  // Features avanzadas + soporte dedicado
-}
-
-enum SubscriptionStatus {
-  TRIALING   // Período de prueba activo
-  ACTIVE     // Suscripción pagada y vigente
-  PAST_DUE   // Pago fallido; acceso degradado pero no eliminado
-  CANCELED   // Cancelada; datos preservados hasta fin de período
-  EXPIRED    // Período terminado sin renovación; degradado a FREE
-  INCOMPLETE // Creada pero pago inicial no completado (flujo Stripe)
-}
-
-// ============================================
-// 📦 SCHOOL SUBSCRIPTION
-// 1 colegio = 1 fila (unique schoolId).
-// El historial de cambios de plan se registra en SubscriptionHistory.
-//
-// REGLAS DE NEGOCIO:
-//   FREE       → limitar profesores/cursos (ver src/config/plans.ts)
-//   PRO        → acceso ilimitado
-//   ENTERPRISE → features avanzadas (reportes, API, soporte)
-//   status != ACTIVE/TRIALING → bloquear creación de recursos
-// ============================================
-model SchoolSubscription {
-  id       String @id @default(cuid())
-  schoolId String @unique // Hard constraint: 1 suscripción por colegio
-
-  // Estado actual
-  plan   SubscriptionPlan   @default(FREE)
-  status SubscriptionStatus @default(ACTIVE)
-
-  // Período de facturación vigente
-  currentPeriodStart DateTime @default(now())
-  currentPeriodEnd   DateTime // Nunca nulo — FREE usa fecha lejana (e.g., año 9999)
-
-  // Prueba gratuita
-  trialEndsAt DateTime? // null = no tiene o ya terminó
-
-  // Cancelación
-  canceledAt DateTime? // null = no cancelada
-
-  // Stripe IDs (opcionales hasta que el colegio ingrese tarjeta)
-  stripeCustomerId     String? @unique
-  stripeSubscriptionId String? @unique
-
-  // Metadata extensible — para flags futuros sin migración
-  // JSON: { "grandfatheredPro": true, "trialExtended": true }
-  metadata String @default("{}")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  school  School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  history SubscriptionHistory[] // Historial de cambios de plan
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  subject  Subject  @relation(fields: [subjectId], references: [id])
+  teacher  Teacher  @relation(fields: [teacherId], references: [id])
 
-  @@index([status])            // Consultas de suscripciones activas/vencidas
-  @@index([stripeCustomerId])  // Lookup rápido desde webhooks Stripe
-  @@index([currentPeriodEnd])  // Job de expiración periódica
+  // HARD CONSTRAINT: one subject per slot per schedule
+  @@unique([scheduleId, dayOfWeek, blockNumber])
+  // HARD CONSTRAINT: teacher cannot be in two places at the same time
+  @@unique([teacherId, dayOfWeek, startTime, academicYear])
+
+  @@index([scheduleId])
+  @@index([teacherId])
+  @@index([teacherId, academicYear])
+  @@index([schoolId, academicYear])
+  @@index([dayOfWeek, startTime])
+  @@index([academicYear])
+  @@map("schedule_blocks")
+}
+
+// ================================================================
+// 🤖 SCHEDULE GENERATION JOB
+// Tracks every automatic timetable generation run.
+// Enables async processing, progress monitoring, re-runs, and auditing.
+// ================================================================
+
+model ScheduleGenerationJob {
+  id              String           @id @default(cuid())
+  schoolId        String
+  academicYear    Int
+  semester        Int
+  status          GenerationStatus @default(PENDING)
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  score           Float?           // Objective score from the solver (higher = better)
+  iterations      Int?             // Solver iterations completed
+  logs            Json             @default("[]") // Structured run log entries
+  configSnapshot  Json             @default("{}") // Copy of relevant config at launch time
+  createdByUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school    School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdBy User?                      @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  results   ScheduleGenerationResult[]
+
+  @@index([schoolId])
+  @@index([status])
+  @@index([schoolId, academicYear])
+  @@index([schoolId, status])
+  @@map("schedule_generation_jobs")
+}
+
+// ================================================================
+// 📊 SCHEDULE GENERATION RESULT
+// Links a generation job to the schedules it produced,
+// along with per-schedule quality metrics and constraint violations.
+// ================================================================
+
+model ScheduleGenerationResult {
+  id                   String   @id @default(cuid())
+  jobId                String
+  scheduleId           String
+  score                Float?
+  constraintViolations Json     @default("[]") // Array of { rule, severity, description }
+
+  createdAt DateTime @default(now())
+
+  job      ScheduleGenerationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  schedule Schedule              @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([scheduleId])
+  @@map("schedule_generation_results")
+}
+
+// ================================================================
+// 💳 BILLING & SUBSCRIPTIONS
+//
+// ARCHITECTURE: Subscription is per-School, not per-user.
+// The School is the billing customer.
+// Ready to scale to Organization → Schools → Subscription.
+// ================================================================
+
+model SchoolSubscription {
+  id       String @id @default(cuid())
+  schoolId String @unique
+
+  plan   SubscriptionPlan   @default(FREE)
+  status SubscriptionStatus @default(ACTIVE)
+
+  currentPeriodStart   DateTime  @default(now())
+  currentPeriodEnd     DateTime
+  trialEndsAt          DateTime?
+  canceledAt           DateTime?
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+
+  metadata Json @default("{}") // Extensible flags: grandfatheredPro, trialExtended, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school  School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  history SubscriptionHistory[]
+
+  @@index([status])
+  @@index([stripeCustomerId])
+  @@index([currentPeriodEnd])
   @@map("school_subscriptions")
 }
 
-// ============================================
-// 📜 SUBSCRIPTION HISTORY
-// Inmutable por diseño: nunca se actualiza, solo se inserta.
-// Fuente de auditoría para cambios de plan.
-// ============================================
 model SubscriptionHistory {
   id             String @id @default(cuid())
   subscriptionId String
 
   oldPlan SubscriptionPlan
   newPlan SubscriptionPlan
-
   oldStatus SubscriptionStatus
   newStatus SubscriptionStatus
 
-  // Origen del cambio: "school_request", "stripe_webhook", "admin", "trial_expired", "cron_expiry"
+  // Origin: "school_request" | "stripe_webhook" | "admin" | "trial_expired" | "cron_expiry"
   reason    String?
-
   changedAt DateTime @default(now())
 
-  // Relations
   subscription SchoolSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId])
   @@index([changedAt])
-  @@index([subscriptionId, changedAt]) // "Dame los últimos N cambios de esta suscripción"
+  @@index([subscriptionId, changedAt])
   @@map("subscription_history")
 }
 
-// ============================================
-// 📨 BILLING EVENT (Idempotencia de webhooks Stripe)
-//
-// Cada evento Stripe se persiste aquí ANTES de procesarlo.
-// El campo `processed` + `stripeEventId` @unique garantiza
-// que el mismo evento no se ejecute dos veces (at-least-once delivery).
-// ============================================
-model BillingEvent {
-  id       String  @id @default(cuid())
-  schoolId String? // Null si el evento no mapea aún a un colegio (ej. checkout.session pendiente)
+// ================================================================
+// 📨 BILLING EVENT — Stripe webhook idempotency log
+// stripeEventId @unique guarantees at-most-once processing.
+// ================================================================
 
-  // Stripe event ID — unique garantiza idempotencia
-  stripeEventId String @unique
-  type          String // e.g., "invoice.payment_succeeded", "customer.subscription.updated"
-  payload       String // JSON del evento completo (Stripe Event object)
+model BillingEvent {
+  id            String    @id @default(cuid())
+  schoolId      String?
+  stripeEventId String    @unique
+  type          String    // e.g., "invoice.payment_succeeded"
+  payload       Json      // Full Stripe Event object
 
   processed    Boolean   @default(false)
-  processedAt  DateTime? // null = pendiente
-  errorMessage String?   // Si el procesamiento falló
+  processedAt  DateTime?
+  errorMessage String?
 
   createdAt DateTime @default(now())
 
-  // Relations
   school School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
 
-  @@index([processed, createdAt]) // Worker: procesar pendientes ordenados por fecha
+  @@index([processed, createdAt])
   @@index([schoolId])
   @@map("billing_events")
 }
 
-// ============================================
-// 📋 AUDIT LOG
-//
-// Registro inmutable de acciones sensibles:
-// USER_CREATED, ROLE_CHANGED, OWNER_TRANSFERRED,
-// USER_DELETED, SUBSCRIPTION_CHANGED.
-// actorId: quien hizo la acción (userId)
-// schoolId: null para acciones globales de SUPER_ADMIN
-// ============================================
+// ================================================================
+// 📋 AUDIT LOG — Immutable history of sensitive actions
+// action uses a strict enum to prevent typo-driven gaps in the log.
+// ================================================================
+
 model AuditLog {
-  id        String   @id @default(cuid())
-  schoolId  String?  // null para acciones globales de SUPER_ADMIN
-  actorId   String   // userId del que realizó la acción
-  actorRole String   // Rol del actor en el momento de la acción
+  id        String      @id @default(cuid())
+  schoolId  String?     // Null for SUPER_ADMIN global actions
+  actorId   String      // userId of who performed the action
+  actorRole String      // Role at the time of the action
 
-  action   String // USER_CREATED | ROLE_CHANGED | OWNER_TRANSFERRED | USER_DELETED | SUBSCRIPTION_CHANGED
-  entity   String // User | School | SchoolSubscription
+  action   AuditAction
+  entity   String      // e.g., "User", "School", "SchoolSubscription"
   entityId String
-
-  // Metadata JSON con detalles específicos de la acción
-  // Ej: { oldRole: "STAFF", newRole: "ADMIN", targetUserId: "..." }
-  metadata String @default("{}")
+  metadata Json        @default("{}") // { oldRole, newRole, targetUserId, ... }
 
   createdAt DateTime @default(now())
 
-  // Relations
   school School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
 
   @@index([schoolId])
   @@index([actorId])
   @@index([entity, entityId])
+  @@index([action])
   @@index([createdAt])
+  @@index([schoolId, createdAt])
   @@map("audit_logs")
 }

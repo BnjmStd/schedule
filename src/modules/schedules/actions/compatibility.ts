@@ -95,7 +95,9 @@ export async function getScheduleCompatibilityInfo(scheduleId: string) {
   );
 
   // Parsear snapshot del schedule
-  const scheduleSnapshot = parseConfigSnapshot(schedule.configSnapshot);
+  const scheduleSnapshot = parseConfigSnapshot(
+    schedule.configSnapshot as string | null,
+  );
 
   // Si no hay snapshot, probablemente es un schedule viejo
   if (!scheduleSnapshot) {

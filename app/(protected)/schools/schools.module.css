@@ -1,5 +1,258 @@
 /* Schools Page - Estilo oscuro moderno */
 
+/* ================================================================
+   NUEVAS SECCIONES - Página reestructurada (colegio único)
+   ================================================================ */
+
+/* Section wrapper */
+.school-section {
+  margin-bottom: 2rem;
+}
+
+/* Section header (title + description above the card) */
+.school-section-header {
+  margin-bottom: 1rem;
+}
+
+.school-section-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.375rem 0;
+  letter-spacing: -0.01em;
+}
+
+.school-section-desc {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* Card body for sections */
+.school-section-body {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+}
+
+/* ── School info card (view mode) ── */
+.school-info-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+}
+
+.school-info-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.school-info-badge {
+  display: inline-block;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  padding: 0.2rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.school-info-name {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.school-info-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.school-info-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.school-info-detail-icon {
+  font-size: 1.0625rem;
+  opacity: 0.8;
+}
+
+/* Edit trigger button */
+.school-edit-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.school-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+/* ── School info edit form (inline) ── */
+.school-edit-form {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(13, 139, 255, 0.3);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+}
+
+.school-edit-form-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.school-edit-error {
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.school-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.school-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.school-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.school-edit-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.required {
+  color: var(--danger-400, #f87171);
+  margin-left: 0.2rem;
+}
+
+.school-edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Shared action buttons */
+.school-btn-primary {
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.school-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(13, 139, 255, 0.35);
+}
+
+.school-btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.school-btn-secondary {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.school-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.school-btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .school-edit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .school-info-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .school-edit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .school-edit-actions {
+    flex-direction: column-reverse;
+  }
+
+  .school-btn-primary,
+  .school-btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ================================================================ */
+
 .schools-page {
   min-height: 100vh;
   background: #000;

@@ -7,6 +7,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSessionSchoolId, userHasAccessToSchool } from "@/lib/auth-helpers";
 import { validateCourseCreation } from "@/lib/billing";
+import type { AcademicLevel } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function getCourses() {
@@ -72,7 +73,7 @@ export async function createCourse(data: {
   await validateCourseCreation(data.schoolId);
 
   const course = await prisma.course.create({
-    data,
+    data: { ...data, academicLevel: data.academicLevel as AcademicLevel },
   });
 
   revalidatePath("/courses");
@@ -92,9 +93,15 @@ export async function updateCourse(
 ) {
   const schoolId = await getSessionSchoolId();
 
+  const { academicLevel, ...rest } = data;
   const course = await prisma.course.update({
     where: { id, schoolId },
-    data,
+    data: {
+      ...rest,
+      ...(academicLevel !== undefined && {
+        academicLevel: academicLevel as AcademicLevel,
+      }),
+    },
   });
 
   revalidatePath("/courses");

@@ -5,6 +5,8 @@ import { getSession } from "@/lib/session";
 import { getSessionSchoolId } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { requireFeature } from "@/lib/billing";
+import { DayOfWeek } from "@prisma/client";
+import { timeStringToDate } from "@/lib/utils/time";
 import {
   validateTeacherSchedule,
   hasTeacherScheduleConflict,
@@ -76,7 +78,7 @@ async function findOrCreateCourse(
         name,
         grade: "1",
         section: "A",
-        academicLevel: "SECONDARY",
+        academicLevel: "BASIC",
         academicYear: year,
       },
     });
@@ -378,12 +380,13 @@ export async function saveSchedule(data: {
         await prisma.scheduleBlock.create({
           data: {
             scheduleId: schedule.id,
+            schoolId,
             subjectId: subject.id,
             teacherId: blockTeacherId,
-            dayOfWeek: block.day,
+            dayOfWeek: block.day as DayOfWeek,
             blockNumber,
-            startTime: block.startTime,
-            endTime: block.endTime,
+            startTime: timeStringToDate(block.startTime),
+            endTime: timeStringToDate(block.endTime),
             duration,
             academicYear,
           },
@@ -455,12 +458,13 @@ export async function saveSchedule(data: {
         await prisma.scheduleBlock.create({
           data: {
             scheduleId: schedule.id,
+            schoolId,
             subjectId: subject.id,
             teacherId,
-            dayOfWeek: block.day,
+            dayOfWeek: block.day as DayOfWeek,
             blockNumber,
-            startTime: block.startTime,
-            endTime: block.endTime,
+            startTime: timeStringToDate(block.startTime),
+            endTime: timeStringToDate(block.endTime),
             duration,
             academicYear,
           },

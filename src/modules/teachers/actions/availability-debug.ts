@@ -5,6 +5,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { DayOfWeek } from "@prisma/client";
+import { dateToTimeString } from "@/lib/utils/time";
 
 export async function checkTeacherAvailabilityDebug(
   teacherId: string,
@@ -27,7 +29,7 @@ export async function checkTeacherAvailabilityDebug(
     where: {
       teacherId,
       academicYear: year,
-      dayOfWeek,
+      dayOfWeek: dayOfWeek as DayOfWeek,
     },
     select: {
       startTime: true,
@@ -44,26 +46,28 @@ export async function checkTeacherAvailabilityDebug(
   }
 
   const matchingSlot = availability.find(
-    (slot) => startTime >= slot.startTime && endTime <= slot.endTime,
+    (slot) =>
+      startTime >= dateToTimeString(slot.startTime) &&
+      endTime <= dateToTimeString(slot.endTime),
   );
 
   if (matchingSlot) {
     return {
       isAvailable: true,
-      reason: `Slot ${matchingSlot.startTime}-${matchingSlot.endTime}`,
+      reason: `Slot ${dateToTimeString(matchingSlot.startTime)}-${dateToTimeString(matchingSlot.endTime)}`,
       availabilitySlots: availability.map((s) => ({
-        start: s.startTime,
-        end: s.endTime,
+        start: dateToTimeString(s.startTime),
+        end: dateToTimeString(s.endTime),
       })),
     };
   }
 
   return {
     isAvailable: false,
-    reason: `Bloque ${startTime}-${endTime} fuera de slots: ${availability.map((s) => `${s.startTime}-${s.endTime}`).join(", ")}`,
+    reason: `Bloque ${startTime}-${endTime} fuera de slots: ${availability.map((s) => `${dateToTimeString(s.startTime)}-${dateToTimeString(s.endTime)}`).join(", ")}`,
     availabilitySlots: availability.map((s) => ({
-      start: s.startTime,
-      end: s.endTime,
+      start: dateToTimeString(s.startTime),
+      end: dateToTimeString(s.endTime),
     })),
   };
 }

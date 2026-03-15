@@ -7,6 +7,9 @@
 
 import { prisma } from "@/lib/prisma";
 import { userHasAccessToSchool } from "@/lib/auth-helpers";
+import { timeStringToDate, dateToTimeString } from "@/lib/utils/time";
+import type { Prisma } from "@prisma/client";
+import { validateScheduleConfig } from "@/lib/utils/schedule-config-validator";
 import type {
   ScheduleLevelConfig,
   AcademicLevel,
@@ -47,17 +50,14 @@ export async function getScheduleConfigForLevel(
     return { ...defaultConfig, schoolId };
   }
 
-  // Parsear breaks desde JSON
-  const breaks: BreakConfig[] = JSON.parse(config.breaks);
-
   return {
     id: config.id,
     schoolId: config.schoolId,
     academicLevel: config.academicLevel as AcademicLevel,
-    startTime: config.startTime,
-    endTime: config.endTime,
+    startTime: dateToTimeString(config.startTime),
+    endTime: dateToTimeString(config.endTime),
     blockDuration: config.blockDuration,
-    breaks,
+    breaks: config.breaks as unknown as BreakConfig[],
   };
 }
 
@@ -73,19 +73,11 @@ export async function saveScheduleConfigForLevel(
     throw new Error("No tienes acceso a este colegio");
   }
 
-  // Validar que blockDuration sea múltiplo de 15
-  if (config.blockDuration % 15 !== 0) {
-    throw new Error("La duración de bloques debe ser múltiplo de 15 minutos");
+  // Full validation via ScheduleConfigValidator
+  const validation = validateScheduleConfig(config);
+  if (!validation.valid) {
+    throw new Error(validation.errors.join(" | "));
   }
-
-  // Validar que las duraciones de recreos sean múltiplos de 15
-  for (const breakConfig of config.breaks) {
-    if (breakConfig.duration % 15 !== 0) {
-      throw new Error("La duración de recreos debe ser múltiplo de 15 minutos");
-    }
-  }
-
-  const breaksJson = JSON.stringify(config.breaks);
 
   // Obtener configuración previa para detectar cambios críticos
   const previousConfig = await prisma.scheduleLevelConfig.findUnique({
@@ -97,13 +89,15 @@ export async function saveScheduleConfigForLevel(
     },
   });
 
-  // Detectar cambios críticos
+  // Detectar cambios críticos (compare as HH:mm strings)
   const hasCriticalChanges =
     previousConfig &&
-    (previousConfig.startTime !== config.startTime ||
-      previousConfig.endTime !== config.endTime ||
-      previousConfig.blockDuration !== config.blockDuration ||
-      previousConfig.breaks !== breaksJson);
+    (dateToTimeString(previousConfig.startTime) !== config.startTime ||
+      dateToTimeString(previousConfig.endTime) !== config.endTime ||
+      previousConfig.blockDuration !== config.blockDuration);
+
+  const dbStartTime = timeStringToDate(config.startTime);
+  const dbEndTime = timeStringToDate(config.endTime);
 
   const savedConfig = await prisma.scheduleLevelConfig.upsert({
     where: {
@@ -115,16 +109,16 @@ export async function saveScheduleConfigForLevel(
     create: {
       schoolId: config.schoolId,
       academicLevel: config.academicLevel,
-      startTime: config.startTime,
-      endTime: config.endTime,
+      startTime: dbStartTime,
+      endTime: dbEndTime,
       blockDuration: config.blockDuration,
-      breaks: breaksJson,
+      breaks: config.breaks as unknown as Prisma.InputJsonValue,
     },
     update: {
-      startTime: config.startTime,
-      endTime: config.endTime,
+      startTime: dbStartTime,
+      endTime: dbEndTime,
       blockDuration: config.blockDuration,
-      breaks: breaksJson,
+      breaks: config.breaks as unknown as Prisma.InputJsonValue,
     },
   });
 
@@ -143,7 +137,7 @@ export async function saveScheduleConfigForLevel(
         startTime: previousConfig.startTime,
         endTime: previousConfig.endTime,
         blockDuration: previousConfig.blockDuration,
-        breaks: previousConfig.breaks,
+        breaks: previousConfig.breaks as unknown as Prisma.InputJsonValue,
         changedBy: session?.userId,
         changeReason: changeReason || "Actualización de jornada",
       },
@@ -151,7 +145,7 @@ export async function saveScheduleConfigForLevel(
 
     console.log("[Config] 📜 Cambio guardado en historial:", {
       academicLevel: config.academicLevel,
-      from: `${previousConfig.startTime}-${previousConfig.endTime}`,
+      from: `${dateToTimeString(previousConfig.startTime)}-${dateToTimeString(previousConfig.endTime)}`,
       to: `${config.startTime}-${config.endTime}`,
     });
   }
@@ -168,10 +162,10 @@ export async function saveScheduleConfigForLevel(
     id: savedConfig.id,
     schoolId: savedConfig.schoolId,
     academicLevel: savedConfig.academicLevel as AcademicLevel,
-    startTime: savedConfig.startTime,
-    endTime: savedConfig.endTime,
+    startTime: dateToTimeString(savedConfig.startTime),
+    endTime: dateToTimeString(savedConfig.endTime),
     blockDuration: savedConfig.blockDuration,
-    breaks: JSON.parse(savedConfig.breaks),
+    breaks: savedConfig.breaks as unknown as BreakConfig[],
   };
 }
 
@@ -235,10 +229,10 @@ export async function getScheduleConfigForTeacher(
     id: config.id,
     schoolId: config.schoolId,
     academicLevel: config.academicLevel as AcademicLevel,
-    startTime: config.startTime,
-    endTime: config.endTime,
+    startTime: dateToTimeString(config.startTime),
+    endTime: dateToTimeString(config.endTime),
     blockDuration: config.blockDuration,
-    breaks: JSON.parse(config.breaks),
+    breaks: config.breaks as unknown as BreakConfig[],
   }));
 
   // Ordenar por horario más amplio (inicio más temprano y fin más tardío)
@@ -276,10 +270,10 @@ export async function getAllScheduleConfigsForSchool(
     id: config.id,
     schoolId: config.schoolId,
     academicLevel: config.academicLevel as AcademicLevel,
-    startTime: config.startTime,
-    endTime: config.endTime,
+    startTime: dateToTimeString(config.startTime),
+    endTime: dateToTimeString(config.endTime),
     blockDuration: config.blockDuration,
-    breaks: JSON.parse(config.breaks),
+    breaks: config.breaks as unknown as BreakConfig[],
   }));
 }
 /**
@@ -319,7 +313,7 @@ export async function getScheduleConfigHistory(
     startTime: h.startTime,
     endTime: h.endTime,
     blockDuration: h.blockDuration,
-    breaks: JSON.parse(h.breaks),
+    breaks: h.breaks as unknown as BreakConfig[],
     changedBy: h.changedBy,
     changeReason: h.changeReason,
     changedAt: h.createdAt,

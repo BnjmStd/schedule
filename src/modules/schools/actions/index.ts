@@ -172,7 +172,12 @@ export async function getSchoolScheduleConfig(schoolId: string) {
     { enabled: boolean; start: string; end: string }
   > = {};
   try {
-    lunchBreakByDay = JSON.parse(school.lunchBreakConfig);
+    if (
+      school.lunchBreakConfig &&
+      typeof school.lunchBreakConfig === "object"
+    ) {
+      lunchBreakByDay = school.lunchBreakConfig as typeof lunchBreakByDay;
+    }
   } catch (e) {
     // Si falla el parsing, usar valores por defecto
     lunchBreakByDay = {
@@ -256,7 +261,7 @@ export async function updateSchoolScheduleConfig(
 
   // Siempre guardar lunchBreakConfig (ya sea con datos o vacío)
   if (config.lunchBreakByDay !== undefined) {
-    updateData.lunchBreakConfig = JSON.stringify(config.lunchBreakByDay);
+    updateData.lunchBreakConfig = config.lunchBreakByDay;
   }
 
   await prisma.school.update({
